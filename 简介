@@ -1,0 +1,3230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>王露平 · 个人介绍</title>
+    
+    <style>
+        :root {
+            --black: #0a0a0a;
+            --black-2: #1a1a1a;
+            --black-3: #2a2a2a;
+            --gray-900: #333333;
+            --gray-800: #4a4a4a;
+            --gray-700: #666666;
+            --gray-500: #888888;
+            --gray-400: #aaaaaa;
+            --gray-300: #cccccc;
+            --gray-200: #e5e5e5;
+            --gray-100: #f2f2f2;
+            --white: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: auto; }
+
+        body {
+            font-family: 'Inter', 'Noto Sans SC', -apple-system, sans-serif;
+            background: linear-gradient(180deg, #FFFFFF 0%, #F5F5F5 100%);
+            background-attachment: fixed;
+            color: var(--black);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+            position: relative;
+            overflow-x: hidden;
+        }
+        /* Page vignette */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background: radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0,0,0,0.03) 85%, rgba(0,0,0,0.06) 100%);
+        }
+
+        /* Ink bleed breathing animation */
+        @keyframes inkBleed {
+            0%, 100% { opacity: 0.85; }
+            50% { opacity: 1; }
+        }
+
+        /* ===== Nav ===== */
+        .nav {
+            position: fixed; top: 0; left: 0; right: 0;
+            background: var(--white);
+            border-bottom: 1px solid var(--black);
+            z-index: 100;
+            padding: 0 3rem;
+        }
+        .nav-inner {
+            max-width: 1100px; margin: 0 auto;
+            height: 64px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .nav-logo {
+            font-size: 1.05rem; font-weight: 800;
+            color: var(--black);
+            letter-spacing: -0.02em;
+        }
+        .nav-links { list-style: none; display: flex; gap: 2.5rem; }
+        .nav-links a {
+            text-decoration: none;
+            color: var(--gray-700);
+            font-size: 0.88rem;
+            font-weight: 500;
+            transition: color 0.2s;
+            letter-spacing: 0.02em;
+        }
+        .nav-links a:hover { color: var(--black); }
+
+        /* ===== Hero ===== */
+        .hero {
+            min-height: 100vh;
+            display: flex; align-items: center;
+            padding: 120px 3rem 80px;
+            max-width: 1100px; margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-content { max-width: 720px; position: relative; z-index: 2; }
+        .hero-keywords {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .hero-keywords span {
+            position: absolute;
+            color: #C8C8C8;
+            font-weight: 400;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            transform-origin: center center;
+            transition: color 0.3s;
+        }
+        .hero-keywords .kw-dim { color: #D2D2D2; font-size: 0.75rem; font-weight: 300; opacity: 0.8; }
+        .hero-keywords .kw-mid { color: #B5B5B5; font-size: 0.88rem; font-weight: 400; opacity: 0.85; }
+        .hero-keywords .kw-bold { color: #8A8A8A; font-size: 1rem; font-weight: 600; opacity: 0.9; }
+        .hero-keywords .kw-xl { color: #666666; font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; opacity: 0.95; }
+        .hero-keywords .kw-tag {
+            display: inline-block;
+            border: 1px solid #BBBBBB;
+            padding: 1px 8px;
+            font-size: 0.82rem;
+            color: #BBBBBB;
+            font-weight: 500;
+            opacity: 0.85;
+        }
+        .hero-keywords .kw-tag-lg {
+            display: inline-block;
+            border: 1.5px solid #AAAAAA;
+            padding: 2px 10px;
+            font-size: 0.98rem;
+            color: #AAAAAA;
+            font-weight: 700;
+            opacity: 0.9;
+        }
+        .hero-keywords .kw-line {
+            position: absolute;
+            height: 1px;
+            background: #E0E0E0;
+        }
+        .hero-keywords .kw-dot {
+            position: absolute;
+            width: 4px; height: 4px;
+            background: #C8C8C8;
+            border-radius: 50%;
+        }
+        .hero-greeting {
+            font-size: 0.82rem;
+            color: var(--gray-500);
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+        }
+        .hero-name {
+            font-size: clamp(4rem, 12vw, 8rem);
+            font-weight: 900;
+            color: var(--black);
+            letter-spacing: -0.04em;
+            line-height: 0.95;
+            margin-bottom: 2rem;
+        }
+        .hero-line {
+            width: 60px; height: 3px;
+            background: var(--black);
+            margin-bottom: 2rem;
+        }
+        .hero-tagline {
+            font-size: 1.25rem;
+            color: var(--gray-700);
+            font-weight: 400;
+            line-height: 1.6;
+            margin-bottom: 2.5rem;
+        }
+        .hero-tagline strong {
+            color: var(--black);
+            font-weight: 700;
+        }
+        .hero-meta {
+            font-size: 0.88rem;
+            color: var(--gray-500);
+            font-weight: 500;
+            letter-spacing: 0.03em;
+        }
+
+        /* ===== Section (Layer Stacking) =====
+         * Default state: normal document flow, no overlap, no shadows.
+         * Scroll-down: sections stack with overlap, shadows, scale/opacity changes.
+         * Scroll-up: all stacking effects removed, back to normal flow.
+         */
+        .section {
+            position: relative;
+            padding: 7rem 3rem;
+            background: var(--white);
+            border-radius: 6px;
+            z-index: 1;
+            margin-top: 0;
+            transition: transform 1.3s cubic-bezier(0.25, 0.1, 0.25, 1),
+                        opacity 1.3s cubic-bezier(0.25, 0.1, 0.25, 1),
+                        box-shadow 1.3s cubic-bezier(0.25, 0.1, 0.25, 1),
+                        margin-top 1.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+            /* Section lighting: top edge highlight, bottom edge shadow */
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 2px 8px rgba(0,0,0,0.06);
+        }
+        /* Upper section fading out (scroll-down only) */
+        .section.stacked-top {
+            opacity: 0.8;
+            transform: scale(0.98);
+            z-index: 1;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.06);
+            transition: transform 1.3s cubic-bezier(0.25, 0.1, 0.25, 1),
+                        opacity 1.3s cubic-bezier(0.25, 0.1, 0.25, 1),
+                        box-shadow 1.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+        /* Lower section entering (scroll-down only) - delayed 0.15s */
+        .section.stacked-bottom {
+            opacity: 1;
+            z-index: 2;
+            margin-top: -32px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,1), 0 -4px 16px rgba(0,0,0,0.12);
+            transition: transform 1.3s cubic-bezier(0.25, 0.1, 0.25, 1) 0.15s,
+                        opacity 1.3s cubic-bezier(0.25, 0.1, 0.25, 1) 0.15s,
+                        box-shadow 1.3s cubic-bezier(0.25, 0.1, 0.25, 1) 0.15s,
+                        margin-top 1.3s cubic-bezier(0.25, 0.1, 0.25, 1) 0.15s;
+        }
+        /* Both stacked: the one in middle */
+        .section.stacked-top.stacked-bottom {
+            opacity: 0.8;
+            transform: scale(0.98);
+            z-index: 1;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.06);
+        }
+        /* Section lighting based on viewport position */
+        .section.section-lit {
+            background: #FFFFFF;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,1), 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .section.section-dim {
+            background: rgba(250,250,250,0.97);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .section-inner {
+            max-width: 1100px; margin: 0 auto;
+        }
+        .section-header {
+            margin-bottom: 4rem;
+            display: flex; align-items: baseline; gap: 1.5rem;
+        }
+        .section-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--gray-500);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .section-title {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: var(--black);
+            letter-spacing: -0.02em;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 48px;
+            height: 2px;
+            background: #1A1A1A;
+        }
+        /* Alternating section backgrounds */
+        #about, #certificates, #future {
+            background: #FAFAFA;
+        }
+        /* Side border lines */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 32px;
+            width: 1px;
+            height: 100vh;
+            background: #E8E8E8;
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            right: 32px;
+            width: 1px;
+            height: 100vh;
+            background: #E8E8E8;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ===== About ===== */
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1.05fr 1fr;
+            gap: 3.5rem;
+            align-items: center;
+        }
+        .about-left {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .about-right {
+            position: relative;
+            min-height: 520px;
+        }
+        .about-right .chart-mbti {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: rotate(-3deg);
+        }
+        .about-right .chart-radar {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            transform: rotate(3deg);
+        }
+        .about-avatar {
+            width: 180px; height: 180px;
+            border-radius: 50%;
+            background-image: url('avatar.jpg');
+            background-size: cover;
+            background-position: center;
+            filter: grayscale(100%) contrast(1.1);
+            border: 2px solid var(--black);
+        }
+        .about-text {
+            font-size: 1rem;
+            color: #444444;
+            line-height: 1.9;
+            font-weight: 400;
+        }
+        .about-text p { margin-bottom: 1.2rem; }
+        .about-text strong {
+            color: var(--black);
+            font-weight: 700;
+        }
+
+        /* ===== Personality portrait (inside About) ===== */
+        .personality-desc {
+            font-size: 0.95rem;
+            color: var(--gray-700);
+            line-height: 1.9;
+            font-weight: 400;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--gray-200);
+        }
+        .personality-desc p { margin-bottom: 1rem; }
+        .personality-desc strong {
+            color: var(--black);
+            font-weight: 700;
+        }
+        .chart-mbti {
+            position: relative;
+            width: 240px;
+            height: 240px;
+        }
+        .chart-mbti svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+        .chart-mbti-text {
+            position: absolute;
+            top: 38%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+        }
+        .chart-mbti-title {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--black);
+            letter-spacing: 0.02em;
+            line-height: 1;
+        }
+        .chart-mbti-sub {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--black);
+            margin-top: 0.2rem;
+        }
+        .chart-mbti-bottom {
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--black);
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+        .chart-radar {
+            width: 260px;
+            height: 260px;
+        }
+        .chart-radar svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        /* ===== Timeline ===== */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            max-width: 700px;
+        }
+        .timeline-line {
+            position: absolute;
+            left: 5px; top: 8px; bottom: 8px;
+            width: 1.5px;
+            background: var(--black);
+        }
+        .timeline-item {
+            position: relative;
+            padding-bottom: 3.5rem;
+        }
+        .timeline-item:last-child { padding-bottom: 0; }
+        .timeline-dot {
+            position: absolute;
+            left: -2rem; top: 6px;
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: var(--white);
+            border: 2.5px solid var(--black);
+        }
+        .timeline-period {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--black);
+            letter-spacing: 0.06em;
+            margin-bottom: 0.5rem;
+        }
+        .timeline-school {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--black);
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.01em;
+        }
+        .timeline-tags { display: flex; gap: 0.6rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .timeline-tag {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--white);
+            background: var(--black);
+            padding: 0.3rem 0.85rem;
+            letter-spacing: 0.03em;
+        }
+        .timeline-tag-outline {
+            background: var(--white);
+            color: var(--black);
+            border: 1.5px solid var(--black);
+        }
+        .timeline-desc {
+            font-size: 0.92rem;
+            color: var(--gray-700);
+            line-height: 1.8;
+            font-weight: 400;
+        }
+        .timeline-desc p { margin-bottom: 0.75rem; }
+        .timeline-desc ul {
+            margin: 0.5rem 0 0.9rem;
+            padding-left: 1.25rem;
+            list-style: disc;
+        }
+        .timeline-desc li { margin-bottom: 0.4rem; }
+
+        /* ===== Certificates ===== */
+        .cert-intro {
+            font-size: 0.95rem;
+            color: var(--gray-700);
+            line-height: 1.8;
+            margin-bottom: 3rem;
+            max-width: 620px;
+        }
+        /* Scene Container */
+        .cert-scene-wrap {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+        }
+        .cert-scene {
+            position: relative;
+            width: 320px;
+            height: 400px;
+            cursor: pointer;
+            transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+        .cert-scene:hover {
+            transform: scale(1.04);
+        }
+        /* Vignette */
+        .scene-vignette {
+            position: absolute;
+            inset: -30px;
+            background: radial-gradient(ellipse at 50% 42%, transparent 35%, rgba(0,0,0,0.08) 100%);
+            pointer-events: none;
+            z-index: 0;
+            transition: opacity 0.3s ease;
+        }
+        .cert-scene:hover .scene-vignette {
+            opacity: 1.3;
+        }
+        /* ===== Lamp ===== */
+        .scene-lamp {
+            position: absolute;
+            top: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.5s ease;
+        }
+        .cert-scene:hover .scene-lamp {
+            transform: translateX(-50%) rotate(-1deg);
+        }
+        .lamp-cord {
+            width: 1px;
+            height: 44px;
+            background: #1A1A1A;
+        }
+        .lamp-cord-ring {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            border: 1.5px solid #1A1A1A;
+            margin-top: -2px;
+        }
+        .lamp-shade {
+            width: 0;
+            height: 0;
+            border-left: 24px solid transparent;
+            border-right: 24px solid transparent;
+            border-top: 34px solid #1A1A1A;
+            margin-top: -2px;
+            position: relative;
+        }
+        .lamp-shade::after {
+            content: '';
+            position: absolute;
+            top: -36px;
+            left: -22px;
+            width: 0;
+            height: 0;
+            border-left: 22px solid transparent;
+            border-right: 22px solid transparent;
+            border-top: 4px solid #1A1A1A;
+        }
+        .lamp-bulb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #FAFAFA;
+            border: 1px solid #D0D0D0;
+            margin-top: -8px;
+            box-shadow: 0 0 24px 6px rgba(255,255,255,0.4), 0 0 48px 14px rgba(255,255,255,0.2);
+            transition: box-shadow 0.3s ease;
+        }
+        .cert-scene:hover .lamp-bulb {
+            box-shadow: 0 0 30px 8px rgba(255,255,255,0.55), 0 0 60px 20px rgba(255,255,255,0.28);
+        }
+        /* ===== Light Cone ===== */
+        .scene-light-cone {
+            position: absolute;
+            top: 72px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 220px;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0.14) 0%,
+                rgba(255,255,255,0.24) 30%,
+                rgba(255,255,255,0.10) 65%,
+                transparent 100%
+            );
+            clip-path: polygon(38% 0%, 62% 0%, 90% 100%, 10% 100%);
+            pointer-events: none;
+            z-index: 3;
+            transition: opacity 0.3s ease;
+        }
+        .cert-scene:hover .scene-light-cone {
+            opacity: 1.5;
+        }
+        /* ===== Book ===== */
+        .scene-book {
+            position: absolute;
+            top: 130px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 290px;
+            height: 190px;
+            z-index: 4;
+            transition: transform 0.3s ease;
+        }
+        .cert-scene:hover .scene-book {
+            transform: translateX(-50%) translateY(-2px);
+        }
+        .book-spread {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .book-page {
+            position: absolute;
+            top: 0;
+            width: 144px;
+            height: 100%;
+            background: linear-gradient(to bottom, #FAFAFA 0%, #F2F2F2 100%);
+            border: 1px solid #DDD;
+            overflow: hidden;
+        }
+        .book-page-left {
+            left: 0;
+            border-radius: 3px 0 0 3px;
+            transform-origin: right center;
+            transform: perspective(700px) rotateY(-4deg);
+            border-right: 0.5px solid #CCC;
+            box-shadow: -2px 2px 10px rgba(0,0,0,0.05);
+        }
+        .book-page-right {
+            right: 0;
+            border-radius: 0 3px 3px 0;
+            transform-origin: left center;
+            transform: perspective(700px) rotateY(4deg);
+            border-left: 0.5px solid #CCC;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.05);
+        }
+        .book-spine-line {
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(
+                to right,
+                rgba(0,0,0,0.10) 0%,
+                rgba(0,0,0,0.03) 40%,
+                rgba(0,0,0,0.0) 50%,
+                rgba(0,0,0,0.03) 60%,
+                rgba(0,0,0,0.10) 100%
+            );
+            z-index: 2;
+            pointer-events: none;
+        }
+        /* Page Highlight */
+        .page-highlight {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .page-highlight-left {
+            background: radial-gradient(ellipse at 55% 40%, rgba(255,255,255,0.30) 0%, transparent 65%);
+        }
+        .page-highlight-right {
+            background: radial-gradient(ellipse at 45% 40%, rgba(255,255,255,0.30) 0%, transparent 65%);
+        }
+        /* Page Content */
+        .page-content {
+            position: absolute;
+            inset: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+        .page-content svg {
+            width: 75px;
+            height: 75px;
+        }
+        .page-content .page-icon-stroke {
+            stroke: #555;
+            stroke-width: 1.2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .page-content .page-icon-fill {
+            fill: #555;
+        }
+        .page-content .page-icon-dot {
+            fill: #333;
+            stroke: #333;
+            stroke-width: 0.5;
+        }
+        .page-content .page-label {
+            font-size: 10px;
+            color: #999;
+            letter-spacing: 0.1em;
+            margin-top: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        /* ===== Book Shadow ===== */
+        .scene-book-shadow {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 270px;
+            height: 14px;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.16) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+        .cert-scene:hover .scene-book-shadow {
+            width: 290px;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.22) 0%, transparent 70%);
+        }
+        /* ===== Platform ===== */
+        .scene-platform {
+            position: absolute;
+            bottom: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 270px;
+            height: 4px;
+            background: #E0E0E0;
+            z-index: 1;
+            border-radius: 2px;
+        }
+        .scene-platform-refl {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 3px;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.5) 30%, rgba(255,255,255,0.5) 70%, transparent);
+            z-index: 0;
+            pointer-events: none;
+            border-radius: 2px;
+        }
+        .scene-platform-shadow {
+            position: absolute;
+            bottom: 3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 210px;
+            height: 10px;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.05) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        /* ===== Scene Badge ===== */
+        .scene-badge {
+            position: absolute;
+            top: -8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            background: var(--white);
+            border: 1.5px solid var(--black);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 300;
+            color: var(--black);
+            z-index: 7;
+            line-height: 1;
+            transition: all 0.25s ease;
+        }
+        .cert-scene:hover .scene-badge {
+            background: var(--black);
+            color: var(--white);
+        }
+        /* ===== Scene Label ===== */
+        .scene-label {
+            position: absolute;
+            bottom: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--black);
+            color: var(--white);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            padding: 3px 10px;
+            border-radius: 4px;
+            z-index: 6;
+            white-space: nowrap;
+        }
+        /* ===== View Button ===== */
+        .cert-view-wrap {
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+        .cert-view-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--white);
+            border: 1.5px solid var(--black);
+            color: var(--black);
+            font-size: 0.88rem;
+            font-weight: 600;
+            padding: 8px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            letter-spacing: 0.02em;
+            font-family: inherit;
+        }
+        .cert-view-btn:hover {
+            background: var(--black);
+            color: var(--white);
+        }
+        .cert-view-count {
+            font-size: 0.75rem;
+            color: #AAAAAA;
+            margin-top: 0.6rem;
+            display: block;
+        }
+
+        /* ===== Lightbox ===== */
+        .cert-lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .cert-lightbox.active {
+            display: flex;
+            opacity: 1;
+        }
+        .cert-lightbox-panel {
+            background: var(--white);
+            border-radius: 16px;
+            width: 80%;
+            max-width: 900px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 2.5rem 2rem 2rem;
+            transform: scale(0.95);
+            transition: transform 0.3s ease-out;
+            position: relative;
+            scrollbar-width: thin;
+            scrollbar-color: #CCCCCC transparent;
+        }
+        .cert-lightbox.active .cert-lightbox-panel {
+            transform: scale(1);
+        }
+        .cert-lightbox-panel::-webkit-scrollbar {
+            width: 4px;
+        }
+        .cert-lightbox-panel::-webkit-scrollbar-thumb {
+            background: #CCCCCC;
+            border-radius: 2px;
+        }
+        .cert-lightbox-title {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--black);
+            margin-bottom: 0.5rem;
+        }
+        .cert-lightbox-divider {
+            width: 80px;
+            height: 1px;
+            background: var(--gray-200);
+            margin: 0 auto 2rem;
+        }
+        .cert-lightbox-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--white);
+            border: 1.5px solid var(--gray-300);
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-weight: 400;
+            line-height: 1;
+        }
+        .cert-lightbox-close:hover {
+            background: var(--black);
+            color: var(--white);
+            border-color: var(--black);
+        }
+        .cert-lightbox-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .cert-lightbox-card {
+            background: var(--white);
+            border: 1px solid #EEEEEE;
+            border-radius: 8px;
+            padding: 0.75rem;
+            transition: opacity 0.4s ease;
+            opacity: 0;
+        }
+        .cert-lightbox-card.visible {
+            opacity: 1;
+        }
+        .cert-lightbox-card.ai-card {
+            grid-column: span 2;
+            border: 2px solid var(--black);
+        }
+        .cert-lightbox-card.ai-card .cert-lightbox-card-name::after {
+            content: 'AI';
+            display: inline-block;
+            background: var(--black);
+            color: var(--white);
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 3px;
+            margin-left: 6px;
+            letter-spacing: 0.05em;
+        }
+        .cert-lightbox-card-img {
+            width: 100%;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+            border-radius: 4px;
+            display: block;
+        }
+        .cert-lightbox-card-name {
+            text-align: center;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: #555555;
+            margin-top: 0.65rem;
+        }
+
+        @media (max-width: 768px) {
+            .cert-scene-wrap {
+                gap: 30px;
+            }
+            .cert-scene {
+                width: 280px;
+                height: 360px;
+            }
+            .scene-book {
+                width: 250px;
+                height: 160px;
+                top: 115px;
+            }
+            .book-page { width: 124px; }
+            .page-content svg { width: 60px; height: 60px; }
+            .scene-light-cone { width: 170px; height: 180px; top: 62px; }
+            .scene-platform { width: 240px; }
+            .scene-book-shadow { width: 240px; }
+            .cert-lightbox-panel {
+                width: 95%;
+                padding: 2rem 1.25rem 1.5rem;
+            }
+            .cert-lightbox-grid {
+                grid-template-columns: 1fr;
+            }
+            .cert-lightbox-card.ai-card {
+                grid-column: span 1;
+            }
+        }
+
+        /* ===== Projects ===== */
+        .project-stage {
+            position: relative;
+            padding: 0 1rem;
+        }
+        .project-cards {
+            display: grid;
+            grid-template-columns: 2fr 3fr;
+            gap: 28px;
+            position: relative;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .project-cards::before {
+            display: none;
+        }
+        .project-card {
+            position: relative;
+            background: #FAFAFA;
+            border: 1px solid #E0E0E0;
+            border-radius: 16px;
+            padding: 0;
+            transition: all 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+            cursor: default;
+            overflow: visible;
+            z-index: 1;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06),
+                        inset 0 0 0 1px rgba(0,0,0,0.02),
+                        inset 0 1px 0 rgba(255,255,255,0.8);
+        }
+        /* Tank Battle: left column, spans 2 rows */
+        .project-card:nth-child(1) {
+            grid-column: 1;
+            grid-row: 1 / 3;
+            width: auto;
+            margin-top: 0;
+        }
+        /* Whack-a-Mole: right column top */
+        .project-card:nth-child(2) {
+            grid-column: 2;
+            grid-row: 1;
+            width: auto;
+            margin-top: 0;
+        }
+        /* Particle Gesture: right column, spans rows 2-3 */
+        .project-card:nth-child(3) {
+            grid-column: 2;
+            grid-row: 2 / 4;
+            width: auto;
+            margin-top: 0;
+        }
+        /* Plane Battle: left column bottom, below Tank Battle */
+        .project-card:nth-child(4) {
+            grid-column: 1;
+            grid-row: 3;
+            width: auto;
+            margin-top: 0;
+        }
+        /* Ink bleed glow */
+        .project-card::after {
+            content: '';
+            position: absolute;
+            inset: -24px;
+            border-radius: 32px;
+            background: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.06) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+            pointer-events: none;
+            z-index: -1;
+        }
+        .project-card:hover {
+            transform: scale(1.04) translateZ(0);
+            box-shadow: 0 10px 28px rgba(0,0,0,0.10),
+                        0 20px 40px rgba(0,0,0,0.05),
+                        0 3px 6px rgba(0,0,0,0.06),
+                        inset 0 0 0 1px rgba(0,0,0,0.02),
+                        inset 0 1px 0 rgba(255,255,255,1);
+            border-color: #999999;
+            z-index: 10;
+        }
+        .project-card:hover::after {
+            opacity: 1;
+            animation: inkBleed 2.5s ease-in-out infinite;
+        }
+        /* Card bottom shadow line */
+        .project-card::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 8px;
+            right: 8px;
+            height: 1px;
+            background: rgba(0,0,0,0.06);
+            pointer-events: none;
+            z-index: 1;
+            transition: opacity 0.35s ease;
+        }
+        .project-card:hover::before {
+            opacity: 0;
+        }
+        .project-thumb {
+            width: 100%;
+            background: #FAFAFA;
+            display: flex;
+            flex-direction: column;
+            border-bottom: 1px solid #F0F0F0;
+            overflow: hidden;
+            border-radius: 16px 16px 0 0;
+            cursor: pointer;
+            transition: background 0.25s ease;
+        }
+        .project-thumb:hover { background: #F4F4F4; }
+        .project-window-titlebar {
+            height: 30px;
+            background: #FAFAFA;
+            border-bottom: 1px solid #E0E0E0;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            gap: 6px;
+            position: relative;
+            flex-shrink: 0;
+            transition: background 0.25s ease;
+        }
+        .project-thumb:hover .project-window-titlebar { background: #F0F0F0; }
+        .project-window-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .project-window-dot.d1 { background: #CCCCCC; }
+        .project-window-dot.d2 { background: #AAAAAA; }
+        .project-window-dot.d3 { background: #888888; }
+        .project-window-title {
+            font-size: 11px;
+            color: #999999;
+            margin-left: 8px;
+            font-family: 'Inter', monospace;
+            letter-spacing: 0.02em;
+        }
+        .project-window-close {
+            position: absolute;
+            right: 12px;
+            color: #AAAAAA;
+            font-size: 14px;
+            line-height: 1;
+            font-weight: 300;
+        }
+        .project-window-content {
+            background: #FFFFFF;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            min-height: 180px;
+            transition: background 0.25s ease;
+        }
+        .project-thumb:hover .project-window-content { background: #FCFCFC; }
+        .project-window-content svg {
+            width: 100%;
+            height: 100%;
+            max-height: 280px;
+        }
+        .project-window-statusbar {
+            height: 26px;
+            background: #FAFAFA;
+            border-top: 1px solid #E0E0E0;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            gap: 8px;
+            flex-shrink: 0;
+            transition: background 0.25s ease;
+        }
+        .project-thumb:hover .project-window-statusbar { background: #F0F0F0; }
+        .project-window-lock {
+            width: 9px; height: 9px;
+            color: #AAAAAA;
+            flex-shrink: 0;
+        }
+        .project-window-url {
+            flex: 1;
+            background: #FFFFFF;
+            border: 1px solid #E8E8E8;
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 10px;
+            color: #999999;
+            font-family: 'Inter', monospace;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .project-window-open {
+            color: #666666;
+            font-size: 13px;
+            line-height: 1;
+            transition: transform 0.25s ease, color 0.25s ease;
+            flex-shrink: 0;
+        }
+        .project-thumb:hover .project-window-open {
+            color: #1A1A1A;
+            transform: translateX(2px);
+        }
+        .project-thumb svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Project Lightbox */
+        .proj-lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            padding: 2rem;
+        }
+        .proj-lightbox.active { display: flex; opacity: 1; }
+        .proj-lightbox-panel {
+            background: var(--white);
+            border-radius: 14px;
+            width: 100%;
+            max-width: 680px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 2.5rem 2.2rem 2.2rem;
+            transform: scale(0.95);
+            transition: transform 0.3s ease-out;
+            position: relative;
+            scrollbar-width: thin;
+        }
+        .proj-lightbox.active .proj-lightbox-panel { transform: scale(1); }
+        .proj-lightbox-panel::-webkit-scrollbar { width: 4px; }
+        .proj-lightbox-panel::-webkit-scrollbar-thumb { background: #CCCCCC; border-radius: 2px; }
+        .proj-lightbox-close {
+            position: absolute;
+            top: 16px; right: 16px;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: var(--white);
+            border: 1.5px solid var(--gray-300);
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            line-height: 1;
+            z-index: 5;
+        }
+        .proj-lightbox-close:hover {
+            background: var(--black);
+            color: var(--white);
+            border-color: var(--black);
+        }
+        .proj-lightbox-tag {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--gray-500);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 0.6rem;
+        }
+        .proj-lightbox-title {
+            font-size: 1.7rem;
+            font-weight: 900;
+            color: var(--black);
+            margin-bottom: 0.4rem;
+            letter-spacing: -0.02em;
+        }
+        .proj-lightbox-subtitle {
+            font-size: 0.95rem;
+            color: var(--gray-500);
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            font-family: 'Inter', monospace;
+        }
+        .proj-lightbox-divider {
+            width: 60px; height: 2px;
+            background: var(--black);
+            margin-bottom: 1.5rem;
+        }
+        .proj-lightbox-preview {
+            background: #FAFAFA;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .proj-lightbox-preview svg {
+            width: 100%;
+            height: auto;
+            max-height: 260px;
+            display: block;
+        }
+        .proj-lightbox-section { margin-bottom: 1.2rem; }
+        .proj-lightbox-section-title {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--black);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        .proj-lightbox-section-text {
+            font-size: 0.9rem;
+            color: var(--gray-700);
+            line-height: 1.75;
+        }
+        .proj-lightbox-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .proj-lightbox-features li {
+            font-size: 0.88rem;
+            color: var(--gray-700);
+            line-height: 1.8;
+            padding-left: 1.2rem;
+            position: relative;
+        }
+        .proj-lightbox-features li::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0.7rem;
+            width: 6px; height: 6px;
+            background: var(--black);
+            border-radius: 50%;
+        }
+        .proj-lightbox-stack {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .proj-lightbox-stack span {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--white);
+            background: var(--black);
+            padding: 0.25rem 0.65rem;
+            border-radius: 3px;
+            letter-spacing: 0.02em;
+        }
+        .proj-lightbox-actions {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--gray-200);
+        }
+        .proj-lightbox-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--black);
+            color: var(--white);
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: 1.5px solid var(--black);
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .proj-lightbox-btn:hover { background: var(--gray-800); border-color: var(--gray-800); }
+        .proj-lightbox-btn.outline {
+            background: var(--white);
+            color: var(--black);
+        }
+        .proj-lightbox-btn.outline:hover { background: var(--gray-100); }
+        .project-body {
+            padding: 1.25rem 1.5rem 1.5rem;
+        }
+        .project-name {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--black);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.005em;
+        }
+        .project-desc {
+            font-size: 0.85rem;
+            color: #444444;
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+        .project-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .project-tag {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #333333;
+            background: #F0F0F0;
+            border: 1px solid #E0E0E0;
+            border-radius: 4px;
+            padding: 2px 8px;
+            letter-spacing: 0.02em;
+        }
+        .project-features {
+            margin-top: 0.75rem;
+            border-top: 1px solid #F0F0F0;
+            padding-top: 0.75rem;
+        }
+        .project-features-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #333;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        .project-feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 0.75rem 0;
+        }
+        .project-feature-list li {
+            font-size: 0.78rem;
+            color: #555;
+            line-height: 1.7;
+            padding-left: 1rem;
+            position: relative;
+        }
+        .project-feature-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.55em;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #999;
+        }
+        .project-takeaway {
+            margin-top: 0.5rem;
+            padding-top: 0.6rem;
+            border-top: 1px solid #F0F0F0;
+            font-size: 0.78rem;
+            color: #555;
+            line-height: 1.7;
+            font-style: italic;
+        }
+        .project-takeaway-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #333;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 0.35rem;
+            font-style: normal;
+        }
+        @media (max-width: 768px) {
+            .project-cards {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            .project-card:nth-child(1),
+            .project-card:nth-child(2),
+            .project-card:nth-child(3),
+            .project-card:nth-child(4) {
+                grid-column: 1;
+                grid-row: auto;
+                width: 100%;
+                margin-top: 0;
+            }
+            .project-card:hover { transform: scale(1.03); }
+        }
+
+        .project-note {
+            margin: 4rem auto 0;
+            max-width: 620px;
+            text-align: center;
+        }
+        .project-note p {
+            font-size: 0.95rem;
+            color: var(--gray-500);
+            line-height: 1.9;
+            margin-bottom: 0.9rem;
+        }
+        .project-note p:last-child { margin-bottom: 0; }
+
+        /* ===== Future ===== */
+        .future-quote {
+            font-size: 1.15rem;
+            color: var(--gray-800);
+            font-weight: 400;
+            line-height: 1.9;
+            margin-bottom: 3.5rem;
+            max-width: 680px;
+            border-left: 3px solid var(--black);
+            padding-left: 1.5rem;
+        }
+        .future-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 36px;
+        }
+        .future-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        .future-row.full {
+            grid-template-columns: 1fr;
+        }
+        .future-card {
+            padding: 2.5rem 2rem;
+            border-radius: 16px;
+            border: 1px solid #E0E0E0;
+            transition: all 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+            position: relative;
+            overflow: visible;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06),
+                        inset 0 0 0 1px rgba(0,0,0,0.02);
+        }
+        /* Row 1: light gray → mid-light gray */
+        .future-row:nth-child(1) .future-card:nth-child(1) {
+            background: linear-gradient(to right, #F2F2F2, #E8E8E8);
+        }
+        .future-row:nth-child(1) .future-card:nth-child(2) {
+            background: linear-gradient(to right, #E8E8E8, #E0E0E0);
+        }
+        /* Row 2: mid-light gray → mid gray */
+        .future-row:nth-child(2) .future-card:nth-child(1) {
+            background: linear-gradient(to right, #E0E0E0, #D6D6D6);
+        }
+        .future-row:nth-child(2) .future-card:nth-child(2) {
+            background: linear-gradient(to right, #D6D6D6, #CCCCCC);
+        }
+        /* Row 3: dark gray → black (full width, visual anchor) */
+        .future-row:nth-child(3) .future-card {
+            background: linear-gradient(to right, #666666, #1A1A1A);
+        }
+        .future-card::after {
+            content: '';
+            position: absolute;
+            inset: -24px;
+            border-radius: 32px;
+            background: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.06) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+            pointer-events: none;
+            z-index: -1;
+        }
+        .future-card:hover {
+            transform: scale(1.04) translateZ(0);
+            box-shadow: 0 10px 28px rgba(0,0,0,0.10),
+                        0 20px 40px rgba(0,0,0,0.05),
+                        0 3px 6px rgba(0,0,0,0.06);
+            z-index: 10;
+        }
+        .future-card:hover::after {
+            opacity: 1;
+            animation: inkBleed 2.5s ease-in-out infinite;
+        }
+        /* Row 3 dark card: deeper shadow */
+        .future-row:nth-child(3) .future-card:hover {
+            box-shadow: 0 10px 28px rgba(0,0,0,0.16),
+                        0 20px 40px rgba(0,0,0,0.08),
+                        0 3px 6px rgba(0,0,0,0.10);
+        }
+        .future-num {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            margin-bottom: 1rem;
+            color: var(--gray-500);
+        }
+        .future-row:nth-child(3) .future-num {
+            color: rgba(255,255,255,0.6);
+        }
+        .future-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin-bottom: 0.8rem;
+            letter-spacing: -0.01em;
+            color: var(--black);
+        }
+        .future-row:nth-child(3) .future-title {
+            color: #FFFFFF;
+        }
+        .future-desc {
+            font-size: 0.9rem;
+            line-height: 1.7;
+            color: #444444;
+        }
+        .future-row:nth-child(3) .future-desc {
+            color: #E8E8E8;
+        }
+        .future-closing {
+            margin-top: 3.5rem;
+            font-size: 1rem;
+            color: var(--gray-800);
+            font-weight: 500;
+        }
+
+        /* ===== Contact ===== */
+        .contact-wrap { text-align: center; max-width: 600px; margin: 0 auto; }
+        .contact-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--black);
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+        }
+        .contact-desc {
+            font-size: 1rem;
+            color: var(--gray-700);
+            font-weight: 400;
+            margin-bottom: 3rem;
+        }
+        .contact-list {
+            display: flex; justify-content: center;
+            gap: 4rem; flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+        .contact-item { text-align: center; }
+        .contact-label {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+        .contact-value {
+            font-size: 1rem;
+            color: var(--black);
+            font-weight: 700;
+            letter-spacing: 0.01em;
+        }
+        .contact-link {
+            color: var(--black);
+            text-decoration: underline;
+            text-underline-offset: 2.5px;
+            transition: color 0.2s ease;
+        }
+        .contact-link:hover { color: var(--gray-500); }
+        .contact-tags { display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; }
+        .contact-tag {
+            font-size: 0.82rem;
+            color: var(--black);
+            background: var(--white);
+            border: 1.5px solid var(--black);
+            padding: 0.4rem 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        /* ===== Footer ===== */
+        .footer {
+            text-align: center;
+            padding: 2.5rem 3rem;
+            border-top: 1px solid var(--black);
+            background: var(--black);
+            color: var(--gray-300);
+        }
+        .footer p { font-size: 0.85rem; font-weight: 500; letter-spacing: 0.03em; }
+
+        /* ===== Back to top ===== */
+        .back-top {
+            position: fixed; bottom: 2rem; right: 2rem;
+            width: 48px; height: 48px;
+            background: var(--black);
+            color: var(--white);
+            font-size: 1.1rem;
+            cursor: pointer;
+            z-index: 50;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transform: translateY(20px);
+            transition: all 0.3s;
+            border: none;
+            font-weight: 700;
+        }
+        .back-top.show { opacity: 1; transform: translateY(0); }
+        .back-top:hover { background: var(--gray-800); }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 768px) {
+            .nav { padding: 0 1rem; }
+            .nav-logo { font-size: 0.85rem; }
+            .nav-links { gap: 1rem; }
+            .nav-links a { font-size: 0.78rem; }
+            .hero { padding: 100px 1.5rem 60px; }
+            .section { padding: 5rem 1.5rem; border-radius: 4px; }
+            .section.stacked-top { opacity: 0.8; transform: scale(0.99); }
+            .section.stacked-bottom { margin-top: -16px; }
+            .section.stacked-top.stacked-bottom { opacity: 0.8; transform: scale(0.99); }
+            .section-header { flex-direction: column; gap: 0.5rem; }
+            .project-card:hover { transform: scale(1.03); }
+            .future-card:hover { transform: scale(1.03); }
+            .cert-scene:hover { transform: scale(1.03); }
+            .about-grid { grid-template-columns: 1fr; gap: 2rem; text-align: center; }
+            .about-avatar { margin: 0 auto; width: 140px; height: 140px; }
+            .about-right {
+                position: static;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 2.5rem;
+            }
+            .about-right .chart-mbti,
+            .about-right .chart-radar {
+                position: static;
+                transform: none;
+            }
+            .future-row { grid-template-columns: 1fr; }
+            .future-grid { gap: 24px; }
+            .future-card:hover { transform: scale(1.03); }
+            .contact-list { gap: 2rem; }
+            .contact-title { font-size: 1.8rem; }
+            .project-note { margin-top: 3rem; }
+            .project-note p { font-size: 0.9rem; }
+            .proj-lightbox { padding: 1rem; }
+            .proj-lightbox-panel { padding: 2rem 1.25rem 1.5rem; }
+            .future-card { padding: 2rem 1.5rem; }
+        }
+
+        @media (max-width: 400px) {
+            .nav-logo { display: none; }
+            .nav-inner { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+    <div class="nav-inner">
+        <div class="nav-logo">WANG LUPING</div>
+        <ul class="nav-links">
+            <li><a href="#about">关于</a></li>
+            <li><a href="#timeline">求学</a></li>
+            <li><a href="#certificates">证书</a></li>
+            <li><a href="#projects">项目</a></li>
+            <li><a href="#future">展望</a></li>
+            <li><a href="#contact">联系</a></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero" id="hero">
+    <div class="hero-keywords">
+        <!-- SAFE ZONE: Left 35% is reserved for name/title. No keywords there. -->
+
+        <!-- Right side - large core keywords (far from title) -->
+        <span class="kw-xl" style="top:8%;left:68%;transform:rotate(-2deg);">信号与系统</span>
+        <span class="kw-tag-lg" style="top:35%;left:72%;transform:rotate(2deg);">人工智能</span>
+        <span class="kw-xl" style="top:72%;left:62%;transform:rotate(-3deg);">嵌入式系统</span>
+
+        <!-- Right side - bold keywords -->
+        <span class="kw-bold" style="top:20%;left:85%;transform:rotate(3deg);">单片机</span>
+        <span class="kw-bold" style="top:55%;left:80%;transform:rotate(-2deg);">ARM</span>
+        <span class="kw-bold" style="top:88%;left:78%;transform:rotate(2deg);">计算机视觉</span>
+        <span class="kw-bold" style="top:42%;left:92%;transform:rotate(-4deg);">机器学习</span>
+
+        <!-- Right side - tags -->
+        <span class="kw-tag" style="top:14%;left:78%;transform:rotate(-3deg);">C++</span>
+        <span class="kw-tag" style="top:62%;left:88%;transform:rotate(2deg);">Python</span>
+        <span class="kw-tag" style="top:95%;left:70%;transform:rotate(4deg);">云计算</span>
+
+        <!-- Top edge - spanning right side only -->
+        <span class="kw-mid" style="top:4%;left:42%;transform:rotate(-1deg);">模拟电路</span>
+        <span class="kw-mid" style="top:10%;left:56%;transform:rotate(2deg);">数字信号处理</span>
+        <span class="kw-mid" style="top:6%;left:88%;transform:rotate(-2deg);">通信原理</span>
+        <span class="kw-dim" style="top:2%;left:70%;transform:rotate(1deg);">FPGA</span>
+        <span class="kw-dim" style="top:14%;left:95%;transform:rotate(-3deg);">Verilog</span>
+
+        <!-- Bottom edge -->
+        <span class="kw-mid" style="top:92%;left:40%;transform:rotate(2deg);">网络协议</span>
+        <span class="kw-mid" style="top:95%;left:55%;transform:rotate(-1deg);">大数据</span>
+        <span class="kw-mid" style="top:90%;left:88%;transform:rotate(3deg);">STM32</span>
+        <span class="kw-dim" style="top:96%;left:96%;transform:rotate(-2deg);">MATLAB</span>
+
+        <!-- Right side mid -->
+        <span class="kw-mid" style="top:28%;left:58%;transform:rotate(-2deg);">数据结构</span>
+        <span class="kw-mid" style="top:32%;left:82%;transform:rotate(1deg);">算法</span>
+        <span class="kw-mid" style="top:46%;left:52%;transform:rotate(-3deg);">Linux</span>
+        <span class="kw-mid" style="top:50%;left:68%;transform:rotate(2deg);">物联网</span>
+        <span class="kw-mid" style="top:58%;left:55%;transform:rotate(-1deg);">边缘计算</span>
+        <span class="kw-mid" style="top:66%;left:88%;transform:rotate(3deg);">DSP</span>
+        <span class="kw-mid" style="top:78%;left:50%;transform:rotate(-2deg);">RTOS</span>
+        <span class="kw-mid" style="top:82%;left:92%;transform:rotate(1deg);">VHDL</span>
+
+        <!-- Tiny scattered keywords on edges only -->
+        <span class="kw-dim" style="top:18%;left:62%;transform:rotate(2deg);">数字电路</span>
+        <span class="kw-dim" style="top:24%;left:92%;transform:rotate(-3deg);">嵌入式</span>
+        <span class="kw-dim" style="top:38%;left:50%;transform:rotate(1deg);">射频</span>
+        <span class="kw-dim" style="top:44%;left:76%;transform:rotate(-2deg);">图像处理</span>
+        <span class="kw-dim" style="top:52%;left:96%;transform:rotate(4deg);">语音信号</span>
+        <span class="kw-dim" style="top:60%;left:66%;transform:rotate(-1deg);">Altium</span>
+        <span class="kw-dim" style="top:68%;left:52%;transform:rotate(2deg);">驱动开发</span>
+        <span class="kw-dim" style="top:74%;left:95%;transform:rotate(-3deg);">传感器</span>
+        <span class="kw-dim" style="top:80%;left:68%;transform:rotate(1deg);">5G</span>
+        <span class="kw-dim" style="top:86%;left:88%;transform:rotate(-2deg);">深度学习</span>
+        <span class="kw-dim" style="top:4%;left:48%;transform:rotate(3deg);">系统</span>
+        <span class="kw-dim" style="top:96%;left:64%;transform:rotate(-3deg);">天线设计</span>
+        <span class="kw-dim" style="top:93%;left:82%;transform:rotate(2deg);">集成电路</span>
+
+        <!-- Left edge extreme - only at very top/bottom corners -->
+        <span class="kw-dim" style="top:2%;left:2%;transform:rotate(-3deg);">Keil</span>
+        <span class="kw-dim" style="top:96%;left:2%;transform:rotate(3deg);">Verilog HDL</span>
+
+        <!-- Tiny dots on right side only -->
+        <span class="kw-dot" style="top:16%;left:74%;"></span>
+        <span class="kw-dot" style="top:30%;left:90%;"></span>
+        <span class="kw-dot" style="top:50%;left:60%;"></span>
+        <span class="kw-dot" style="top:65%;left:76%;"></span>
+        <span class="kw-dot" style="top:80%;left:86%;"></span>
+        <span class="kw-dot" style="top:90%;left:66%;"></span>
+
+        <!-- Faint lines on right side -->
+        <span class="kw-line" style="top:22%;left:62%;width:28px;transform:rotate(-5deg);"></span>
+        <span class="kw-line" style="top:48%;left:56%;width:22px;transform:rotate(8deg);"></span>
+        <span class="kw-line" style="top:70%;left:64%;width:30px;transform:rotate(-3deg);"></span>
+        <span class="kw-line" style="top:84%;left:80%;width:24px;transform:rotate(6deg);"></span>
+    </div>
+    <div class="hero-content">
+        <div class="hero-greeting">HELLO, I'M</div>
+        <h1 class="hero-name">王露平</h1>
+        <div class="hero-line"></div>
+        <p class="hero-tagline"><strong>保持好奇，踏实前行。</strong><br>在代码与思考之间，寻找属于自己的节奏。</p>
+        <div class="hero-meta">电子信息类 · 热爱技术与创造</div>
+    </div>
+</section>
+
+<!-- About -->
+<section class="section" id="about">
+    <div class="section-inner">
+        <div class="section-header">
+            <span class="section-label">01 / ABOUT</span>
+            <h2 class="section-title">关于我</h2>
+        </div>
+        <div class="about-grid">
+            <div class="about-left">
+                <div class="about-avatar"></div>
+                <div class="about-text">
+                    <p>你好，我是<strong>王露平</strong>。喜欢在自然与秩序之间寻找平衡，也相信缓慢而坚定的生长。</p>
+                    <p>感谢你来到我的介绍页。愿与你分享我的<strong>学习轨迹</strong>与小小热望，也期待与你在未来的道路上相遇。</p>
+                    <p>我相信每一份努力都像一颗种子，在合适的季节里，总会开出属于自己的花朵。</p>
+                </div>
+                <div class="personality-desc">
+                    <p><strong>MBTI 人格</strong>测试结果是 INTJ 与 INTP 的混合体——既能独立思考宏观策略，也能沉浸在细节里拆解问题。</p>
+                    <p>能力雷达里，<strong>动手</strong>和<strong>思维</strong>是我的主轴，而<strong>搞笑</strong>与<strong>乐子人</strong>负责让生活不那么严肃。</p>
+                    <p>不端着，不装腔，来回蹦迪，做自己就好。</p>
+                </div>
+            </div>
+            <div class="about-right">
+                <div class="chart-mbti">
+                    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M102,98 L168,58 A78,78 0 0,1 156,32 Z" fill="#1a1a1a" stroke="#0a0a0a" stroke-width="2.2" stroke-linejoin="round"/>
+                        <path d="M102,98 L156,32 A78,78 0 0,1 100,22 Z" fill="#4a4a4a" stroke="#0a0a0a" stroke-width="2.2" stroke-linejoin="round"/>
+                        <path d="M102,98 L100,22 A78,78 0 0,1 44,56 Z" fill="#8a8a8a" stroke="#0a0a0a" stroke-width="2.2" stroke-linejoin="round"/>
+                        <path d="M102,98 L44,56 A78,78 0 0,1 102,98 Z" fill="#c8c8c8" stroke="#0a0a0a" stroke-width="2.2" stroke-linejoin="round"/>
+                        <ellipse cx="102" cy="98" rx="88" ry="86" fill="none" stroke="#0a0a0a" stroke-width="2.5"/>
+                        <text x="158" y="48" font-size="9" font-weight="700" font-family="'Inter', sans-serif" fill="#0a0a0a" transform="rotate(-18, 158, 48)">INTJ</text>
+                        <text x="104" y="18" font-size="9" font-weight="700" font-family="'Inter', sans-serif" fill="#0a0a0a" transform="rotate(-2, 104, 18)">INTP</text>
+                        <text x="52" y="52" font-size="8" font-weight="600" font-family="'Inter', sans-serif" fill="#0a0a0a" transform="rotate(18, 52, 52)">?</text>
+                    </svg>
+                    <div class="chart-mbti-text">
+                        <div class="chart-mbti-title">MBTI</div>
+                        <div class="chart-mbti-sub">人格</div>
+                    </div>
+                    <div class="chart-mbti-bottom">来回蹦迪</div>
+                </div>
+                <div class="chart-radar">
+                    <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M110,20 L200,110 L110,200 L20,110 Z" fill="none" stroke="#0a0a0a" stroke-width="2.5" stroke-linejoin="round"/>
+                        <path d="M110,42 L178,110 L110,178 L42,110 Z" fill="none" stroke="#0a0a0a" stroke-width="1.5" stroke-linejoin="round"/>
+                        <path d="M110,64 L156,110 L110,156 L64,110 Z" fill="none" stroke="#0a0a0a" stroke-width="1.2" stroke-linejoin="round"/>
+                        <path d="M110,86 L134,110 L110,134 L86,110 Z" fill="none" stroke="#0a0a0a" stroke-width="1" stroke-linejoin="round"/>
+                        <line x1="110" y1="20" x2="110" y2="110" stroke="#0a0a0a" stroke-width="1.5"/>
+                        <line x1="200" y1="110" x2="110" y2="110" stroke="#0a0a0a" stroke-width="1.5"/>
+                        <line x1="110" y1="200" x2="110" y2="110" stroke="#0a0a0a" stroke-width="1.5"/>
+                        <line x1="20" y1="110" x2="110" y2="110" stroke="#0a0a0a" stroke-width="1.5"/>
+                        <path d="M110,28 L185,95 L108,170 L32,100 Z" fill="#0a0a0a" fill-opacity="0.15" stroke="#0a0a0a" stroke-width="2.8" stroke-linejoin="round"/>
+                        <text x="110" y="14" text-anchor="middle" font-size="12" font-weight="800" font-family="'Noto Sans SC', sans-serif" fill="#0a0a0a">动手</text>
+                        <text x="210" y="114" text-anchor="start" font-size="12" font-weight="800" font-family="'Noto Sans SC', sans-serif" fill="#0a0a0a">思维</text>
+                        <text x="110" y="218" text-anchor="middle" font-size="12" font-weight="800" font-family="'Noto Sans SC', sans-serif" fill="#0a0a0a">搞笑</text>
+                        <text x="10" y="114" text-anchor="end" font-size="12" font-weight="800" font-family="'Noto Sans SC', sans-serif" fill="#0a0a0a">乐子人</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Timeline -->
+<section class="section" id="timeline">
+    <div class="section-inner">
+        <div class="section-header">
+            <span class="section-label">02 / EDUCATION</span>
+            <h2 class="section-title">求学之路</h2>
+        </div>
+        <div class="timeline">
+            <div class="timeline-line"></div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-period">2026 — 至今</div>
+                <div class="timeline-school">大连理工大学</div>
+                <div class="timeline-tags">
+                    <span class="timeline-tag">电子信息类</span>
+                    <span class="timeline-tag timeline-tag-outline">大一</span>
+                </div>
+                <div class="timeline-desc">在这里开启新的旅程，探索更广阔的世界。保持好奇心，不断学习，在代码与创造中寻找乐趣。</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-period">2026.6 — 2026.8</div>
+                <div class="timeline-school">暑期 AI 编程实践</div>
+                <div class="timeline-tags">
+                    <span class="timeline-tag">Vibe Coding</span>
+                    <span class="timeline-tag timeline-tag-outline">四个小游戏</span>
+                    <span class="timeline-tag timeline-tag-outline">GitHub Pages</span>
+                </div>
+                <div class="timeline-desc">
+                    <p>【项目经历】中存在四个小游戏，是暑期学习 AI 编程的实践成果。与传统的逐行编码不同，这个项目采用 Vibe Coding 的开发方式：我负责描述游戏玩法和界面需求，AI 工具负责生成基础代码、提供优化建议并协助调试。通过 Trae CN 和 WorkBuddy 的配合，我完成了从项目构思、原型设计到代码实现、部署上线的完整流程。</p>
+                    <p>游戏目前包含以下核心功能：</p>
+                    <ul>
+                        <li>基础游戏循环（开始、进行、结束）</li>
+                        <li>简单的碰撞检测与分数/计时系统</li>
+                        <li>响应式画布与基础 UI 界面</li>
+                        <li>可运行的 MVP 版本，已部署到 GitHub Pages 供在线试玩</li>
+                    </ul>
+                    <p>虽然项目的代码复杂度不高，但它完整展示了一个初学者如何借助 AI 工具降低开发门槛、快速看到成果。项目中还记录了详细的开发日志，包括 AI 协作过程中的关键节点、遇到的坑和解决方案。如果你也对 Vibe Coding 或 AI 辅助开发感兴趣，欢迎查看仓库、试玩游戏，或直接基于本项目进行二次创作。</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-period">2023 — 2026</div>
+                <div class="timeline-school">西峡县第一高级中学</div>
+                <div class="timeline-tags">
+                    <span class="timeline-tag">学习委员</span>
+                    <span class="timeline-tag timeline-tag-outline">三好学生</span>
+                    <span class="timeline-tag timeline-tag-outline">高考 640+</span>
+                    <span class="timeline-tag timeline-tag-outline">理科扎实</span>
+                </div>
+                <div class="timeline-desc">担任学习委员期间，学会了在服务同学与自我成长之间寻找平衡。"三好学生"是一份鼓励，更提醒我要保持谦逊，继续努力。高考总分 640+，理科基础知识扎实，为日后的电子信息类专业学习打下了良好基础。</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Certificates -->
+<section class="section" id="certificates">
+    <div class="section-inner">
+        <div class="section-header">
+            <span class="section-label">03 / CERTIFICATES</span>
+            <h2 class="section-title">荣誉证书</h2>
+        </div>
+        <div class="cert-intro">
+            每一份证书，都是一段认真走过的路。感谢老师的指引、同学的陪伴，也感谢那个没有轻易放弃的自己。
+        </div>
+        <div class="cert-scene-wrap">
+            <!-- Scene 1: Open Book - Neural Network + AI -->
+            <div class="cert-scene" onclick="openCertLightbox()">
+                <div class="scene-vignette"></div>
+                <div class="scene-badge">+</div>
+                <!-- Lamp -->
+                <div class="scene-lamp">
+                    <div class="lamp-cord"></div>
+                    <div class="lamp-cord-ring"></div>
+                    <div class="lamp-shade"></div>
+                    <div class="lamp-bulb"></div>
+                </div>
+                <!-- Light Cone -->
+                <div class="scene-light-cone"></div>
+                <!-- Book -->
+                <div class="scene-book">
+                    <div class="book-spread">
+                        <div class="book-page book-page-left">
+                            <div class="page-highlight page-highlight-left"></div>
+                            <div class="page-content">
+                                <svg viewBox="0 0 80 80">
+                                    <circle cx="20" cy="18" r="5" class="page-icon-dot"/>
+                                    <circle cx="40" cy="10" r="4" class="page-icon-dot"/>
+                                    <circle cx="60" cy="18" r="5" class="page-icon-dot"/>
+                                    <circle cx="30" cy="38" r="4" class="page-icon-dot"/>
+                                    <circle cx="50" cy="38" r="4" class="page-icon-dot"/>
+                                    <circle cx="40" cy="55" r="5" class="page-icon-dot"/>
+                                    <line x1="20" y1="18" x2="40" y2="10" class="page-icon-stroke"/>
+                                    <line x1="40" y1="10" x2="60" y2="18" class="page-icon-stroke"/>
+                                    <line x1="20" y1="18" x2="30" y2="38" class="page-icon-stroke"/>
+                                    <line x1="60" y1="18" x2="50" y2="38" class="page-icon-stroke"/>
+                                    <line x1="30" y1="38" x2="40" y2="55" class="page-icon-stroke"/>
+                                    <line x1="50" y1="38" x2="40" y2="55" class="page-icon-stroke"/>
+                                    <line x1="30" y1="38" x2="50" y2="38" class="page-icon-stroke"/>
+                                </svg>
+                                <span class="page-label">NEURAL NETWORK</span>
+                            </div>
+                        </div>
+                        <div class="book-page book-page-right">
+                            <div class="page-highlight page-highlight-right"></div>
+                            <div class="page-content">
+                                <svg viewBox="0 0 80 80">
+                                    <text x="40" y="48" text-anchor="middle" font-family="serif" font-size="42" font-weight="900" fill="#333" letter-spacing="-2">AI</text>
+                                    <line x1="12" y1="58" x2="68" y2="58" stroke="#999" stroke-width="0.8"/>
+                                </svg>
+                                <span class="page-label">AI CERTIFICATE</span>
+                            </div>
+                        </div>
+                        <div class="book-spine-line"></div>
+                    </div>
+                </div>
+                <div class="scene-book-shadow"></div>
+                <div class="scene-platform"></div>
+                <div class="scene-platform-refl"></div>
+                <div class="scene-platform-shadow"></div>
+                <span class="scene-label">AI 证书</span>
+            </div>
+
+            <!-- Scene 2: Open Book - Chip/Circuit + Lightbulb -->
+            <div class="cert-scene" onclick="openCertLightbox()">
+                <div class="scene-vignette"></div>
+                <div class="scene-badge">+</div>
+                <!-- Lamp -->
+                <div class="scene-lamp">
+                    <div class="lamp-cord"></div>
+                    <div class="lamp-cord-ring"></div>
+                    <div class="lamp-shade"></div>
+                    <div class="lamp-bulb"></div>
+                </div>
+                <!-- Light Cone -->
+                <div class="scene-light-cone"></div>
+                <!-- Book -->
+                <div class="scene-book">
+                    <div class="book-spread">
+                        <div class="book-page book-page-left">
+                            <div class="page-highlight page-highlight-left"></div>
+                            <div class="page-content">
+                                <svg viewBox="0 0 80 80">
+                                    <rect x="18" y="12" width="44" height="44" rx="3" class="page-icon-stroke"/>
+                                    <rect x="24" y="24" width="32" height="20" rx="1" class="page-icon-stroke"/>
+                                    <line x1="18" y1="20" x2="10" y2="20" class="page-icon-stroke"/>
+                                    <line x1="18" y1="28" x2="10" y2="28" class="page-icon-stroke"/>
+                                    <line x1="18" y1="36" x2="10" y2="36" class="page-icon-stroke"/>
+                                    <line x1="18" y1="44" x2="10" y2="44" class="page-icon-stroke"/>
+                                    <line x1="62" y1="20" x2="70" y2="20" class="page-icon-stroke"/>
+                                    <line x1="62" y1="28" x2="70" y2="28" class="page-icon-stroke"/>
+                                    <line x1="62" y1="36" x2="70" y2="36" class="page-icon-stroke"/>
+                                    <line x1="62" y1="44" x2="70" y2="44" class="page-icon-stroke"/>
+                                    <polyline points="28,60 28,54 32,48 48,48 52,54 52,60" class="page-icon-stroke"/>
+                                    <line x1="40" y1="64" x2="40" y2="72" class="page-icon-stroke"/>
+                                    <line x1="34" y1="72" x2="46" y2="72" class="page-icon-stroke"/>
+                                </svg>
+                                <span class="page-label">CHIP DESIGN</span>
+                            </div>
+                        </div>
+                        <div class="book-page book-page-right">
+                            <div class="page-highlight page-highlight-right"></div>
+                            <div class="page-content">
+                                <svg viewBox="0 0 80 80">
+                                    <circle cx="40" cy="38" r="28" class="page-icon-stroke"/>
+                                    <circle cx="40" cy="38" r="14" class="page-icon-stroke"/>
+                                    <line x1="40" y1="12" x2="40" y2="4" class="page-icon-stroke"/>
+                                    <line x1="40" y1="64" x2="40" y2="76" class="page-icon-stroke"/>
+                                    <line x1="14" y1="38" x2="2" y2="38" class="page-icon-stroke"/>
+                                    <line x1="66" y1="38" x2="78" y2="38" class="page-icon-stroke"/>
+                                    <path d="M40 24 L50 38 L44 38 L44 52 L36 52 L36 38 L30 38 Z" class="page-icon-dot"/>
+                                </svg>
+                                <span class="page-label">INTELLIGENCE</span>
+                            </div>
+                        </div>
+                        <div class="book-spine-line"></div>
+                    </div>
+                </div>
+                <div class="scene-book-shadow"></div>
+                <div class="scene-platform"></div>
+                <div class="scene-platform-refl"></div>
+                <div class="scene-platform-shadow"></div>
+                <span class="scene-label">AI 证书</span>
+            </div>
+        </div>
+        <div class="cert-view-wrap">
+            <button class="cert-view-btn" onclick="openCertLightbox()">
+                点击查看全部证书
+                <span style="transition: transform 0.25s;">→</span>
+            </button>
+            <span class="cert-view-count">共 18 张证书</span>
+        </div>
+    </div>
+</section>
+
+<!-- Certificate Lightbox -->
+<div class="cert-lightbox" id="certLightbox" onclick="closeCertLightbox(event)">
+    <div class="cert-lightbox-panel" onclick="event.stopPropagation()">
+        <div class="cert-lightbox-close" onclick="closeCertLightbox()">×</div>
+        <h3 class="cert-lightbox-title">荣誉证书</h3>
+        <div class="cert-lightbox-divider"></div>
+        <div class="cert-lightbox-grid" id="certLightboxGrid"></div>
+    </div>
+</div>
+
+<!-- Projects -->
+<section class="section" id="projects">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-label">04 / PROJECTS</span>
+            <h2 class="section-title">项目经历</h2>
+        </div>
+        <div class="section-divider"></div>
+        <div class="project-stage">
+            <div class="project-cards">
+                <!-- Card 1: 坦克大战 -->
+                <div class="project-card">
+                    <div class="project-thumb" onclick="openProjectLightbox(0)">
+                        <div class="project-window-titlebar">
+                            <span class="project-window-dot d1"></span>
+                            <span class="project-window-dot d2"></span>
+                            <span class="project-window-dot d3"></span>
+                            <span class="project-window-title">tank_battle.exe</span>
+                            <span class="project-window-close">×</span>
+                        </div>
+                        <div class="project-window-content">
+                        <svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="0" y="0" width="640" height="360" fill="#FAFAFA"/>
+                            <!-- Brick wall -->
+                            <g stroke="#CCC" stroke-width="0.8" fill="none">
+                                <rect x="30" y="30" width="120" height="80" rx="1"/>
+                                <line x1="30" y1="50" x2="150" y2="50"/><line x1="30" y1="70" x2="150" y2="70"/>
+                                <line x1="70" y1="30" x2="70" y2="50"/><line x1="110" y1="30" x2="110" y2="50"/>
+                                <line x1="50" y1="50" x2="50" y2="70"/><line x1="90" y1="50" x2="90" y2="70"/><line x1="130" y1="50" x2="130" y2="70"/>
+                                <line x1="70" y1="70" x2="70" y2="90"/><line x1="110" y1="70" x2="110" y2="90"/>
+                            </g>
+                            <rect x="60" y="50" width="10" height="10" fill="#333"/>
+                            <rect x="100" y="70" width="10" height="10" fill="#333"/>
+                            <!-- Enemy tank silhouette -->
+                            <g transform="translate(540,100)" opacity="0.25">
+                                <rect x="0" y="10" width="60" height="30" rx="3" fill="#999" stroke="#999" stroke-width="1"/>
+                                <rect x="15" y="0" width="30" height="15" rx="2" fill="#999"/>
+                                <line x1="30" y1="0" x2="10" y2="-20" stroke="#999" stroke-width="3"/>
+                                <rect x="0" y="15" width="60" height="5" fill="#999"/>
+                                <rect x="0" y="30" width="60" height="5" fill="#999"/>
+                            </g>
+                            <!-- Bullet trajectory -->
+                            <path d="M300,190 Q380,150 460,140" stroke="#CCC" stroke-width="1" stroke-dasharray="4,4" fill="none"/>
+                            <!-- Main tank -->
+                            <g transform="translate(240,165)">
+                                <!-- Treads -->
+                                <rect x="0" y="32" width="90" height="6" rx="2" fill="#333"/>
+                                <rect x="0" y="42" width="90" height="6" rx="2" fill="#333"/>
+                                <line x1="10" y1="32" x2="10" y2="48" stroke="#555" stroke-width="0.5"/>
+                                <line x1="20" y1="32" x2="20" y2="48" stroke="#555" stroke-width="0.5"/>
+                                <line x1="30" y1="32" x2="30" y2="48" stroke="#555" stroke-width="0.5"/>
+                                <line x1="40" y1="32" x2="40" y2="48" stroke="#555" stroke-width="0.5"/>
+                                <line x1="50" y1="32" x2="50" y2="48" stroke="#555" stroke-width="0.5"/>
+                                <line x1="60" y1="32" x2="60" y2="48" stroke="#555" stroke-width="0.5"/>
+                                <line x1="70" y1="32" x2="70" y2="48" stroke="#555" stroke-width="0.5"/>
+                                <line x1="80" y1="32" x2="80" y2="48" stroke="#555" stroke-width="0.5"/>
+                                <!-- Body -->
+                                <rect x="5" y="8" width="80" height="26" rx="3" fill="#E0E0E0" stroke="#333" stroke-width="1.5"/>
+                                <!-- Turret base -->
+                                <circle cx="45" cy="8" r="16" fill="#333"/>
+                                <!-- Barrel -->
+                                <line x1="45" y1="8" x2="78" y2="-10" stroke="#1A1A1A" stroke-width="5" stroke-linecap="round"/>
+                                <!-- Turret top -->
+                                <rect x="35" y="0" width="20" height="12" rx="2" fill="#1A1A1A"/>
+                            </g>
+                            <!-- Explosion effect -->
+                            <circle cx="460" cy="140" r="8" fill="#E0E0E0" stroke="#AAA" stroke-width="0.5"/>
+                            <line x1="460" y1="128" x2="460" y2="124" stroke="#BBB" stroke-width="1.5"/>
+                            <line x1="472" y1="140" x2="476" y2="140" stroke="#BBB" stroke-width="1.5"/>
+                            <line x1="460" y1="152" x2="460" y2="156" stroke="#BBB" stroke-width="1.5"/>
+                            <line x1="448" y1="140" x2="444" y2="140" stroke="#BBB" stroke-width="1.5"/>
+                        </svg>
+                        </div>
+                        <div class="project-window-statusbar">
+                            <svg class="project-window-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <rect x="5" y="11" width="14" height="10" rx="1"/>
+                                <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+                            </svg>
+                            <span class="project-window-url">// 经典坦克对战</span>
+                            <span class="project-window-open">↗</span>
+                        </div>
+                    </div>
+                    <div class="project-body">
+                        <div class="project-name">坦克大战小游戏</div>
+                        <div class="project-desc">使用 C++ 实现经典坦克对战玩法，通过面向对象思想管理游戏实体，完成移动、射击、碰撞检测与简单敌方 AI，并利用双缓冲减少画面闪烁。</div>
+                        <div class="project-features">
+                            <div class="project-features-title">项目功能</div>
+                            <ul class="project-feature-list">
+                                <li>玩家坦克移动与方向控制</li>
+                                <li>子弹发射与敌方坦克命中判定</li>
+                                <li>砖墙与钢墙的碰撞响应</li>
+                                <li>敌方坦克基础 AI 行为</li>
+                                <li>双缓冲绘图实现流畅画面</li>
+                            </ul>
+                        </div>
+                        <div class="project-takeaway">
+                            <div class="project-takeaway-title">个人收获</div>
+                            在开发过程中，我初步理解了游戏循环、状态管理和碰撞检测等基础概念，也体会到将复杂逻辑拆分为多个对象后，代码结构会更清晰。
+                        </div>
+                        <div class="project-tags" style="margin-top: 0.75rem;">
+                            <span class="project-tag">C++</span>
+                            <span class="project-tag">面向对象</span>
+                            <span class="project-tag">碰撞检测</span>
+                            <span class="project-tag">游戏循环</span>
+                            <span class="project-tag">双缓冲</span>
+                            <span class="project-tag">简单 AI</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: 打地鼠 -->
+                <div class="project-card">
+                    <div class="project-thumb" onclick="openProjectLightbox(1)">
+                        <div class="project-window-titlebar">
+                            <span class="project-window-dot d1"></span>
+                            <span class="project-window-dot d2"></span>
+                            <span class="project-window-dot d3"></span>
+                            <span class="project-window-title">whack_mole.py</span>
+                            <span class="project-window-close">×</span>
+                        </div>
+                        <div class="project-window-content">
+                        <svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="0" y="0" width="640" height="360" fill="#FAFAFA"/>
+                            <!-- Ground/grass hints -->
+                            <path d="M30,320 Q60,300 90,320" stroke="#DDD" stroke-width="1" fill="none"/>
+                            <path d="M500,330 Q530,310 560,330" stroke="#DDD" stroke-width="1" fill="none"/>
+                            <path d="M180,340 Q200,320 220,340" stroke="#DDD" stroke-width="1" fill="none"/>
+                            <!-- Empty holes -->
+                            <g transform="translate(140,260)">
+                                <ellipse cx="40" cy="0" rx="40" ry="12" fill="#CCCCCC" stroke="#333" stroke-width="1.5"/>
+                                <ellipse cx="40" cy="0" rx="28" ry="8" fill="#888"/>
+                            </g>
+                            <g transform="translate(480,250)">
+                                <ellipse cx="30" cy="0" rx="30" ry="10" fill="#CCCCCC" stroke="#333" stroke-width="1.5"/>
+                                <ellipse cx="30" cy="0" rx="20" ry="6" fill="#888"/>
+                            </g>
+                            <!-- Hammer -->
+                            <g transform="translate(140,60) rotate(-15)">
+                                <rect x="0" y="0" width="40" height="30" rx="4" fill="#333"/>
+                                <line x1="20" y1="30" x2="20" y2="120" stroke="#1A1A1A" stroke-width="4"/>
+                                <!-- Swing arc -->
+                                <path d="M-30,90 Q0,50 40,20" stroke="#DDD" stroke-width="1.5" fill="none" stroke-dasharray="6,3"/>
+                            </g>
+                            <!-- Main mole -->
+                            <g transform="translate(290,218)">
+                                <!-- Hole -->
+                                <ellipse cx="50" cy="0" rx="55" ry="16" fill="#CCCCCC" stroke="#333" stroke-width="2"/>
+                                <ellipse cx="50" cy="0" rx="40" ry="10" fill="#999"/>
+                                <!-- Mole body -->
+                                <ellipse cx="50" cy="-30" rx="32" ry="36" fill="#F5F5F5" stroke="#333" stroke-width="1.5"/>
+                                <!-- Ears -->
+                                <circle cx="28" cy="-58" r="8" fill="#F5F5F5" stroke="#333" stroke-width="1"/>
+                                <circle cx="72" cy="-58" r="8" fill="#F5F5F5" stroke="#333" stroke-width="1"/>
+                                <!-- Eyes -->
+                                <circle cx="38" cy="-35" r="5" fill="#1A1A1A"/>
+                                <circle cx="62" cy="-35" r="5" fill="#1A1A1A"/>
+                                <!-- Eye shine -->
+                                <circle cx="40" cy="-37" r="1.5" fill="#FFF"/>
+                                <circle cx="64" cy="-37" r="1.5" fill="#FFF"/>
+                                <!-- Nose -->
+                                <ellipse cx="50" cy="-25" rx="5" ry="3.5" fill="#333"/>
+                                <!-- Whiskers -->
+                                <line x1="30" y1="-23" x2="10" y2="-28" stroke="#999" stroke-width="0.8"/>
+                                <line x1="30" y1="-20" x2="10" y2="-20" stroke="#999" stroke-width="0.8"/>
+                                <line x1="70" y1="-23" x2="90" y2="-28" stroke="#999" stroke-width="0.8"/>
+                                <line x1="70" y1="-20" x2="90" y2="-20" stroke="#999" stroke-width="0.8"/>
+                                <!-- Mouth -->
+                                <ellipse cx="50" cy="-18" rx="6" ry="4" fill="none" stroke="#333" stroke-width="1"/>
+                                <!-- Hair tufts -->
+                                <line x1="42" y1="-62" x2="40" y2="-72" stroke="#333" stroke-width="1.5"/>
+                                <line x1="50" y1="-64" x2="50" y2="-75" stroke="#333" stroke-width="1.5"/>
+                                <line x1="58" y1="-62" x2="60" y2="-72" stroke="#333" stroke-width="1.5"/>
+                            </g>
+                            <!-- Score effects -->
+                            <text x="380" y="180" fill="#DDD" font-size="20" font-family="sans-serif" font-weight="bold">+100</text>
+                        </svg>
+                        </div>
+                        <div class="project-window-statusbar">
+                            <svg class="project-window-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <rect x="5" y="11" width="14" height="10" rx="1"/>
+                                <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+                            </svg>
+                            <span class="project-window-url">// 休闲反应游戏</span>
+                            <span class="project-window-open">↗</span>
+                        </div>
+                    </div>
+                    <div class="project-body">
+                        <div class="project-name">打地鼠小游戏</div>
+                        <div class="project-desc">使用 Python 编写休闲反应类游戏，通过随机事件控制地鼠出现位置与频率，利用计时器与事件监听实现计分和命中反馈，锻炼了逻辑与交互设计能力。</div>
+                        <div class="project-tags">
+                            <span class="project-tag">Python</span>
+                            <span class="project-tag">随机事件</span>
+                            <span class="project-tag">事件监听</span>
+                            <span class="project-tag">计时器</span>
+                            <span class="project-tag">交互逻辑</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: 粒子手势特效 -->
+                <div class="project-card">
+                    <div class="project-thumb" onclick="openProjectLightbox(2)">
+                        <div class="project-window-titlebar">
+                            <span class="project-window-dot d1"></span>
+                            <span class="project-window-dot d2"></span>
+                            <span class="project-window-dot d3"></span>
+                            <span class="project-window-title">particle_gesture</span>
+                            <span class="project-window-close">×</span>
+                        </div>
+                        <div class="project-window-content">
+                        <svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="0" y="0" width="640" height="360" fill="#FAFAFA"/>
+                            <!-- Sensor boundary -->
+                            <rect x="120" y="40" width="400" height="280" rx="12" fill="none" stroke="#E0E0E0" stroke-width="1" stroke-dasharray="8,4"/>
+                            <!-- Hand silhouette -->
+                            <g transform="translate(280,100)">
+                                <!-- Palm -->
+                                <rect x="30" y="60" width="60" height="80" rx="30" fill="#FAFAFA" stroke="#333" stroke-width="2"/>
+                                <!-- Thumb -->
+                                <path d="M30,90 Q0,70 10,110" stroke="#333" stroke-width="2" fill="none"/>
+                                <path d="M30,90 Q0,70 10,110 Q5,120 20,105" fill="#FAFAFA" stroke="#333" stroke-width="1.5"/>
+                                <!-- Index finger -->
+                                <rect x="20" y="25" width="16" height="50" rx="8" fill="#FAFAFA" stroke="#333" stroke-width="1.5"/>
+                                <!-- Middle finger -->
+                                <rect x="42" y="10" width="16" height="55" rx="8" fill="#FAFAFA" stroke="#333" stroke-width="1.5"/>
+                                <!-- Ring finger -->
+                                <rect x="64" y="18" width="16" height="52" rx="8" fill="#FAFAFA" stroke="#333" stroke-width="1.5"/>
+                                <!-- Pinky -->
+                                <rect x="86" y="35" width="14" height="45" rx="7" fill="#FAFAFA" stroke="#333" stroke-width="1.5"/>
+                                <!-- Wrist -->
+                                <rect x="25" y="125" width="70" height="25" rx="8" fill="#FAFAFA" stroke="#333" stroke-width="1.5"/>
+                            </g>
+                            <!-- Particles around fingers -->
+                            <circle cx="290" cy="85" r="5" fill="#1A1A1A"/>
+                            <circle cx="310" cy="70" r="3" fill="#555"/>
+                            <circle cx="330" cy="60" r="4" fill="#1A1A1A"/>
+                            <circle cx="355" cy="55" r="2.5" fill="#999"/>
+                            <circle cx="380" cy="65" r="3.5" fill="#555"/>
+                            <circle cx="400" cy="80" r="2" fill="#CCC" stroke="#AAA" stroke-width="0.5"/>
+                            <circle cx="410" cy="95" r="4" fill="#1A1A1A"/>
+                            <circle cx="395" cy="115" r="3" fill="#555"/>
+                            <circle cx="370" cy="130" r="2.5" fill="#999"/>
+                            <!-- Trajectory curves -->
+                            <path d="M290,85 Q310,50 355,55" stroke="#CCC" stroke-width="1" fill="none" stroke-dasharray="3,3"/>
+                            <path d="M310,70 Q340,40 380,65" stroke="#DDD" stroke-width="1" fill="none" stroke-dasharray="3,3"/>
+                            <path d="M330,60 Q370,35 410,95" stroke="#CCC" stroke-width="1" fill="none" stroke-dasharray="3,3"/>
+                            <path d="M355,55 Q380,40 395,115" stroke="#DDD" stroke-width="1" fill="none" stroke-dasharray="3,3"/>
+                            <!-- Spiral particles -->
+                            <circle cx="280" cy="55" r="2" fill="#AAA"/>
+                            <circle cx="270" cy="75" r="1.5" fill="#CCC"/>
+                            <circle cx="285" cy="45" r="3" fill="#888"/>
+                            <circle cx="260" cy="60" r="2" fill="#AAA"/>
+                            <!-- Bottom particles -->
+                            <circle cx="340" cy="160" r="3" fill="#555"/>
+                            <circle cx="360" cy="175" r="2" fill="#AAA"/>
+                            <circle cx="320" cy="170" r="2.5" fill="#888"/>
+                            <!-- Hand glow effect -->
+                            <ellipse cx="320" cy="110" rx="80" ry="60" fill="none" stroke="#F0F0F0" stroke-width="0.5"/>
+                            <ellipse cx="320" cy="110" rx="60" ry="40" fill="none" stroke="#F0F0F0" stroke-width="0.5"/>
+                        </svg>
+                        </div>
+                        <div class="project-window-statusbar">
+                            <svg class="project-window-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <rect x="5" y="11" width="14" height="10" rx="1"/>
+                                <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+                            </svg>
+                            <span class="project-window-url">// 手势交互特效</span>
+                            <span class="project-window-open">↗</span>
+                        </div>
+                    </div>
+                    <div class="project-body">
+                        <div class="project-name">粒子手势交互特效</div>
+                        <div class="project-desc">基于摄像头实时捕捉手势，利用 OpenCV 进行图像处理与肤色检测，驱动粒子系统产生动态视觉效果，探索了计算机视觉与图形渲染的初步结合。</div>
+                        <div class="project-tags">
+                            <span class="project-tag">OpenCV</span>
+                            <span class="project-tag">手势识别</span>
+                            <span class="project-tag">粒子系统</span>
+                            <span class="project-tag">实时渲染</span>
+                            <span class="project-tag">创意交互</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: 飞机大战 -->
+                <div class="project-card">
+                    <div class="project-thumb" onclick="openProjectLightbox(3)">
+                        <div class="project-window-titlebar">
+                            <span class="project-window-dot d1"></span>
+                            <span class="project-window-dot d2"></span>
+                            <span class="project-window-dot d3"></span>
+                            <span class="project-window-title">plane_battle.py</span>
+                            <span class="project-window-close">×</span>
+                        </div>
+                        <div class="project-window-content">
+                        <svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="0" y="0" width="640" height="360" fill="#FAFAFA"/>
+                            <!-- Clouds -->
+                            <path d="M60,90 Q80,80 100,90 Q120,80 140,90" stroke="#EEE" stroke-width="1.5" fill="none"/>
+                            <path d="M480,58 Q500,48 520,58 Q540,48 560,58" stroke="#EEE" stroke-width="1.5" fill="none"/>
+                            <path d="M72,222 Q90,214 108,222" stroke="#EEE" stroke-width="1" fill="none"/>
+                            <!-- Enemy planes (top, descending) -->
+                            <g transform="translate(160,80) rotate(180)" opacity="0.35">
+                                <path d="M0,-14 L-30,10 L-9,6 Z" fill="#999" stroke="#999" stroke-width="1"/>
+                                <path d="M0,-14 L30,10 L9,6 Z" fill="#999" stroke="#999" stroke-width="1"/>
+                                <path d="M0,-34 L6,-6 L6,16 L-6,16 L-6,-6 Z" fill="#999" stroke="#999" stroke-width="1"/>
+                            </g>
+                            <g transform="translate(470,108) rotate(180)" opacity="0.25">
+                                <path d="M0,-12 L-24,8 L-7,5 Z" fill="#999" stroke="#999" stroke-width="1"/>
+                                <path d="M0,-12 L24,8 L7,5 Z" fill="#999" stroke="#999" stroke-width="1"/>
+                                <path d="M0,-28 L5,-6 L5,13 L-5,13 L-5,-6 Z" fill="#999" stroke="#999" stroke-width="1"/>
+                            </g>
+                            <!-- Enemy bullet streak -->
+                            <path d="M150,122 L150,162" stroke="#DDD" stroke-width="1.5" stroke-dasharray="5,5"/>
+                            <!-- Player bullet streaks -->
+                            <path d="M320,242 L320,186" stroke="#CCC" stroke-width="2" stroke-dasharray="6,5"/>
+                            <path d="M320,242 L320,176" stroke="#BBB" stroke-width="1.5" stroke-dasharray="4,6"/>
+                            <!-- Explosion -->
+                            <g transform="translate(320,172)">
+                                <circle r="16" fill="#EEE" stroke="#BBB" stroke-width="1"/>
+                                <circle r="8" fill="#FFF" stroke="#AAA" stroke-width="0.5"/>
+                                <line x1="0" y1="-22" x2="0" y2="-30" stroke="#CCC" stroke-width="1.5"/>
+                                <line x1="22" y1="0" x2="30" y2="0" stroke="#CCC" stroke-width="1.5"/>
+                                <line x1="0" y1="22" x2="0" y2="30" stroke="#CCC" stroke-width="1.5"/>
+                                <line x1="-22" y1="0" x2="-30" y2="0" stroke="#CCC" stroke-width="1.5"/>
+                                <line x1="15" y1="-15" x2="21" y2="-21" stroke="#CCC" stroke-width="1"/>
+                                <line x1="-15" y1="15" x2="-21" y2="21" stroke="#CCC" stroke-width="1"/>
+                            </g>
+                            <!-- Player plane (bottom, pointing up) -->
+                            <g transform="translate(320,300)">
+                                <path d="M0,-26 L-52,14 L-17,7 Z" fill="#333" stroke="#333" stroke-width="1"/>
+                                <path d="M0,-26 L52,14 L17,7 Z" fill="#333" stroke="#333" stroke-width="1"/>
+                                <path d="M0,-56 L9,-12 L9,30 L-9,30 L-9,-12 Z" fill="#1A1A1A" stroke="#333" stroke-width="1"/>
+                                <path d="M-9,30 L-26,44 L-9,36 Z" fill="#333"/>
+                                <path d="M9,30 L26,44 L9,36 Z" fill="#333"/>
+                                <ellipse cx="0" cy="-16" rx="4.5" ry="9" fill="#F5F5F5"/>
+                                <path d="M0,30 L-5,46 L0,58 L5,46 Z" fill="#E0E0E0" stroke="#BBB" stroke-width="0.5"/>
+                            </g>
+                            <!-- Score & HP -->
+                            <text x="30" y="42" fill="#DDD" font-size="22" font-family="sans-serif" font-weight="bold">SCORE 1200</text>
+                            <rect x="30" y="322" width="120" height="6" rx="3" fill="#EEE" stroke="#DDD" stroke-width="1"/>
+                            <rect x="30" y="322" width="80" height="6" rx="3" fill="#999"/>
+                        </svg>
+                        </div>
+                        <div class="project-window-statusbar">
+                            <svg class="project-window-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <rect x="5" y="11" width="14" height="10" rx="1"/>
+                                <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+                            </svg>
+                            <span class="project-window-url">// 飞机大战射击游戏</span>
+                            <span class="project-window-open">↗</span>
+                        </div>
+                    </div>
+                    <div class="project-body">
+                        <div class="project-name">飞机大战小游戏</div>
+                        <div class="project-desc">使用 Pygame 实现纵版飞机射击游戏，通过键盘控制战机移动与射击，完成敌机生成、碰撞检测、计分与难度递增，体验了游戏循环与对象管理的完整过程。</div>
+                        <div class="project-tags">
+                            <span class="project-tag">Pygame</span>
+                            <span class="project-tag">游戏循环</span>
+                            <span class="project-tag">碰撞检测</span>
+                            <span class="project-tag">对象管理</span>
+                            <span class="project-tag">计分系统</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="project-note">
+            <p>这个项目始于一个简单的愿望：不急于成为技术高手，只想亲手做出一点能玩的东西。</p>
+            <p>这个夏天，我和 AI 像温和的伙伴一样对话：用自然语言描述想法，由 Trae CN 和 WorkBuddy 生成代码，一遍遍调整、优化，直到一个小游戏在浏览器里跑起来。</p>
+            <p>它不复杂，没有华丽特效，但有清晰的开始、进行和结束，有轻轻跳动的分数，有碰撞带来的小小反馈。它安静地运行着，像夏夜窗外的风。</p>
+        </div>
+    </div>
+</section>
+
+<!-- Project Lightbox -->
+<div class="proj-lightbox" id="projLightbox" onclick="closeProjectLightbox(event)">
+    <div class="proj-lightbox-panel" id="projLightboxPanel">
+        <button class="proj-lightbox-close" onclick="closeProjectLightbox(event, true)" aria-label="关闭">×</button>
+        <div class="proj-lightbox-tag" id="projLightboxTag">PROJECT</div>
+        <h3 class="proj-lightbox-title" id="projLightboxTitle">项目</h3>
+        <div class="proj-lightbox-subtitle" id="projLightboxSubtitle">filename</div>
+        <div class="proj-lightbox-divider"></div>
+        <div class="proj-lightbox-preview" id="projLightboxPreview"></div>
+        <div class="proj-lightbox-section">
+            <div class="proj-lightbox-section-title">项目简介</div>
+            <div class="proj-lightbox-section-text" id="projLightboxDesc"></div>
+        </div>
+        <div class="proj-lightbox-section" id="projLightboxFeaturesSection">
+            <div class="proj-lightbox-section-title">实现细节</div>
+            <ul class="proj-lightbox-features" id="projLightboxFeatures"></ul>
+        </div>
+        <div class="proj-lightbox-section" id="projLightboxTakeawaySection">
+            <div class="proj-lightbox-section-title">个人收获</div>
+            <div class="proj-lightbox-section-text" id="projLightboxTakeaway"></div>
+        </div>
+        <div class="proj-lightbox-section">
+            <div class="proj-lightbox-section-title">技术栈</div>
+            <div class="proj-lightbox-stack" id="projLightboxStack"></div>
+        </div>
+        <div class="proj-lightbox-actions">
+            <a class="proj-lightbox-btn" id="projLightboxLink" href="#" target="_blank" rel="noopener">查看源码 ↗</a>
+            <button class="proj-lightbox-btn outline" onclick="closeProjectLightbox(event, true)">关闭</button>
+        </div>
+    </div>
+</div>
+
+<!-- Future -->
+<section class="section" id="future">
+    <div class="section-inner">
+        <div class="section-header">
+            <span class="section-label">05 / FUTURE</span>
+            <h2 class="section-title">未来展望</h2>
+        </div>
+        <div class="future-quote">
+            比起急于抵达，我更希望自己像一株植物，把根扎稳，再慢慢舒展枝叶。接下来，我想从五件事开始：
+        </div>
+        <div class="future-grid">
+            <!-- Row 1: Prospects 1 & 2 -->
+            <div class="future-row">
+                <div class="future-card">
+                    <div class="future-num">01 / LEARNING</div>
+                    <div class="future-title">自学 C++</div>
+                    <div class="future-desc">从语法基础到项目实践，用代码训练逻辑与严谨，为后续学习打下扎实根基。</div>
+                </div>
+                <div class="future-card">
+                    <div class="future-num">02 / LANGUAGE</div>
+                    <div class="future-title">学习 IELTS 与 CET</div>
+                    <div class="future-desc">提升英语能力，为阅读前沿资料、走向更广阔的平台做好准备。</div>
+                </div>
+            </div>
+            <!-- Row 2: Prospects 3 & 4 -->
+            <div class="future-row">
+                <div class="future-card">
+                    <div class="future-num">03 / AI</div>
+                    <div class="future-title">以 AI 为翼，探索大学学习的新可能</div>
+                    <div class="future-desc">用先进生产力打破固有学习模式，但始终让工具服务于思考，而非代替思考。</div>
+                </div>
+                <div class="future-card">
+                    <div class="future-num">04 / BUILD</div>
+                    <div class="future-title">搭建属于自己的智能体</div>
+                    <div class="future-desc">让学习更具针对性与效率，在个性化辅助中持续进步。</div>
+                </div>
+            </div>
+            <!-- Row 3: Prospect 5 (full width) -->
+            <div class="future-row full">
+                <div class="future-card">
+                    <div class="future-num">05 / COMPETITION</div>
+                    <div class="future-title">以 AI 叩开竞赛之门</div>
+                    <div class="future-desc">尝试以 AI 为切入点，探索学科竞赛的新方向，在实践与挑战中拓宽能力边界，与同伴一起向更高目标迈进。</div>
+                </div>
+            </div>
+        </div>
+        <div class="future-closing">愿与大家一起，在各自的节奏里共同生长。</div>
+    </div>
+</section>
+
+<!-- Contact -->
+<section class="section" id="contact">
+    <div class="section-inner">
+        <div class="contact-wrap">
+            <span class="section-label" style="display:block;color:var(--gray-500);margin-bottom:0.75rem;letter-spacing:0.12em;font-weight:700;">06 / CONTACT</span>
+            <h2 class="contact-title">期待与你相遇</h2>
+            <p class="contact-desc">如果你也在路上，欢迎随时与我同行。</p>
+            <div class="contact-list">
+                <div class="contact-item">
+                    <div class="contact-label">EMAIL</div>
+                    <div class="contact-value">3230817308@qq.com</div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-label">PHONE</div>
+                    <div class="contact-value">15093018054</div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-label">LOCATION</div>
+                    <div class="contact-value">中国</div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-label">QQ</div>
+                    <div class="contact-value">3230817308</div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-label">GITHUB</div>
+                    <a class="contact-value contact-link" href="https://github.com/luping577" target="_blank" rel="noopener">luping577</a>
+                </div>
+            </div>
+            <div class="contact-tags">
+                <span class="contact-tag">Python</span>
+                <span class="contact-tag">Java</span>
+                <span class="contact-tag">AI 探索</span>
+                <span class="contact-tag">持续学习</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <p>© 2026 王露平 · 用心创造，静待花开</p>
+</footer>
+
+<!-- Back to top -->
+<button class="back-top" id="backTop" aria-label="返回顶部">↑</button>
+
+<script>
+    const backTop = document.getElementById('backTop');
+    window.addEventListener('scroll', () => {
+        backTop.classList.toggle('show', window.scrollY > 400);
+    });
+    backTop.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    /* ===== Project Lightbox ===== */
+    const projectData = [
+        {
+            tag: 'C++ GAME',
+            title: '坦克大战小游戏',
+            filename: 'tank_battle.exe',
+            url: '// 经典坦克对战',
+            link: '#',
+            desc: '使用 C++ 实现经典坦克对战玩法，通过面向对象思想管理游戏实体，完成移动、射击、碰撞检测与简单敌方 AI，并利用双缓冲减少画面闪烁。',
+            features: [
+                '玩家坦克移动与方向控制',
+                '子弹发射与敌方坦克命中判定',
+                '砖墙与钢墙的碰撞响应',
+                '敌方坦克基础 AI 行为',
+                '双缓冲绘图实现流畅画面'
+            ],
+            takeaway: '在开发过程中，我初步理解了游戏循环、状态管理和碰撞检测等基础概念，也体会到将复杂逻辑拆分为多个对象后，代码结构会更清晰。',
+            stack: ['C++', '面向对象', '碰撞检测', '游戏循环', '双缓冲', '简单 AI']
+        },
+        {
+            tag: 'PYTHON GAME',
+            title: '打地鼠小游戏',
+            filename: 'whack_mole.py',
+            url: '// 休闲反应游戏',
+            link: '#',
+            desc: '使用 Python 编写休闲反应类游戏，通过随机事件控制地鼠出现位置与频率，利用计时器与事件监听实现计分和命中反馈，锻炼了逻辑与交互设计能力。',
+            features: [
+                '地鼠随机出现位置与频率控制',
+                '计时器驱动游戏循环',
+                '鼠标点击命中检测与计分',
+                '难度梯度递增机制',
+                '简单音效与视觉反馈'
+            ],
+            takeaway: '通过这个项目，我熟悉了事件驱动编程和基本的游戏状态管理，也理解了用户体验设计中"反馈即时性"的重要性。',
+            stack: ['Python', '随机事件', '事件监听', '计时器', '交互逻辑']
+        },
+        {
+            tag: 'OPENCV CV',
+            title: '粒子手势交互特效',
+            filename: 'particle_gesture',
+            url: '// 手势交互特效',
+            link: '#',
+            desc: '基于摄像头实时捕捉手势，利用 OpenCV 进行图像处理与肤色检测，驱动粒子系统产生动态视觉效果，探索了计算机视觉与图形渲染的初步结合。',
+            features: [
+                '摄像头实时视频流采集',
+                '肤色检测与手势轮廓提取',
+                '手势中心点轨迹追踪',
+                '粒子系统跟随手势生成与消散',
+                '实时渲染与帧率优化'
+            ],
+            takeaway: '这个项目让我第一次接触到计算机视觉和创意编程的交叉领域，体会到从原始图像到艺术化呈现的完整链路，也锻炼了实时系统的性能优化意识。',
+            stack: ['OpenCV', '手势识别', '粒子系统', '实时渲染', '创意交互']
+        },
+        {
+            tag: 'PYGAME GAME',
+            title: '飞机大战小游戏',
+            filename: 'plane_battle.py',
+            url: '// 飞机大战射击游戏',
+            link: '#',
+            desc: '使用 Pygame 实现纵版飞机射击游戏，通过键盘控制战机移动与射击，完成敌机生成、碰撞检测、计分与难度递增，体验了游戏循环与对象管理的完整过程。',
+            features: [
+                '玩家战机方向键移动控制',
+                '子弹发射与敌机命中判定',
+                '敌机随机生成与多种敌机类型',
+                '分数与生命值系统',
+                '难度随波次递增',
+                '爆炸特效与音效反馈'
+            ],
+            takeaway: '通过复现经典射击玩法，我理解了游戏主循环、对象池与碰撞检测的协作方式，也体会到把敌机、子弹、战机抽象为独立对象后，逻辑扩展会变得简单许多。',
+            stack: ['Pygame', '游戏循环', '碰撞检测', '对象管理', '事件监听', '计分系统']
+        }
+    ];
+
+    window.openProjectLightbox = function(idx) {
+        const p = projectData[idx];
+        if (!p) return;
+        document.getElementById('projLightboxTag').textContent = p.tag;
+        document.getElementById('projLightboxTitle').textContent = p.title;
+        document.getElementById('projLightboxSubtitle').textContent = p.filename;
+        document.getElementById('projLightboxDesc').textContent = p.desc;
+
+        const preview = document.getElementById('projLightboxPreview');
+        preview.innerHTML = '';
+        const thumbs = document.querySelectorAll('.project-window-content svg');
+        if (thumbs[idx]) {
+            const clone = thumbs[idx].cloneNode(true);
+            clone.removeAttribute('viewBox');
+            clone.setAttribute('viewBox', '0 0 640 360');
+            preview.appendChild(clone);
+        }
+
+        const fList = document.getElementById('projLightboxFeatures');
+        fList.innerHTML = '';
+        if (p.features && p.features.length) {
+            p.features.forEach(f => {
+                const li = document.createElement('li');
+                li.textContent = f;
+                fList.appendChild(li);
+            });
+            document.getElementById('projLightboxFeaturesSection').style.display = '';
+        } else {
+            document.getElementById('projLightboxFeaturesSection').style.display = 'none';
+        }
+
+        const tk = document.getElementById('projLightboxTakeaway');
+        if (p.takeaway) {
+            tk.textContent = p.takeaway;
+            document.getElementById('projLightboxTakeawaySection').style.display = '';
+        } else {
+            document.getElementById('projLightboxTakeawaySection').style.display = 'none';
+        }
+
+        const stack = document.getElementById('projLightboxStack');
+        stack.innerHTML = '';
+        p.stack.forEach(s => {
+            const span = document.createElement('span');
+            span.textContent = s;
+            stack.appendChild(span);
+        });
+
+        const link = document.getElementById('projLightboxLink');
+        if (p.link && p.link !== '#') {
+            link.href = p.link;
+            link.style.display = '';
+        } else {
+            link.style.display = 'none';
+        }
+
+        const lb = document.getElementById('projLightbox');
+        lb.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    window.closeProjectLightbox = function(e, force) {
+        if (e) e.stopPropagation();
+        if (!force && e && e.target !== e.currentTarget && e.target.id !== 'projLightbox') return;
+        const lb = document.getElementById('projLightbox');
+        lb.classList.remove('active');
+        document.body.style.overflow = '';
+    };
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            const lb = document.getElementById('projLightbox');
+            if (lb.classList.contains('active')) {
+                lb.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+    });
+
+    /* ===== Layer Stacking Effect =====
+     * Scroll-down: sections stack with overlap, shadows, scale/opacity changes.
+     * Triggered by: mouse wheel, keyboard (arrows/space/pgdn), touchpad, nav clicks.
+     * Scroll-up: all stacking effects removed, back to normal document flow.
+     */
+    const sections = document.querySelectorAll('.section');
+    const heroKeywords = document.querySelector('.hero-keywords');
+    let stackingTicking = false;
+    let lastScrollY = window.scrollY;
+    let scrollDirection = 'none'; // 'down' | 'up' | 'none'
+
+    function clearAllStacking() {
+        sections.forEach(s => {
+            s.classList.remove('stacked-top', 'stacked-bottom', 'section-lit', 'section-dim');
+        });
+        if (heroKeywords) {
+            heroKeywords.style.transform = '';
+        }
+    }
+
+    function applyStackingDown() {
+        const viewH = window.innerHeight;
+        const isMob = window.innerWidth <= 768;
+        const viewMid = viewH / 2;
+
+        sections.forEach((section, i) => {
+            const rect = section.getBoundingClientRect();
+            const sectionTop = rect.top;
+            const sectionBottom = rect.bottom;
+            const sectionMid = sectionTop + rect.height / 2;
+
+            // Remove stacking classes first
+            section.classList.remove('stacked-top', 'stacked-bottom', 'section-lit', 'section-dim');
+
+            // Section lighting: brightest at viewport center, dimmer at edges
+            const distFromCenter = Math.abs(sectionMid - viewMid);
+            const maxDist = viewH;
+            const dimFactor = Math.min(1, distFromCenter / maxDist);
+
+            if (sectionBottom > 0 && sectionTop < viewH) {
+                if (dimFactor < 0.3) {
+                    section.classList.add('section-lit');
+                } else if (dimFactor > 0.6) {
+                    section.classList.add('section-dim');
+                }
+            }
+
+            // Determine stacking for scroll-down
+            const nextSection = sections[i + 1];
+            if (nextSection) {
+                const nextRect = nextSection.getBoundingClientRect();
+                if (nextRect.top > 0 && nextRect.top < viewH * 0.6) {
+                    if (sectionTop < 0 || sectionBottom > 0) {
+                        section.classList.add('stacked-top');
+                    }
+                    nextSection.classList.add('stacked-bottom');
+                }
+                else if (nextRect.top <= 0 && nextRect.bottom > viewH * 0.3) {
+                    if (sectionTop < 0) {
+                        section.classList.add('stacked-top');
+                    }
+                }
+            }
+
+            // Parallax for background elements (desktop only, scroll-down)
+            if (!isMob && section.classList.contains('stacked-bottom')) {
+                const bgElements = section.querySelectorAll('.hero-keywords, .cert-bg-pattern');
+                if (bgElements.length > 0) {
+                    const yOffset = sectionTop * -0.12;
+                    bgElements.forEach(el => {
+                        el.style.transform = `translateY(${yOffset}px)`;
+                    });
+                }
+            }
+        });
+
+        // Hero keywords parallax (desktop only, scroll-down)
+        if (heroKeywords && !isMob) {
+            const hero = document.querySelector('.hero');
+            if (hero) {
+                const heroRect = hero.getBoundingClientRect();
+                if (heroRect.bottom > 0 && heroRect.top < viewH) {
+                    const offset = heroRect.top * -0.12;
+                    heroKeywords.style.transform = `translateY(${offset}px)`;
+                }
+            }
+        }
+    }
+
+    function updateStacking() {
+        const currentScrollY = window.scrollY;
+        const delta = currentScrollY - lastScrollY;
+
+        if (Math.abs(delta) < 1) {
+            stackingTicking = false;
+            return; // Too small movement, ignore
+        }
+
+        if (delta > 0) {
+            // Scrolling DOWN
+            if (scrollDirection !== 'down') {
+                scrollDirection = 'down';
+            }
+            applyStackingDown();
+        } else {
+            // Scrolling UP
+            if (scrollDirection !== 'up') {
+                scrollDirection = 'up';
+                clearAllStacking();
+            }
+        }
+
+        lastScrollY = currentScrollY;
+        stackingTicking = false;
+    }
+
+    window.addEventListener('scroll', () => {
+        if (!stackingTicking) {
+            requestAnimationFrame(() => {
+                updateStacking();
+            });
+            stackingTicking = true;
+        }
+    }, { passive: true });
+
+    // Nav link click: ensure stacking works during smooth scroll
+    document.querySelectorAll('.nav-links a[href^="#"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            const target = document.querySelector(targetId);
+            if (target) {
+                // Reset scroll direction to force stacking on smooth scroll
+                scrollDirection = 'none';
+                lastScrollY = window.scrollY;
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+
+    // Initial state: ensure no stacking classes on load
+    clearAllStacking();
+
+    /* ===== Hero Keyword Contract + Explode Animation =====
+     * Load: scatter 0.5s → contract to right-side center (1.5s)
+     * Click: explode radially to new random positions
+     * Scroll away: fade out. Return to top: replay.
+     */
+    const heroKeywordsContainer = document.querySelector('.hero-keywords');
+    const keywordSpans = heroKeywordsContainer ? heroKeywordsContainer.querySelectorAll('span') : [];
+    const heroSection = document.getElementById('hero');
+    let keywordPositions = [];
+    let isContracted = false;
+    let contractTimeout = null;
+
+    function storeKeywordPositions() {
+        keywordPositions = [];
+        if (!heroKeywordsContainer) return;
+        const heroRect = heroKeywordsContainer.getBoundingClientRect();
+        keywordSpans.forEach(span => {
+            const rect = span.getBoundingClientRect();
+            keywordPositions.push({
+                el: span,
+                left: rect.left - heroRect.left,
+                top: rect.top - heroRect.top,
+                width: rect.width,
+                height: rect.height
+            });
+        });
+    }
+
+    function getRightSideCenter() {
+        if (!heroKeywordsContainer) return { x: 0, y: 0, w: 0, h: 0 };
+        const heroRect = heroKeywordsContainer.getBoundingClientRect();
+        // Right side: from ~35% to 95% width, center vertically
+        const areaLeft = heroRect.width * 0.35;
+        const areaRight = heroRect.width * 0.92;
+        const areaTop = heroRect.height * 0.15;
+        const areaBottom = heroRect.height * 0.85;
+        return {
+            x: (areaLeft + areaRight) / 2,
+            y: (areaTop + areaBottom) / 2,
+            w: areaRight - areaLeft,
+            h: areaBottom - areaTop
+        };
+    }
+
+    // Pre-compute non-overlapping target positions in a grid with jitter
+    function computeContractTargets() {
+        const center = getRightSideCenter();
+        const count = keywordPositions.length;
+        const cols = Math.ceil(Math.sqrt(count * (center.w / center.h)));
+        const rows = Math.ceil(count / cols);
+        const cellW = center.w / cols;
+        const cellH = center.h / rows;
+        const targets = [];
+
+        for (let i = 0; i < count; i++) {
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+            const jitterX = (Math.random() - 0.5) * cellW * 0.5;
+            const jitterY = (Math.random() - 0.5) * cellH * 0.5;
+            targets.push({
+                x: center.x - center.w / 2 + col * cellW + cellW / 2 + jitterX,
+                y: center.y - center.h / 2 + row * cellH + cellH / 2 + jitterY
+            });
+        }
+        return targets;
+    }
+
+    function contractKeywords() {
+        if (isContracted || keywordPositions.length === 0) return;
+        isContracted = true;
+
+        // Reset all xforms to identity first, then capture positions
+        keywordSpans.forEach(span => {
+            span.style.transition = 'none';
+            span.style.transform = 'scale(1.0)';
+            span.style.opacity = '1';
+            span.style.color = '';
+        });
+        heroKeywordsContainer.offsetHeight; // force reflow
+        storeKeywordPositions();
+
+        const targets = computeContractTargets();
+
+        keywordPositions.forEach((pos, i) => {
+            const span = pos.el;
+            const target = targets[i];
+            const dx = target.x - pos.left - pos.width / 2;
+            const dy = target.y - pos.top - pos.height / 2;
+
+            span.style.transition = 'transform 1.5s cubic-bezier(0.45, 0.05, 0.55, 0.95), opacity 1.5s ease, color 1.5s ease';
+            span.style.transform = `translate(${dx}px, ${dy}px) scale(0.88)`;
+            span.style.opacity = '0.9';
+            span.style.color = darkenColor(window.getComputedStyle(span).color);
+        });
+
+        contractTimeout = setTimeout(() => {
+            // Bake transform into top/left, reset transform
+            keywordSpans.forEach(span => {
+                span.style.transition = 'none';
+                const rect = span.getBoundingClientRect();
+                const heroRect = heroKeywordsContainer.getBoundingClientRect();
+                span.style.left = (rect.left - heroRect.left) + 'px';
+                span.style.top = (rect.top - heroRect.top) + 'px';
+                span.style.transform = 'scale(0.88)';
+                span.style.transition = 'transform 0.3s ease, opacity 0.3s ease, color 0.3s ease';
+            });
+            storeKeywordPositions();
+        }, 1550);
+    }
+
+    function darkenColor(color) {
+        // Simple darkening: shift gray values down
+        const match = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+        if (match) {
+            const v = Math.max(40, parseInt(match[1]) - 20);
+            return `rgb(${v},${v},${v})`;
+        }
+        return color;
+    }
+
+    function explodeKeywords() {
+        if (keywordPositions.length === 0) return;
+        if (contractTimeout) clearTimeout(contractTimeout);
+
+        if (!heroKeywordsContainer) return;
+
+        // Bake current visual positions into top/left, reset transform to identity
+        keywordSpans.forEach(span => {
+            span.style.transition = 'none';
+            const rect = span.getBoundingClientRect();
+            const heroRect = heroKeywordsContainer.getBoundingClientRect();
+            span.style.left = (rect.left - heroRect.left) + 'px';
+            span.style.top = (rect.top - heroRect.top) + 'px';
+            span.style.transform = 'scale(1.0)';
+            span.style.opacity = '1';
+            span.style.color = '';
+        });
+        heroKeywordsContainer.offsetHeight;
+        storeKeywordPositions();
+        isContracted = false;
+
+        const heroRect = heroKeywordsContainer.getBoundingClientRect();
+        const safeLeft = heroRect.width * 0.08;
+        const safeRight = heroRect.width * 0.94;
+        const safeTop = heroRect.height * 0.06;
+        const safeBottom = heroRect.height * 0.94;
+
+        const count = keywordPositions.length;
+        const cols = Math.ceil(Math.sqrt(count * 1.6));
+        const rows = Math.ceil(count / cols);
+        const availW = safeRight - safeLeft - 20;
+        const availH = safeBottom - safeTop - 10;
+        const cellW = availW / cols;
+        const cellH = availH / rows;
+
+        const candidates = [];
+        for (let i = 0; i < count; i++) {
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+            const jitterX = (Math.random() - 0.5) * cellW * 0.6;
+            const jitterY = (Math.random() - 0.5) * cellH * 0.6;
+            candidates.push({
+                x: safeLeft + 10 + col * cellW + cellW / 2 + jitterX,
+                y: safeTop + 5 + row * cellH + cellH / 2 + jitterY
+            });
+        }
+
+        for (let i = candidates.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+        }
+
+        keywordPositions.forEach((pos, i) => {
+            const span = pos.el;
+            const target = candidates[i];
+            const dx = target.x - pos.left - pos.width / 2;
+            const dy = target.y - pos.top - pos.height / 2;
+
+            span.style.transition = 'transform 1.0s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 1.0s ease, color 1.0s ease';
+            span.style.transform = `translate(${dx}px, ${dy}px) scale(1.0)`;
+            span.style.opacity = '1';
+            span.style.color = '';
+        });
+
+        setTimeout(() => {
+            keywordSpans.forEach(span => {
+                span.style.transition = 'none';
+                const rect = span.getBoundingClientRect();
+                const heroRect = heroKeywordsContainer.getBoundingClientRect();
+                span.style.left = (rect.left - heroRect.left) + 'px';
+                span.style.top = (rect.top - heroRect.top) + 'px';
+                span.style.transform = 'none';
+                span.style.transition = 'color 0.3s';
+            });
+            storeKeywordPositions();
+        }, 1050);
+    }
+
+    // Initialize: store positions, then contract after 0.5s pause
+    function initHeroContract() {
+        storeKeywordPositions();
+        contractTimeout = setTimeout(() => {
+            contractKeywords();
+        }, 500);
+    }
+
+    // Click to explode
+    if (heroSection) {
+        heroSection.addEventListener('click', (e) => {
+            // Don't trigger on nav links or buttons
+            if (e.target.closest('a, button')) return;
+            explodeKeywords();
+        });
+    }
+
+    // Scroll handling
+    let heroVisible = true;
+    window.addEventListener('scroll', () => {
+        const scrollY = window.scrollY;
+        const viewH = window.innerHeight;
+
+        if (scrollY > viewH * 0.3) {
+            if (heroVisible) {
+                heroVisible = false;
+                keywordSpans.forEach(span => {
+                    span.style.transition = 'opacity 0.4s ease';
+                    span.style.opacity = '0';
+                });
+            }
+        } else if (scrollY < 10) {
+            if (!heroVisible) {
+                heroVisible = true;
+                keywordSpans.forEach(span => {
+                    span.style.transition = 'opacity 0.4s ease';
+                    span.style.opacity = '';
+                });
+                // Replay contract animation
+                isContracted = false;
+                if (contractTimeout) clearTimeout(contractTimeout);
+                // Reset transforms
+                keywordSpans.forEach(span => {
+                    span.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+                    span.style.transform = '';
+                    span.style.opacity = '';
+                    span.style.color = '';
+                });
+                setTimeout(() => {
+                    storeKeywordPositions();
+                    contractTimeout = setTimeout(() => contractKeywords(), 500);
+                }, 400);
+            }
+        }
+    }, { passive: true });
+
+    setTimeout(initHeroContract, 300);
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                e.target.style.opacity = '1';
+                e.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.timeline-item, .cert-scene, .project-card, .future-card, .personality-desc, .chart-mbti, .chart-radar').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+    });
+
+    const certData = [
+        { name: 'Agent Engineering 技能认证', img: 'images/certs/cert_01.jpg', isAI: true },
+        { name: 'Prompt Engineer', img: 'images/certs/cert_02.jpg', isAI: true },
+        { name: 'AI+编程能力认证', img: 'images/certs/cert_03.jpg', isAI: true },
+        { name: '人工智能训练师', img: 'images/certs/cert_04.jpg', isAI: true },
+        { name: '荣誉证书', img: 'images/certs/cert_05.jpg', isAI: false },
+        { name: '荣誉证书', img: 'images/certs/cert_06.png', isAI: false },
+        { name: '荣誉证书', img: 'images/certs/cert_07.jpg', isAI: false },
+        { name: '荣誉证书', img: 'images/certs/cert_08.jpg', isAI: false },
+        { name: '荣誉证书', img: 'images/certs/cert_09.jpg', isAI: false },
+        { name: '荣誉证书', img: 'images/certs/cert_10.jpg', isAI: false },
+        { name: '荣誉证书', img: 'images/certs/cert_11.jpg', isAI: false },
+        { name: '荣誉证书', img: 'images/certs/cert_12.jpg', isAI: false },
+        { name: '荣誉证书', img: 'images/certs/cert_13.jpg', isAI: false },
+        { name: '荣誉证书', img: 'images/certs/cert_14.jpg', isAI: false },
+        { name: '荣誉证书', img: 'images/certs/cert_15.jpg', isAI: false },
+        { name: '荣誉证书', img: 'images/certs/cert_16.jpg', isAI: false },
+        { name: '荣誉证书', img: 'images/certs/cert_17.jpg', isAI: false },
+        { name: '荣誉证书', img: 'images/certs/cert_18.jpg', isAI: false }
+    ];
+
+    const lightboxGrid = document.getElementById('certLightboxGrid');
+    certData.forEach((cert, i) => {
+        const card = document.createElement('div');
+        card.className = 'cert-lightbox-card' + (cert.isAI ? ' ai-card' : '');
+        card.innerHTML = `
+            <img class="cert-lightbox-card-img" src="${cert.img}" alt="${cert.name}">
+            <div class="cert-lightbox-card-name">${cert.name}</div>
+        `;
+        lightboxGrid.appendChild(card);
+        setTimeout(() => { card.classList.add('visible'); }, i * 80);
+    });
+
+    window.openCertLightbox = function() {
+        const lb = document.getElementById('certLightbox');
+        lb.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    window.closeCertLightbox = function(e) {
+        if (e && e.target !== e.currentTarget) return;
+        const lb = document.getElementById('certLightbox');
+        lb.classList.remove('active');
+        document.body.style.overflow = '';
+    };
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            document.getElementById('certLightbox').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+
+    </script>
+
+</body>
+</html>
