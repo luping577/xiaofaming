@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>萌鼠敲敲乐 | Cute Mole Bonanza</title>
+<style>
+/* ============ Reset & Variables ============ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --pink:#FFB5C2;--mint:#B5EAD7;--cream:#FFF5E4;--lavender:#E2D5F1;
+  --gold:#FFD700;--brown:#C4956A;--dark:#5D4E37;--white:#FFF;
+  --red:#FF6B6B;--bg-pink:#FFF0F3;--bg-mint:#E8F8F0;
+  --shadow:0 4px 15px rgba(0,0,0,0.1);
+  --radius:20px;--radius-sm:12px;
+  --font:'Quicksand','PingFang SC','Microsoft YaHei',sans-serif;
+}
+body{
+  font-family:var(--font);background:var(--bg-pink);
+  display:flex;justify-content:center;align-items:center;
+  min-height:100vh;overflow-x:hidden;user-select:none;-webkit-user-select:none;
+  background-image:radial-gradient(circle at 20% 30%,#FFE0E8 0%,transparent 50%),
+    radial-gradient(circle at 80% 70%,#E0F0FF 0%,transparent 50%),
+    radial-gradient(circle at 50% 50%,#FFF5E4 0%,transparent 70%);
+}
+#game-container{
+  width:100%;max-width:420px;min-height:100vh;
+  position:relative;overflow:hidden;
+  transition:background 0.5s;
+}
+/* Shake */
+#game-container.shake{animation:screenShake 0.4s ease-out}
+@keyframes screenShake{
+  0%,100%{transform:translateX(0)}10%{transform:translateX(-6px) rotate(-1deg)}
+  30%{transform:translateX(6px) rotate(1deg)}50%{transform:translateX(-4px)}
+  70%{transform:translateX(4px)}90%{transform:translateX(-2px)}
+}
+
+/* ============ Decorative BG ============ */
+.bg-decor{position:absolute;pointer-events:none;z-index:0}
+.bg-cloud{width:80px;height:40px;background:white;border-radius:50px;opacity:0.6;animation:floatCloud 8s ease-in-out infinite}
+.bg-cloud::before,.bg-cloud::after{content:'';position:absolute;background:white;border-radius:50%}
+.bg-cloud::before{width:50px;height:50px;top:-25px;left:10px}
+.bg-cloud::after{width:35px;height:35px;top:-15px;left:40px}
+.bg-decor.star{font-size:20px;animation:twinkle 2s ease-in-out infinite}
+.bg-decor.flower{font-size:24px;animation:sway 3s ease-in-out infinite}
+@keyframes floatCloud{0%,100%{transform:translateX(0)}50%{transform:translateX(20px)}}
+@keyframes twinkle{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1.2)}}
+@keyframes sway{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+
+/* ============ Screens ============ */
+.screen{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;z-index:10;transition:opacity 0.4s,transform 0.4s}
+.screen.hidden{opacity:0;pointer-events:none;transform:scale(0.95)}
+
+/* ============ Start Screen ============ */
+#start-screen{z-index:50}
+.start-logo{font-size:48px;animation:bounce 2s ease-in-out infinite;margin-bottom:6px}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+.start-title{font-size:30px;font-weight:800;color:var(--dark);text-shadow:2px 2px 0 rgba(255,181,194,0.5);text-align:center}
+.start-subtitle{font-size:13px;color:#B8A9C9;margin-bottom:12px}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:340px;margin-bottom:10px}
+.mode-btn{padding:12px 10px;border-radius:var(--radius-sm);border:2px solid transparent;background:white;cursor:pointer;text-align:center;transition:all 0.2s;box-shadow:var(--shadow);font-family:var(--font)}
+.mode-btn:hover,.mode-btn.selected{border-color:var(--pink);background:var(--bg-pink);transform:translateY(-2px)}
+.mode-btn .mode-icon{font-size:24px;display:block;margin-bottom:2px}
+.mode-btn .mode-name{font-size:13px;font-weight:700;color:var(--dark)}
+.mode-btn .mode-desc{font-size:10px;color:#999;margin-top:1px}
+.theme-row{display:flex;gap:8px;margin-bottom:10px}
+.theme-dot{width:30px;height:30px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all 0.2s}
+.theme-dot.selected{border-color:var(--dark);transform:scale(1.15)}
+.theme-dot.t-dessert{background:linear-gradient(135deg,#FFB5C2,#B5EAD7)}
+.theme-dot.t-cloud{background:linear-gradient(135deg,#B5D8FF,#E2D5F1)}
+.theme-dot.t-candy{background:linear-gradient(135deg,#FFD700,#FF6B6B)}
+.theme-dot.t-starry{background:linear-gradient(135deg,#1a1a3e,#4a3f8a)}
+/* Difficulty Selector */
+.diff-row{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;justify-content:center}
+.diff-row.hidden{display:none}
+.diff-btn{padding:6px 14px;border-radius:50px;border:2px solid #DDD;background:white;cursor:pointer;font-size:12px;font-weight:700;font-family:var(--font);transition:all 0.2s;box-shadow:var(--shadow)}
+.diff-btn:hover{transform:translateY(-1px)}
+.diff-btn.selected{color:white;border-color:transparent}
+.diff-btn.d-rookie.selected{background:linear-gradient(135deg,#B5EAD7,#7EC8A0);border-color:#B5EAD7}
+.diff-btn.d-easy.selected{background:linear-gradient(135deg,#FFB5C2,#FF9EB5);border-color:#FFB5C2}
+.diff-btn.d-hard.selected{background:linear-gradient(135deg,#FF8C94,#FF6B6B);border-color:#FF8C94}
+.diff-btn.d-hell.selected{background:linear-gradient(135deg,#8B0000,#C0392B);border-color:#8B0000}
+.diff-btn .diff-icon{font-size:14px;margin-right:2px}
+.btn-start{padding:14px 50px;font-size:18px;font-weight:800;background:linear-gradient(135deg,var(--pink),#FF9EB5);color:white;border:none;border-radius:50px;cursor:pointer;box-shadow:0 6px 20px rgba(255,181,194,0.5);transition:all 0.2s;font-family:var(--font)}
+.btn-start:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(255,181,194,0.6)}
+.btn-start:active{transform:scale(0.95)}
+
+/* ============ Game Screen ============ */
+#game-screen{z-index:20}
+.top-bar{display:flex;justify-content:space-between;align-items:center;width:100%;padding:6px 12px;z-index:5;gap:4px}
+.stat-item{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.85);padding:5px 10px;border-radius:50px;box-shadow:var(--shadow);font-size:13px}
+.stat-icon{font-size:16px}
+.stat-value{font-size:16px;font-weight:800;color:var(--dark)}
+.combo-display{position:absolute;top:68px;left:50%;transform:translateX(-50%);font-size:22px;font-weight:800;color:var(--gold);text-shadow:0 2px 4px rgba(0,0,0,0.1);opacity:0;transition:all 0.3s;pointer-events:none;z-index:30}
+.combo-display.active{opacity:1;animation:comboPop 0.4s ease-out}
+@keyframes comboPop{0%{transform:translateX(-50%) scale(0.5)}50%{transform:translateX(-50%) scale(1.3)}100%{transform:translateX(-50%) scale(1)}}
+
+/* Announcement */
+.announce{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);font-size:22px;font-weight:800;color:var(--pink);text-shadow:0 2px 8px rgba(255,181,194,0.6);pointer-events:none;z-index:35;opacity:0;transition:all 0.3s;text-align:center;white-space:nowrap}
+.announce.show{opacity:1;animation:announcePop 0.5s ease-out}
+@keyframes announcePop{0%{transform:translate(-50%,-50%) scale(0.3)}60%{transform:translate(-50%,-50%) scale(1.15)}100%{transform:translate(-50%,-50%) scale(1)}}
+
+/* ============ Holes Grid ============ */
+.holes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px 16px;width:100%;max-width:380px;position:relative;z-index:2}
+.hole{position:relative;aspect-ratio:1;display:flex;align-items:flex-end;justify-content:center;cursor:pointer}
+.hole-bg{position:absolute;bottom:0;width:88%;height:48%;background:radial-gradient(ellipse at center,#E8DDD0 0%,#C4B5A5 60%,#A89888 100%);border-radius:50%;box-shadow:inset 0 4px 8px rgba(0,0,0,0.15);transition:background 0.5s,box-shadow 0.5s}
+.hole-bg::after{content:'';position:absolute;top:4px;left:10%;width:80%;height:60%;background:radial-gradient(ellipse at center,#3D2B1F 0%,#1a1008 100%);border-radius:50%}
+.hole.bonus .hole-bg{animation:holeGlow 0.6s ease-in-out infinite}
+@keyframes holeGlow{0%,100%{box-shadow:inset 0 4px 8px rgba(0,0,0,0.15),0 0 15px rgba(255,215,0,0.3)}50%{box-shadow:inset 0 4px 8px rgba(0,0,0,0.15),0 0 30px rgba(255,215,0,0.7)}}
+
+/* Mole */
+.mole{position:absolute;bottom:20%;left:50%;transform:translateX(-50%) translateY(30px);width:70%;aspect-ratio:1;z-index:3;transition:transform 0.15s ease-out;cursor:pointer;pointer-events:none}
+.mole.show{transform:translateX(-50%) translateY(0);pointer-events:auto}
+.mole.hit{animation:moleHit 0.3s ease-out}
+@keyframes moleHit{0%{transform:translateX(-50%) translateY(0) scale(1,1)}30%{transform:translateX(-50%) translateY(-10px) scale(1.3,0.7)}60%{transform:translateX(-50%) translateY(-5px) scale(0.9,1.1)}100%{transform:translateX(-50%) translateY(30px) scale(0.8,0.8)}}
+.mole-body{width:100%;height:100%;position:relative;animation:moleIdle 2s ease-in-out infinite}
+@keyframes moleIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.mole-face{position:absolute;top:15%;left:10%;width:80%;height:65%;background:var(--brown);border-radius:50% 50% 45% 45%}
+.mole-face::before{content:'';position:absolute;bottom:10%;left:10%;width:80%;height:40%;background:#F5DEB3;border-radius:50%}
+.eye{position:absolute;width:20%;height:22%;background:white;border-radius:50%;top:25%}
+.eye::after{content:'';position:absolute;width:55%;height:55%;background:#333;border-radius:50%;top:25%;left:25%}
+.eye::before{content:'';position:absolute;width:20%;height:20%;background:white;border-radius:50%;top:15%;left:15%;z-index:2}
+.eye.left{left:20%}.eye.right{right:20%}
+.nose{position:absolute;width:15%;height:12%;background:#FF8C94;border-radius:50%;top:45%;left:42.5%}
+.mouth{position:absolute;width:30%;height:8%;border-bottom:3px solid #8B5E3C;border-radius:0 0 50% 50%;top:55%;left:35%}
+.blush{position:absolute;width:18%;height:10%;background:rgba(255,150,150,0.4);border-radius:50%;top:48%}
+.blush.left{left:8%}.blush.right{right:8%}
+
+/* Special Moles */
+.mole.golden .mole-face{background:linear-gradient(135deg,#FFD700,#FFA500)}
+.mole.golden .mole-face::before{background:#FFF8DC}
+.mole.golden .crown{position:absolute;top:-15%;left:25%;width:50%;height:25%;font-size:24px;text-align:center;z-index:4;animation:crownFloat 1s ease-in-out infinite}
+@keyframes crownFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.mole.bomb .mole-face{background:linear-gradient(135deg,#4a4a4a,#2d2d2d)}
+.mole.bomb .mole-face::before{background:#666}
+.mole.bomb .fuse{position:absolute;top:-20%;left:46%;width:4px;height:30%;background:#FF6B6B;border-radius:2px;z-index:4}
+.mole.bomb .fuse::after{content:'💥';position:absolute;top:-18px;left:-10px;font-size:14px;animation:spark 0.3s ease-in-out infinite}
+@keyframes spark{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.3)}}
+.mole.rabbit .mole-face{background:white;border:2px solid #EEE}
+.mole.rabbit .mole-face::before{background:#FFF}
+.mole.rabbit .ears{position:absolute;top:-25%;width:100%;height:35%;z-index:1}
+.mole.rabbit .ear{position:absolute;width:25%;height:100%;background:white;border-radius:50%;border:2px solid #EEE}
+.mole.rabbit .ear::after{content:'';position:absolute;width:60%;height:70%;background:#FFD5D5;border-radius:50%;top:15%;left:20%}
+.mole.rabbit .ear.left{left:15%}.mole.rabbit .ear.right{right:15%}
+.mole.rabbit .carrot{position:absolute;bottom:-5%;right:-5%;font-size:18px;z-index:5}
+.mole.boss{transform:translateX(-50%) translateY(30px) scale(1.3)}
+.mole.boss.show{transform:translateX(-50%) translateY(0) scale(1.3)}
+.mole.boss .mole-face{background:linear-gradient(135deg,#FF6B6B,#C0392B)}
+.mole.boss .mole-face::before{background:#FFD5D5}
+.mole.boss .big-crown{position:absolute;top:-20%;left:20%;width:60%;height:30%;font-size:28px;text-align:center;z-index:4;animation:crownFloat 0.8s ease-in-out infinite}
+.mole.boss .boss-hp{position:absolute;top:-8%;left:10%;width:80%;height:8px;background:#DDD;border-radius:10px;z-index:5}
+.mole.boss .boss-hp-bar{height:100%;background:var(--red);border-radius:10px;transition:width 0.2s}
+
+/* Event Moles */
+.mole.pumpkin .mole-face{background:linear-gradient(135deg,#FF8C00,#E06500);border-radius:50%}
+.mole.pumpkin .mole-face::before{background:#FFD580}
+.mole.santa .mole-face{background:linear-gradient(135deg,#E74C3C,#C0392B)}
+.mole.santa .mole-face::before{background:white}
+.mole.redpack .mole-face{background:linear-gradient(135deg,#E74C3C,#C0392B)}
+.mole.redpack .mole-face::before{background:#FFD700}
+
+/* Hit Effect */
+.hit-effect{position:absolute;pointer-events:none;z-index:20;font-size:26px;animation:hitFloat 0.8s ease-out forwards}
+@keyframes hitFloat{0%{opacity:1;transform:translateY(0) scale(0.5)}50%{opacity:1;transform:translateY(-35px) scale(1.2)}100%{opacity:0;transform:translateY(-65px) scale(0.8)}}
+.particle{position:absolute;pointer-events:none;z-index:25;animation:particleBurst 0.7s ease-out forwards}
+@keyframes particleBurst{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(0)}}
+
+/* ============ Items Bar ============ */
+.items-bar{display:flex;gap:6px;padding:4px 16px;width:100%;justify-content:center;flex-wrap:wrap;z-index:5}
+.item-slot{width:42px;height:42px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.85);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;box-shadow:var(--shadow);transition:all 0.2s;position:relative}
+.item-slot:hover{transform:translateY(-2px)}
+.item-slot:active{transform:scale(0.9)}
+.item-slot .item-count{position:absolute;top:-4px;right:-4px;background:var(--red);color:white;font-size:10px;font-weight:700;width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.item-slot.empty{opacity:0.35;cursor:default}
+.active-item-indicator{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:13px;font-weight:700;color:var(--pink);background:rgba(255,255,255,0.9);padding:4px 12px;border-radius:50px;pointer-events:none;z-index:25;opacity:0;transition:opacity 0.3s;white-space:nowrap}
+.active-item-indicator.show{opacity:1}
+
+/* ============ Collect Mode HUD ============ */
+.collect-hud{display:none;width:100%;padding:0 16px 8px;z-index:5}
+.collect-hud .collect-bar{width:100%;height:14px;background:#EEE;border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
+.collect-hud .collect-fill{height:100%;background:linear-gradient(90deg,#FFD700,#FFA500);border-radius:10px;transition:width 0.3s;width:0%}
+.collect-hud .collect-text{display:flex;justify-content:space-between;font-size:11px;color:#999;margin-top:2px;padding:0 4px}
+
+/* ============ VS Mode ============ */
+.vs-container{display:none;width:100%;flex:1;flex-direction:row;z-index:2;position:relative}
+.vs-container.active{display:flex}
+.vs-divider{position:absolute;left:50%;top:0;bottom:0;width:3px;background:linear-gradient(180deg,transparent,var(--pink),var(--pink),transparent);z-index:3;pointer-events:none}
+.vs-player{flex:1;display:flex;flex-direction:column;align-items:center;padding:6px;position:relative}
+.vs-player .vs-label{font-size:13px;font-weight:700;color:var(--dark);margin-bottom:2px}
+.vs-player .vs-score{font-size:20px;font-weight:800;color:var(--pink)}
+.vs-holes{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;width:100%;padding:4px}
+.vs-hole{position:relative;aspect-ratio:1;cursor:pointer}
+.vs-hole .hole-bg{position:absolute;bottom:0;width:88%;height:48%;background:radial-gradient(ellipse at center,#E8DDD0 0%,#C4B5A5 60%,#A89888 100%);border-radius:50%;box-shadow:inset 0 4px 8px rgba(0,0,0,0.15);left:6%}
+.vs-hole .hole-bg::after{content:'';position:absolute;top:4px;left:10%;width:80%;height:60%;background:radial-gradient(ellipse at center,#3D2B1F 0%,#1a1008 100%);border-radius:50%}
+.vs-hole .mole{width:75%}
+.vs-interference{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;justify-content:center}
+.vs-interference .vs-item{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.85);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;box-shadow:var(--shadow);transition:all 0.2s}
+.vs-interference .vs-item:hover{transform:translateY(-2px)}
+.vs-interference .vs-item:active{transform:scale(0.9)}
+.vs-interference .vs-item.used{opacity:0.35;pointer-events:none}
+
+/* ============ Progress Bar (generic) ============ */
+.progress-mini{width:100%;height:8px;background:rgba(255,255,255,0.5);border-radius:4px;overflow:hidden;margin-top:4px}
+.progress-mini-fill{height:100%;border-radius:4px;transition:width 0.3s}
+
+/* ============ Game Over Screen ============ */
+#over-screen{z-index:40}
+.over-card{background:white;border-radius:var(--radius);padding:22px;box-shadow:0 10px 40px rgba(0,0,0,0.1);text-align:center;width:90%;max-width:340px;max-height:90vh;overflow-y:auto}
+.over-emoji{font-size:48px;margin-bottom:4px}
+.over-title{font-size:22px;font-weight:800;color:var(--dark);margin-bottom:2px}
+.over-score{font-size:38px;font-weight:800;color:var(--pink);margin-bottom:2px}
+.over-mode{font-size:12px;color:#999;margin-bottom:4px}
+.over-stats{display:flex;justify-content:center;gap:16px;margin:8px 0;flex-wrap:wrap}
+.over-stat{text-align:center}
+.over-stat-val{font-size:18px;font-weight:700;color:var(--dark)}
+.over-stat-lbl{font-size:10px;color:#999}
+.blind-box{margin:10px 0;padding:10px;background:var(--bg-pink);border-radius:var(--radius-sm)}
+.blind-box .box-emoji{font-size:36px;animation:bounce 1.5s ease-in-out infinite;cursor:pointer}
+.blind-box .box-text{font-size:12px;color:#999;margin-top:2px}
+.blind-box .reward{font-size:15px;font-weight:700;color:var(--pink);margin-top:3px;display:none}
+.btn-row{display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+.btn{padding:10px 20px;font-size:14px;font-weight:700;border:none;border-radius:50px;cursor:pointer;font-family:var(--font);transition:all 0.15s;box-shadow:var(--shadow)}
+.btn:hover{transform:translateY(-2px)}.btn:active{transform:scale(0.95)}
+.btn-primary{background:var(--pink);color:white}
+.btn-secondary{background:white;color:var(--dark);border:2px solid #DDD}
+.btn-gold{background:linear-gradient(135deg,#FFD700,#FFA500);color:white}
+
+/* Best Score */
+.best-score{margin-top:6px;font-size:13px;color:var(--gold);font-weight:700}
+.best-score.new{animation:bestScorePop 0.6s ease-out}
+@keyframes bestScorePop{0%{transform:scale(0.5)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+
+/* ============ Pause ============ */
+.pause-btn{position:absolute;top:10px;right:12px;z-index:30;width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,0.85);font-size:16px;cursor:pointer;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.pause-btn:hover{transform:scale(1.1)}
+.pause-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;z-index:35;backdrop-filter:blur(4px)}
+.pause-overlay.hidden{display:none}
+.pause-card{background:white;border-radius:var(--radius);padding:20px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.15)}
+.pause-card h3{font-size:20px;color:var(--dark);margin-bottom:10px}
+
+/* Timer Warning */
+.timer-warning{animation:timerPulse 0.5s ease-in-out}
+@keyframes timerPulse{0%,100%{color:var(--dark)}50%{color:var(--red);transform:scale(1.1)}}
+
+/* Event Decorations */
+.event-decor{position:absolute;pointer-events:none;z-index:1;font-size:20px;animation:eventFloat 3s ease-in-out infinite}
+@keyframes eventFloat{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-10px) rotate(10deg)}}
+
+/* ============ Rules Overlay ============ */
+.rules-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;z-index:45;backdrop-filter:blur(6px)}
+.rules-overlay.hidden{display:none}
+.rules-card{background:white;border-radius:var(--radius);padding:24px 20px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.15);width:88%;max-width:340px;max-height:85vh;overflow-y:auto;animation:rulesIn 0.3s ease-out}
+@keyframes rulesIn{0%{transform:scale(0.8);opacity:0}100%{transform:scale(1);opacity:1}}
+.rules-icon{font-size:52px;margin-bottom:6px}
+.rules-title{font-size:20px;font-weight:800;color:var(--dark);margin-bottom:2px}
+.rules-subtitle{font-size:12px;color:#999;margin-bottom:12px}
+.rules-section{text-align:left;margin-bottom:10px;background:var(--bg-pink);border-radius:var(--radius-sm);padding:12px 14px}
+.rules-section h4{font-size:13px;font-weight:700;color:var(--pink);margin-bottom:4px}
+.rules-section p,.rules-section li{font-size:12px;color:#666;line-height:1.7}
+.rules-section ul{list-style:none;padding:0}
+.rules-section ul li::before{content:'• ';color:var(--pink)}
+.rules-keys{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.rules-key{display:inline-block;background:var(--dark);color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;font-family:monospace;min-width:18px;text-align:center}
+.rules-ctrl{font-size:11px;color:#999;margin-top:6px;display:flex;align-items:center;gap:4px;justify-content:center}
+.rules-btn-row{display:flex;gap:8px;justify-content:center;margin-top:10px}
+
+/* ============ VS Keyboard Hints ============ */
+.vs-hole .key-hint{position:absolute;top:4px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.7);color:white;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;z-index:10;pointer-events:none;font-family:monospace;opacity:0.6;transition:opacity 0.2s}
+.vs-hole:active .key-hint,.vs-hole.pressed .key-hint{opacity:1;background:var(--pink)}
+
+/* ============ Desktop VS Layout ============ */
+@media(min-width:768px){
+  #game-container{max-width:800px}
+  .vs-container{flex-direction:row}
+  .vs-player{padding:12px}
+  .vs-player .vs-label{font-size:16px}
+  .vs-player .vs-score{font-size:28px}
+  .vs-holes{gap:10px;padding:8px;max-width:300px}
+  .vs-hole .mole{width:70%}
+  .vs-interference{gap:8px;margin-top:8px}
+  .vs-interference .vs-item{width:44px;height:44px;font-size:22px}
+  .vs-divider{width:4px}
+  .vs-player .vs-keys-legend{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;justify-content:center}
+  .vs-keys-legend span{font-size:10px;color:#999;background:rgba(255,255,255,0.7);padding:2px 6px;border-radius:4px;font-family:monospace}
+}
+
+/* ============ Responsive ============ */
+@media(min-width:420px){.holes-grid{gap:14px;padding:16px 20px}}
+@media(max-width:360px){.holes-grid{gap:6px;padding:8px}.start-title{font-size:24px}.stat-value{font-size:14px}.mode-btn{padding:10px 8px}.mode-btn .mode-icon{font-size:20px}}
+</style>
+</head>
+<body>
+
+<div id="game-container">
+  <!-- BG Decor -->
+  <div class="bg-decor bg-cloud" style="top:8%;left:5%"></div>
+  <div class="bg-decor bg-cloud" style="top:15%;right:5%;animation-delay:3s;width:60px;height:30px"></div>
+  <div class="bg-decor star" style="top:12%;left:15%">⭐</div>
+  <div class="bg-decor star" style="top:20%;right:12%;animation-delay:1s">✨</div>
+  <div class="bg-decor flower" style="bottom:8%;left:8%">🌸</div>
+  <div class="bg-decor flower" style="bottom:12%;right:8%;animation-delay:1.5s">🌷</div>
+
+  <!-- Start Screen -->
+  <div id="start-screen" class="screen">
+    <div class="start-logo">🐹</div>
+    <div class="start-title">萌鼠敲敲乐</div>
+    <div class="start-subtitle">Cute Mole Bonanza ✨</div>
+    <div class="mode-grid" id="mode-grid">
+      <button class="mode-btn selected" data-mode="classic"><span class="mode-icon">⏱️</span><span class="mode-name">经典模式</span><span class="mode-desc">3阶段 · 奖励轮</span></button>
+      <button class="mode-btn" data-mode="timeattack"><span class="mode-icon">⚡</span><span class="mode-name">限时挑战</span><span class="mode-desc">连击倍率 · 30s</span></button>
+      <button class="mode-btn" data-mode="survival"><span class="mode-icon">💖</span><span class="mode-name">生存模式</span><span class="mode-desc">波次递增 · 3命</span></button>
+      <button class="mode-btn" data-mode="collect"><span class="mode-icon">🌟</span><span class="mode-name">收集模式</span><span class="mode-desc">集星解锁 · 休闲</span></button>
+      <button class="mode-btn" data-mode="vs"><span class="mode-icon">👥</span><span class="mode-name">双人对战</span><span class="mode-desc">同屏PK · 干扰</span></button>
+      <button class="mode-btn" data-mode="event"><span class="mode-icon">🎃</span><span class="mode-name">节日活动</span><span class="mode-desc">限定角色 · 60s</span></button>
+      <button class="mode-btn" data-mode="endless"><span class="mode-icon">♾️</span><span class="mode-name">无尽模式</span><span class="mode-desc">极限挑战</span></button>
+    </div>
+    <div class="theme-row" id="theme-row">
+      <div class="theme-dot t-dessert selected" data-theme="dessert" title="甜品森林"></div>
+      <div class="theme-dot t-cloud" data-theme="cloud" title="云朵牧场"></div>
+      <div class="theme-dot t-candy" data-theme="candy" title="糖果工厂"></div>
+      <div class="theme-dot t-starry" data-theme="starry" title="星空夜市"></div>
+    </div>
+    <div class="diff-row" id="diff-row">
+      <button class="diff-btn d-rookie" data-diff="rookie"><span class="diff-icon">🐣</span>菜鸟</button>
+      <button class="diff-btn d-easy selected" data-diff="easy"><span class="diff-icon">🌸</span>简单</button>
+      <button class="diff-btn d-hard" data-diff="hard"><span class="diff-icon">🔥</span>困难</button>
+      <button class="diff-btn d-hell" data-diff="hell"><span class="diff-icon">💀</span>地狱</button>
+    </div>
+    <button class="btn-start" id="btn-start">🎮 开始游戏</button>
+  </div>
+
+  <!-- Game Screen -->
+  <div id="game-screen" class="screen hidden">
+    <div class="top-bar" id="top-bar">
+      <div class="stat-item"><span class="stat-icon">⭐</span><span class="stat-value" id="score">0</span></div>
+      <div class="stat-item" id="stage-box" style="display:none"><span class="stat-icon">📶</span><span class="stat-value" id="stage-text">阶段1</span></div>
+      <div class="stat-item" id="timer-box"><span class="stat-icon">⏱️</span><span class="stat-value" id="timer">60</span></div>
+      <div class="stat-item" id="lives-box"><span class="stat-icon">💖</span><span class="stat-value" id="lives">3</span></div>
+      <div class="stat-item" id="wave-box" style="display:none"><span class="stat-icon">🌊</span><span class="stat-value" id="wave-text">波次1</span></div>
+    </div>
+    <div class="combo-display" id="combo-display"></div>
+    <div class="announce" id="announce"></div>
+    <div class="active-item-indicator" id="active-item"></div>
+    <button class="pause-btn" id="btn-pause">⏸️</button>
+
+    <!-- Collect HUD -->
+    <div class="collect-hud" id="collect-hud">
+      <div class="collect-bar"><div class="collect-fill" id="collect-fill"></div></div>
+      <div class="collect-text"><span id="collect-progress">0/30 ⭐</span><span id="collect-bonus"></span></div>
+    </div>
+
+    <!-- Standard holes grid -->
+    <div class="holes-grid" id="holes-grid"></div>
+
+    <!-- VS Mode Container -->
+    <div class="vs-container" id="vs-container">
+      <div class="vs-divider"></div>
+      <div class="vs-player" id="vs-p1">
+        <div class="vs-label">👤 玩家1</div>
+        <div class="vs-score" id="vs-score1">0</div>
+        <div class="vs-holes" id="vs-holes1"></div>
+        <div class="vs-interference" id="vs-interference1">
+          <div class="vs-item" data-item="bubble" title="泡泡遮洞">🫧</div>
+          <div class="vs-item" data-item="honey" title="蜂蜜减速">🍯</div>
+          <div class="vs-item" data-item="swap" title="互换分数">🔄</div>
+        </div>
+      </div>
+      <div class="vs-player" id="vs-p2">
+        <div class="vs-label">👤 玩家2</div>
+        <div class="vs-score" id="vs-score2">0</div>
+        <div class="vs-holes" id="vs-holes2"></div>
+        <div class="vs-interference" id="vs-interference2">
+          <div class="vs-item" data-item="bubble" title="泡泡遮洞">🫧</div>
+          <div class="vs-item" data-item="honey" title="蜂蜜减速">🍯</div>
+          <div class="vs-item" data-item="swap" title="互换分数">🔄</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Items Bar -->
+    <div class="items-bar" id="items-bar">
+      <div class="item-slot empty" data-item="rainbow" title="彩虹锤:双倍分(5秒)">🌈</div>
+      <div class="item-slot empty" data-item="time" title="时间沙漏:+5秒">⏳</div>
+      <div class="item-slot empty" data-item="freeze" title="冰冻雪花:减速(3秒)">❄️</div>
+      <div class="item-slot empty" data-item="magnet" title="磁铁星星:全屏吸附">🧲</div>
+      <div class="item-slot empty" data-item="shield" title="护盾泡泡:免扣分1次">🫧</div>
+    </div>
+
+    <!-- Rules Overlay -->
+    <div class="rules-overlay hidden" id="rules-overlay">
+      <div class="rules-card">
+        <div class="rules-icon" id="rules-icon">🐹</div>
+        <div class="rules-title" id="rules-title">经典模式</div>
+        <div class="rules-subtitle" id="rules-subtitle"></div>
+        <div id="rules-content"></div>
+        <div class="rules-btn-row">
+          <button class="btn btn-secondary" id="btn-rules-back">← 返回</button>
+          <button class="btn btn-primary" id="btn-rules-start">开始游戏!</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="pause-overlay hidden" id="pause-overlay">
+      <div class="pause-card">
+        <h3>⏸️ 暂停中</h3>
+        <div class="btn-row"><button class="btn btn-primary" id="btn-resume">继续</button><button class="btn btn-secondary" id="btn-quit">退出</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Over Screen -->
+  <div id="over-screen" class="screen hidden">
+    <div class="over-card">
+      <div class="over-emoji" id="over-emoji">🎉</div>
+      <div class="over-title" id="over-title">太棒了!</div>
+      <div class="over-score" id="over-score">0</div>
+      <div class="over-mode" id="over-mode"></div>
+      <div class="best-score" id="best-score" style="display:none"></div>
+      <div class="over-stats">
+        <div class="over-stat"><div class="over-stat-val" id="stat-hits">0</div><div class="over-stat-lbl">击中</div></div>
+        <div class="over-stat"><div class="over-stat-val" id="stat-combo">0</div><div class="over-stat-lbl">最高连击</div></div>
+        <div class="over-stat"><div class="over-stat-val" id="stat-miss">0</div><div class="over-stat-lbl">失误</div></div>
+        <div class="over-stat"><div class="over-stat-val" id="stat-stars">0</div><div class="over-stat-lbl">收集</div></div>
+      </div>
+      <div class="blind-box">
+        <div class="box-emoji" id="blind-box">🎁</div>
+        <div class="box-text">点击盲盒获取奖励!</div>
+        <div class="reward" id="blind-reward"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-restart">🔄 再来一局</button>
+        <button class="btn btn-secondary" id="btn-menu">🏠 返回菜单</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== 萌鼠敲敲乐 v2 - 7模式完整引擎 ====================
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+const gameContainer=$('#game-container'),startScreen=$('#start-screen'),gameScreen=$('#game-screen'),overScreen=$('#over-screen');
+const holesGrid=$('#holes-grid'),scoreEl=$('#score'),timerEl=$('#timer'),livesEl=$('#lives'),livesBox=$('#lives-box'),timerBox=$('#timer-box');
+const comboDisplay=$('#combo-display'),activeItemEl=$('#active-item'),pauseOverlay=$('#pause-overlay');
+const blindBox=$('#blind-box'),blindReward=$('#blind-reward'),announce=$('#announce');
+const stageBox=$('#stage-box'),stageText=$('#stage-text'),waveBox=$('#wave-box'),waveText=$('#wave-text');
+const collectHud=$('#collect-hud'),collectFill=$('#collect-fill'),collectProgress=$('#collect-progress'),collectBonus=$('#collect-bonus');
+const vsContainer=$('#vs-container'),itemsBar=$('#items-bar');
+
+// ============ Audio Engine ============
+class AudioEngine{
+  constructor(){this.ctx=null;this.enabled=true}
+  init(){if(this.ctx)return;try{this.ctx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){this.enabled=false}}
+  play(freq,type,dur,vol=0.12,glide=0){
+    if(!this.enabled||!this.ctx)return;const t=this.ctx.currentTime;
+    const o=this.ctx.createOscillator(),g=this.ctx.createGain();
+    o.type=type;o.frequency.setValueAtTime(freq,t);
+    if(glide)o.frequency.linearRampToValueAtTime(freq+glide,t+dur);
+    g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    o.connect(g);g.connect(this.ctx.destination);o.start(t);o.stop(t+dur);
+  }
+  pop(){this.play(500,'sine',0.1,0.12,-200)}
+  combo(n){this.play(400+n*80,'sine',0.1,0.1,200)}
+  golden(){this.play(800,'triangle',0.12,0.1);this.play(1200,'triangle',0.08,0.08)}
+  rabbit(){this.play(200,'sine',0.25,0.07,-50)}
+  bomb(){this.play(80,'sawtooth',0.18,0.07)}
+  bossHit(){this.play(300,'square',0.08,0.05);this.play(600,'square',0.06,0.05)}
+  bossDefeat(){this.play(600,'triangle',0.12,0.08);setTimeout(()=>this.play(800,'triangle',0.12,0.08),80);setTimeout(()=>this.play(1000,'triangle',0.15,0.12),160)}
+  item(){this.play(1000,'sine',0.12,0.08);this.play(1400,'sine',0.08,0.06)}
+  gameOver(){this.play(300,'triangle',0.18,0.12);setTimeout(()=>this.play(200,'triangle',0.18,0.18),150)}
+  bonus(){this.play(600,'triangle',0.1,0.06);setTimeout(()=>this.play(800,'triangle',0.1,0.06),80);setTimeout(()=>this.play(1000,'triangle',0.12,0.08),160)}
+  collect(){this.play(700,'sine',0.1,0.08);this.play(900,'sine',0.06,0.06)}
+  wave(){this.play(400,'triangle',0.15,0.12);setTimeout(()=>this.play(500,'triangle',0.15,0.15),120)}
+  vsScore(){this.play(600,'triangle',0.12,0.1);this.play(1000,'triangle',0.08,0.08)}
+}
+const audio=new AudioEngine();
+
+// ============ Game State ============
+const state={
+  mode:'classic',theme:'dessert',classicDifficulty:'easy',running:false,paused:false,
+  score:0,timer:60,maxTimer:60,lives:3,combo:0,maxCombo:0,
+  totalHits:0,totalMiss:0,totalStars:0,
+  activeMoles:[],items:{rainbow:0,time:0,freeze:0,magnet:0,shield:0},
+  activeEffects:{rainbow:0,freeze:0,shield:false},
+  spawnInterval:null,timerInterval:null,difficulty:1,
+  blindOpened:false,coins:0,stage:1,wave:1,
+  _missStreak:0,_lastBossSpawn:-999,_currentSpawnInterval:1200,
+  _bonusActive:false,_eventTheme:'halloween',
+  // Classic level system
+  _currentLevel:1,_levelTransitioning:false,_levelCleared:false,
+  // VS mode
+  vs:{scores:[0,0],activeMoles:[[],[]],spawnIntervals:[null,null],running:false}
+};
+
+// ============ Mode Configs ============
+const modeConfigs={
+  classic:{timer:15,lives:999,showLives:false,showStage:true,showWave:false,itemDropRate:0.15,bossInterval:0,baseInterval:1200,stages:5,stageInterval:15,bonusRound:false,levels:true,levelTargets:[30,60,100,150,210],levelSpeeds:[1200,1050,900,750,600]},
+  timeattack:{timer:30,lives:999,showLives:false,showStage:false,showWave:false,itemDropRate:0.2,bossInterval:0,baseInterval:700,stages:0,stageInterval:0,bonusRound:false,comboMultiplier:true},
+  survival:{timer:999,lives:3,showLives:true,showStage:false,showWave:true,itemDropRate:0.12,bossInterval:45,baseInterval:1400,stages:0,stageInterval:0,bonusRound:false},
+  collect:{timer:999,lives:999,showLives:false,showStage:false,showWave:false,itemDropRate:0.3,bossInterval:0,baseInterval:1500,stages:0,stageInterval:0,bonusRound:false,collectTarget:30},
+  vs:{timer:999,lives:999,showLives:false,showStage:false,showWave:false,itemDropRate:0,baseInterval:1200,vsTarget:100},
+  event:{timer:60,lives:999,showLives:false,showStage:false,showWave:false,itemDropRate:0.2,bossInterval:20,baseInterval:1100,eventTheme:'halloween'},
+  endless:{timer:999,lives:1,showLives:true,showStage:false,showWave:true,itemDropRate:0.1,bossInterval:30,baseInterval:1200,speedRamp:true}
+};
+
+// ============ Classic Difficulty Configs ============
+const difficultyConfigs={
+  rookie:{
+    name:'菜鸟',icon:'🐣',color:'#B5EAD7',
+    levelCount:5,levelTime:18,
+    targets:[15,30,50,75,110],
+    speeds:[1400,1280,1160,1040,920],
+    moleWeights:{normal:68,golden:16,rabbit:8,bomb:0,boss:0},
+    hasBomb:false,hasRabbit:true,rabbitPenalty:-10,
+    bombPenalty:0,bombTimePenalty:0,
+    lives:999,itemDropRate:0.25,desc:'无炸弹 · 5关 · 每关18秒'
+  },
+  easy:{
+    name:'简单',icon:'🌸',color:'#FFB5C2',
+    levelCount:5,levelTime:15,
+    targets:[30,60,100,150,210],
+    speeds:[1200,1050,900,750,600],
+    moleWeights:{normal:55,golden:10,rabbit:15,bomb:10,boss:3},
+    hasBomb:true,hasRabbit:true,rabbitPenalty:-20,
+    bombPenalty:-15,bombTimePenalty:5,
+    lives:999,itemDropRate:0.15,desc:'标准难度 · 5关 · 每关15秒'
+  },
+  hard:{
+    name:'困难',icon:'🔥',color:'#FF8C94',
+    levelCount:5,levelTime:12,
+    targets:[45,95,160,235,325],
+    speeds:[1000,850,700,550,420],
+    moleWeights:{normal:45,golden:8,rabbit:16,bomb:18,boss:8},
+    hasBomb:true,hasRabbit:true,rabbitPenalty:-25,
+    bombPenalty:-20,bombTimePenalty:7,
+    lives:999,itemDropRate:0.1,desc:'炸弹多 · 5关 · 每关12秒'
+  },
+  hell:{
+    name:'地狱',icon:'💀',color:'#6B0000',
+    levelCount:5,levelTime:10,
+    targets:[80,150,230,320,430],
+    speeds:[800,650,500,380,280],
+    moleWeights:{normal:33,golden:5,rabbit:20,bomb:25,boss:10},
+    hasBomb:true,hasRabbit:true,rabbitPenalty:-30,
+    bombPenalty:-25,bombTimePenalty:10,
+    lives:3,itemDropRate:0.05,desc:'3条命 · 5关 · 每关10秒'
+  }
+};
+
+// ============ Rules Content ============
+const rulesContent={
+  classic:{
+    icon:'⏱️',title:'经典模式',sub:'5关挑战 · 4种难度可选',
+    getHtml:function(){
+      const dc=difficultyConfigs[state.classicDifficulty];
+      const dcs=Object.entries(difficultyConfigs).map(([k,v])=>`<span class="rules-key" style="background:${v.color};color:white">${v.icon}${v.name}</span>`).join(' ');
+      const diffs=Object.entries(difficultyConfigs).map(([k,v])=>(
+        `<li>${v.icon} <b>${v.name}</b>: ${v.desc} | 目标 ${v.targets.join('/')}分</li>`
+      )).join('');
+      return `<div class="rules-section"><h4>⚙️ 当前难度: ${dc.icon} ${dc.name}</h4><p>${dc.desc}</p></div>
+      <div class="rules-section"><h4>📶 4种难度</h4><ul>${diffs}</ul></div>
+      <div class="rules-section"><h4>🎯 5关目标 (${dc.name})</h4><p>${dc.targets.map((t,i)=>`关卡${i+1}: <b>${t}分</b>`).join(' | ')}</p></div>
+      <div class="rules-section"><h4>🐭 角色</h4><p>🐹普通+10 | 👑黄金+30 | 🐰兔兔${dc.rabbitPenalty}分${dc.hasBomb?` | 💣炸弹${dc.bombPenalty}分扣${dc.bombTimePenalty}秒`:''}${dc.moleWeights.boss>0?` | 😈Boss+50`:' | 无Boss'}</p></div>
+      ${dc.lives<999?`<div class="rules-section"><h4>💖 生命</h4><p>${dc.lives}条命! 漏打3只地鼠扣1心!</p></div>`:''}
+      <div class="rules-section"><h4>🎮 操作</h4><p>点击地鼠敲击 | 键盘 <span class="rules-key">1</span>-<span class="rules-key">9</span> 对应9洞 | 按 <span class="rules-key">P</span> 暂停</p></div>`;
+    }
+  },
+  timeattack:{
+    icon:'⚡',title:'限时挑战',sub:'连击倍率 · 30秒极速',
+    html:`
+      <div class="rules-section"><h4>🎯 目标</h4><p>30秒内尽可能多得分，连击越高分数加成越大!</p></div>
+      <div class="rules-section"><h4>🔥 连击倍率</h4><p>连击≥5触发倍率加成：每多一连击+0.5倍分数! 节奏越快收益越高!</p></div>
+      <div class="rules-section"><h4>⚡ 速度层级</h4><p>地鼠出现速度极快，且随时间越来越快，考验反应力!</p></div>
+      <div class="rules-section"><h4>🏆 排名</h4><p>最高分自动保存，挑战自己的极限记录!</p></div>
+      <div class="rules-section"><h4>🎮 操作</h4><p>点击地鼠敲击 | 按 <span class="rules-key">P</span> 暂停</p></div>
+    `
+  },
+  survival:{
+    icon:'💖',title:'生存模式',sub:'波次递增 · 3条命',
+    html:`
+      <div class="rules-section"><h4>🎯 目标</h4><p>坚持尽可能久! 每15秒进入新波次，速度越来越快!</p></div>
+      <div class="rules-section"><h4>💔 生命</h4><p>共3条命 | 漏打3只地鼠扣1心 | 心用完游戏结束</p></div>
+      <div class="rules-section"><h4>😈 Boss恢复</h4><p>每45秒出现地鼠王，击败可恢复1颗心!</p></div>
+      <div class="rules-section"><h4>🌊 波次</h4><p>每波难度递增，地鼠出现更快、停留更短</p></div>
+      <div class="rules-section"><h4>🎮 操作</h4><p>点击地鼠敲击 | 按 <span class="rules-key">P</span> 暂停</p></div>
+    `
+  },
+  collect:{
+    icon:'🌟',title:'收集模式',sub:'集星解锁 · 无限时休闲',
+    html:`
+      <div class="rules-section"><h4>🎯 目标</h4><p>收集30颗星星，解锁皮肤和道具! 无时间限制，轻松游玩~</p></div>
+      <div class="rules-section"><h4>⭐ 收集进度</h4><p>击中地鼠掉落星星 | 避免打到兔兔(不掉星)</p></div>
+      <div class="rules-section"><h4>🔓 解锁奖励</h4><p>10⭐草莓地鼠皮肤 | 20⭐布丁锤皮肤 | 30⭐全部收集完成!</p></div>
+      <div class="rules-section"><h4>🎮 操作</h4><p>点击地鼠敲击 | 按 <span class="rules-key">P</span> 暂停</p></div>
+    `
+  },
+  vs:{
+    icon:'👥',title:'双人对战',sub:'同屏PK · 先到100分胜',
+    html:`
+      <div class="rules-section"><h4>🎯 目标</h4><p>左右分屏对战，先获得100分的玩家获胜!</p></div>
+      <div class="rules-section"><h4>🕹️ 键盘操控 (电脑)</h4><p><b>玩家1(左):</b> 洞 <span class="rules-key">1</span><span class="rules-key">2</span><span class="rules-key">3</span><span class="rules-key">4</span><span class="rules-key">5</span><span class="rules-key">6</span> 或 <span class="rules-key">Q</span><span class="rules-key">W</span><span class="rules-key">A</span><span class="rules-key">S</span><span class="rules-key">Z</span><span class="rules-key">X</span> | 道具: 点击按钮</p><p><b>玩家2(右):</b> 洞 <span class="rules-key">U</span><span class="rules-key">I</span><span class="rules-key">J</span><span class="rules-key">K</span><span class="rules-key">N</span><span class="rules-key">M</span> | 道具 <span class="rules-key">7</span><span class="rules-key">8</span><span class="rules-key">9</span></p></div>
+      <div class="rules-section"><h4>📱 触屏操控</h4><p>直接点击对应半屏的地鼠洞即可!</p></div>
+      <div class="rules-section"><h4>🎯 干扰道具</h4><p>🫧泡泡遮洞3秒 | 🍯蜂蜜减速 | 🔄互换分数</p></div>
+      <div class="rules-section"><h4>⚠️ 注意</h4><p>兔兔扣15分 | 按 <span class="rules-key">P</span> 暂停</p></div>
+    `
+  },
+  event:{
+    icon:'🎃',title:'节日活动',sub:'限定角色 · 随机主题 · 60秒',
+    html:`
+      <div class="rules-section"><h4>🎯 目标</h4><p>60秒内尽可能多得分! 每次随机一个节日主题!</p></div>
+      <div class="rules-section"><h4>🎨 随机主题</h4><p>🎃万圣节: 南瓜地鼠+25分 | 🎄圣诞节: 圣诞地鼠+35分 | 🧧春节: 红包地鼠+20分</p></div>
+      <div class="rules-section"><h4>✨ 限定角色</h4><p>每个主题有专属限定地鼠，出现概率更高、得分更多!</p></div>
+      <div class="rules-section"><h4>🎮 操作</h4><p>点击地鼠敲击 | 按 <span class="rules-key">P</span> 暂停</p></div>
+    `
+  },
+  endless:{
+    icon:'♾️',title:'无尽模式',sub:'极限挑战 · 1条命',
+    html:`
+      <div class="rules-section"><h4>🎯 目标</h4><p>只有1条命! 漏打任何地鼠立即结束，挑战极限!</p></div>
+      <div class="rules-section"><h4>💀 一命通关</h4><p>只要漏打1只地鼠(非兔兔/炸弹)，游戏立刻结束!</p></div>
+      <div class="rules-section"><h4>♾️ 无限递增</h4><p>每10秒进入新波次，难度无上限! 速度越来越快!</p></div>
+      <div class="rules-section"><h4>😈 Boss</h4><p>每30秒出现地鼠王，击败+50分</p></div>
+      <div class="rules-section"><h4>🎮 操作</h4><p>点击地鼠敲击 | 按 <span class="rules-key">P</span> 暂停</p></div>
+    `
+  }
+};
+
+const themeConfigs={
+  dessert:{bg:'linear-gradient(180deg,#FFF5F7 0%,#F0E6FF 30%,#E8F8F0 60%,#FFF5E4 100%)',holeBg:'#E8DDD0',name:'甜品森林'},
+  cloud:{bg:'linear-gradient(180deg,#E8F4FD 0%,#D4E8FF 30%,#F0E6FF 60%,#FFF 100%)',holeBg:'#D4E8FF',name:'云朵牧场'},
+  candy:{bg:'linear-gradient(180deg,#FFF0F0 0%,#FFE0E8 30%,#FFF5E4 60%,#FFE8D0 100%)',holeBg:'#FFD5D5',name:'糖果工厂'},
+  starry:{bg:'linear-gradient(180deg,#1a1a3e 0%,#2d2d5e 30%,#3d3d7e 60%,#1a1a3e 100%)',holeBg:'#3d3d7e',name:'星空夜市'}
+};
+
+const moleTypes={
+  normal:{emoji:'🐹',cls:'',points:10,weight:55,duration:[1200,2000],sound:'pop'},
+  golden:{emoji:'👑',cls:'golden',points:30,weight:10,duration:[800,1400],sound:'golden'},
+  rabbit:{emoji:'🐰',cls:'rabbit',points:-20,weight:15,duration:[1500,2500],sound:'rabbit'},
+  bomb:{emoji:'💣',cls:'bomb',points:-15,weight:10,duration:[1500,2200],sound:'bomb'},
+  boss:{emoji:'😈',cls:'boss',points:50,weight:5,duration:[3000,4000],sound:'bossHit',bossHP:3},
+  // Event specials
+  pumpkin:{emoji:'🎃',cls:'pumpkin',points:25,weight:15,duration:[1000,1800],sound:'pop'},
+  santa:{emoji:'🎅',cls:'santa',points:35,weight:12,duration:[900,1600],sound:'golden'},
+  redpack:{emoji:'🧧',cls:'redpack',points:20,weight:15,duration:[1100,1900],sound:'pop'}
+};
+
+// ============ Build Holes ============
+function buildHoles(){
+  holesGrid.innerHTML='';
+  for(let i=0;i<9;i++){
+    const h=document.createElement('div');h.className='hole';h.dataset.index=i;
+    h.innerHTML=`<div class="hole-bg"></div><div style="position:absolute;top:2px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.5);color:white;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;z-index:10;pointer-events:none;font-family:monospace;opacity:0.5">${i+1}</div>`;
+    h.addEventListener('pointerdown',e=>onHoleClick(i,e));
+    holesGrid.appendChild(h);
+  }
+}
+
+function buildVsHoles(containerId,playerIdx){
+  const c=$(containerId);c.innerHTML='';
+  const keys=playerIdx===0?['Q','W','A','S','Z','X']:['U','I','J','K','N','M'];
+  const numKeys=playerIdx===0?['1','2','3','4','5','6']:null;
+  for(let i=0;i<6;i++){
+    const h=document.createElement('div');h.className='vs-hole';h.dataset.index=i;h.dataset.player=playerIdx;
+    const hint=numKeys?`${numKeys[i]}/${keys[i]}`:keys[i];
+    h.innerHTML=`<div class="hole-bg"></div><div class="key-hint">${hint}</div>`;
+    h.addEventListener('pointerdown',e=>onVsHoleClick(playerIdx,i,e));
+    c.appendChild(h);
+  }
+  // Add keyboard legend
+  const legend=document.createElement('div');
+  legend.className='vs-keys-legend';
+  const legendKeys=numKeys?numKeys.map((n,i)=>`${n}/${keys[i]}`):keys;
+  legend.innerHTML=legendKeys.map(k=>`<span>${k}</span>`).join(' ');
+  legend.style.cssText='display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;justify-content:center;font-size:10px;color:#999;';
+  c.parentElement.appendChild(legend);
+}
+
+// ============ Create Mole ============
+function createMoleElement(type){
+  const cfg=moleTypes[type];const el=document.createElement('div');el.className=`mole ${cfg.cls}`;
+  let inner='<div class="mole-body"><div class="mole-face"><div class="eye left"></div><div class="eye right"></div><div class="nose"></div><div class="mouth"></div><div class="blush left"></div><div class="blush right"></div></div></div>';
+  if(type==='golden')inner+='<div class="crown">👑</div>';
+  if(type==='bomb')inner+='<div class="fuse"></div>';
+  if(type==='rabbit'){inner+='<div class="ears"><div class="ear left"></div><div class="ear right"></div></div>';inner+='<div class="carrot">🥕</div>'}
+  if(type==='boss'){inner+='<div class="big-crown">👑</div>';inner+='<div class="boss-hp"><div class="boss-hp-bar" style="width:100%"></div></div>'}
+  el.innerHTML=inner;return el;
+}
+
+// ============ Spawn Mole ============
+function spawnMole(){
+  if(!state.running||state.paused||state._bonusActive)return;
+  const cfg=modeConfigs[state.mode];
+  const elapsed=state.maxTimer-state.timer;
+
+  // Boss spawn check
+  let type;
+  if(cfg.bossInterval>0&&elapsed>0&&Math.floor(elapsed)%cfg.bossInterval===0&&Math.floor(elapsed)>(state._lastBossSpawn||-cfg.bossInterval)){
+    if(!state.activeMoles.some(m=>m.type==='boss')){
+      type='boss';state._lastBossSpawn=Math.floor(elapsed);
+      audio.play(400,'triangle',0.12,0.08);
+      setTimeout(()=>audio.play(600,'triangle',0.12,0.12),100);
+    }
+  }
+  if(!type){
+    // Build available types
+    let available=[];
+    if(state.mode==='event'){
+      const et=state._eventTheme;
+      const eventMap={halloween:'pumpkin',christmas:'santa',spring:'redpack'};
+      const eventType=eventMap[et]||'pumpkin';
+      available=[{type:'normal',weight:50},{type:'golden',weight:8},{type:'rabbit',weight:12},{type:'bomb',weight:8},{type:eventType,weight:22}];
+    }else if(state.mode==='classic'){
+      // Use difficulty-based mole weights for classic mode
+      const dc=difficultyConfigs[state.classicDifficulty];
+      const mw=dc.moleWeights;
+      const baseTypes=Object.entries(moleTypes).filter(([k])=>k!=='boss'&&k!=='pumpkin'&&k!=='santa'&&k!=='redpack');
+      available=[];
+      for(const [k] of baseTypes){
+        if(mw[k]!==undefined&&mw[k]>0)available.push({type:k,weight:mw[k]});
+      }
+      if(mw.boss>0)available.push({type:'boss',weight:mw.boss});
+    }else{
+      available=Object.entries(moleTypes).filter(([k])=>k!=='boss'&&k!=='pumpkin'&&k!=='santa'&&k!=='redpack').map(([k,v])=>({type:k,weight:v.weight}));
+    }
+    const totalW=available.reduce((s,a)=>s+a.weight,0);
+    let rand=Math.random()*totalW;
+    for(const a of available){rand-=a.weight;if(rand<=0){type=a.type;break}}
+    if(!type)type='normal';
+  }
+
+  const occupied=new Set(state.activeMoles.map(m=>m.holeIndex));
+  const avail=Array.from({length:9},(_,i)=>i).filter(i=>!occupied.has(i));
+  if(avail.length===0)return;
+  const holeIndex=avail[Math.floor(Math.random()*avail.length)];
+  const hole=$$('.hole')[holeIndex];
+  const mcfg=moleTypes[type];
+
+  const moleEl=createMoleElement(type);
+  moleEl.addEventListener('pointerdown',e=>{e.stopPropagation();onMoleClick(holeIndex,type,moleEl)});
+  hole.appendChild(moleEl);
+  requestAnimationFrame(()=>moleEl.classList.add('show'));
+
+  const dur=mcfg.duration[0]+Math.random()*(mcfg.duration[1]-mcfg.duration[0]);
+  const sm=state.activeEffects.freeze?0.5:1;
+  const actualDur=dur*sm/Math.min(state.difficulty*0.8,1.5);
+  const moleData={type,holeIndex,element:moleEl,timeout:null};
+  state.activeMoles.push(moleData);
+  moleData.timeout=setTimeout(()=>hideMole(moleData,false),Math.max(actualDur,500));
+}
+
+function hideMole(moleData,wasHit){
+  const idx=state.activeMoles.indexOf(moleData);if(idx===-1)return;
+  state.activeMoles.splice(idx,1);clearTimeout(moleData.timeout);
+  if(moleData.element&&moleData.element.parentNode){
+    if(!wasHit){moleData.element.classList.remove('show');setTimeout(()=>moleData.element.remove(),200)}
+    else moleData.element.remove();
+  }
+  if(state.mode==='survival'&&!wasHit&&moleData.type!=='rabbit'&&moleData.type!=='bomb'){
+    state._missStreak=(state._missStreak||0)+1;
+    if(state._missStreak>=3){state._missStreak=0;state.lives--;updateLives();showHitEffect(moleData.holeIndex,'💔','#FF6B6B');if(state.lives<=0)endGame()}
+  }else if(state.mode==='classic'&&state.classicDifficulty==='hell'&&!wasHit&&moleData.type!=='rabbit'&&moleData.type!=='bomb'){
+    state._missStreak=(state._missStreak||0)+1;
+    if(state._missStreak>=3){state._missStreak=0;state.lives--;updateLives();showHitEffect(moleData.holeIndex,'💔','#FF6B6B');if(state.lives<=0)endGame()}
+  }else if(wasHit)state._missStreak=0;
+  if(state.mode==='endless'&&!wasHit&&moleData.type!=='rabbit'&&moleData.type!=='bomb'){
+    state.lives--;updateLives();showHitEffect(moleData.holeIndex,'💔','#FF6B6B');
+    if(state.lives<=0)endGame();
+  }
+}
+
+// ============ Bonus Round (Classic) ============
+function triggerBonusRound(){
+  if(state._bonusActive||!state.running||state.paused)return;
+  state._bonusActive=true;
+  showAnnounce('🌟 全洞齐冒! 🌟');
+  audio.bonus();
+  $$('.hole').forEach(h=>h.classList.add('bonus'));
+
+  // Spawn moles in all holes
+  const existing=state.activeMoles.map(m=>m.holeIndex);
+  const toSpawn=Array.from({length:9},(_,i)=>i).filter(i=>!existing.includes(i));
+  toSpawn.forEach(i=>{
+    const types=['normal','normal','normal','golden','normal','normal'];
+    const type=types[Math.floor(Math.random()*types.length)];
+    const mcfg=moleTypes[type];const hole=$$('.hole')[i];
+    const moleEl=createMoleElement(type);
+    moleEl.addEventListener('pointerdown',e=>{e.stopPropagation();onMoleClick(i,type,moleEl)});
+    hole.appendChild(moleEl);requestAnimationFrame(()=>moleEl.classList.add('show'));
+    const moleData={type,holeIndex:i,element:moleEl,timeout:null};
+    state.activeMoles.push(moleData);
+  });
+
+  setTimeout(()=>{
+    state._bonusActive=false;
+    $$('.hole').forEach(h=>h.classList.remove('bonus'));
+  },3000);
+}
+
+// ============ Hole Click ============
+function onHoleClick(index,e){
+  if(!state.running||state.paused)return;
+  if(state.activeMoles.find(m=>m.holeIndex===index))return;
+  showHitEffect(index,'💨','#CCC');audio.play(150,'sine',0.04,0.04);
+}
+
+// ============ Mole Click ============
+function onMoleClick(holeIndex,type,moleEl){
+  if(!state.running||state.paused)return;
+  if(moleEl.classList.contains('hit'))return;
+  const cfg=moleTypes[type];
+
+  // Shield
+  if(type==='rabbit'&&state.activeEffects.shield){state.activeEffects.shield=false;activeItemEl.classList.remove('show');showHitEffect(holeIndex,'🛡️','#B5EAD7');hideMole(state.activeMoles.find(m=>m.holeIndex===holeIndex&&m.type===type),true);return}
+
+  // Bomb
+  if(type==='bomb'){
+    const timePenalty=state.mode==='classic'?difficultyConfigs[state.classicDifficulty].bombTimePenalty:5;
+    state.timer=Math.max(0,state.timer-timePenalty);updateTimer();showHitEffect(holeIndex,`💥-${timePenalty}s`,'#FF6B6B');
+    audio.bomb();shakeScreen();moleEl.classList.add('hit');
+    hideMole(state.activeMoles.find(m=>m.holeIndex===holeIndex&&m.type===type),true);spawnParticles(holeIndex,'#FF4444',10);return;
+  }
+
+  // Boss
+  if(type==='boss'){
+    const md=state.activeMoles.find(m=>m.holeIndex===holeIndex&&m.type==='boss');if(!md)return;
+    md.bossHP=(md.bossHP||cfg.bossHP)-1;
+    const hpBar=moleEl.querySelector('.boss-hp-bar');if(hpBar)hpBar.style.width=`${(md.bossHP/cfg.bossHP)*100}%`;
+    if(md.bossHP>0){audio.bossHit();showHitEffect(holeIndex,`👊x${md.bossHP}`,'#FF6B6B');moleEl.style.animation='none';moleEl.offsetHeight;moleEl.style.animation='';return}
+    audio.bossDefeat();state.score+=cfg.points;state.combo++;state.totalHits++;
+    showHitEffect(holeIndex,`+${cfg.points}`,'#FFD700');spawnParticles(holeIndex,'#FFD700',18);
+    if(state.mode==='survival'&&state.lives<3){state.lives++;updateLives();showHitEffect(holeIndex,'💖+1','#FF6B6B')}
+  }else{
+    // Normal hit
+    let points=cfg.points;
+    // Classic mode: use difficulty-based rabbit penalty
+    if(state.mode==='classic'&&type==='rabbit')points=difficultyConfigs[state.classicDifficulty].rabbitPenalty;
+    if(state.mode==='classic'&&type==='bomb')points=difficultyConfigs[state.classicDifficulty].bombPenalty;
+    if(state.activeEffects.rainbow)points*=2;
+    if(state.mode==='timeattack'&&state.combo>=5)points=Math.floor(points*(1+(state.combo-4)*0.5));
+    state.score=Math.max(0,state.score+points);state.combo++;state.totalHits++;
+    const sf=cfg.sound==='golden'?'golden':cfg.sound==='rabbit'?'rabbit':'pop';
+    if(sf==='pop'){audio.pop();if(state.combo>=3)audio.combo(Math.min(state.combo,10))}else audio[sf]();
+    const color=points>=0?(type==='golden'?'#FFD700':'#FFB5C2'):'#FF6B6B';
+    showHitEffect(holeIndex,`${points>=0?'+':''}${points}`,color);spawnParticles(holeIndex,color,points>=0?7:3);
+
+    // Collect mode: drop stars
+    if(state.mode==='collect'&&type!=='rabbit'){
+      state.totalStars++;updateCollectHUD();
+      audio.collect();
+      if(state.totalStars>=30){showAnnounce('🎉 收集完成!');setTimeout(()=>endGame(),1500)}
+    }
+  }
+
+  if(state.combo>=3){comboDisplay.textContent=`🔥 ${state.combo}连击!`;comboDisplay.classList.add('active');clearTimeout(state._comboTimeout);state._comboTimeout=setTimeout(()=>comboDisplay.classList.remove('active'),1500)}
+  state.maxCombo=Math.max(state.maxCombo,state.combo);updateScore();
+  if(!state._bonusActive&&Math.random()<modeConfigs[state.mode].itemDropRate&&type!=='rabbit'&&type!=='bomb')dropItem(holeIndex);
+  moleEl.classList.add('hit');hideMole(state.activeMoles.find(m=>m.holeIndex===holeIndex&&(m.type===type)),true);
+}
+
+// ============ VS Mode ============
+function spawnVsMole(playerIdx){
+  if(!state.vs.running||state.paused)return;
+  const activeMoles=state.vs.activeMoles[playerIdx];
+  const types=['normal','normal','normal','golden','normal','rabbit'];
+  const type=types[Math.floor(Math.random()*types.length)];
+  const occupied=new Set(activeMoles.map(m=>m.holeIndex));
+  const avail=Array.from({length:6},(_,i)=>i).filter(i=>!occupied.has(i));
+  if(avail.length===0)return;
+  const holeIndex=avail[Math.floor(Math.random()*avail.length)];
+  const container=playerIdx===0?$('#vs-holes1'):$('#vs-holes2');
+  const hole=container.querySelectorAll('.vs-hole')[holeIndex];
+  const mcfg=moleTypes[type];
+  const moleEl=createMoleElement(type);
+  moleEl.addEventListener('pointerdown',e=>{e.stopPropagation();onVsMoleClick(playerIdx,holeIndex,type,moleEl)});
+  hole.appendChild(moleEl);requestAnimationFrame(()=>moleEl.classList.add('show'));
+  const dur=mcfg.duration[0]+Math.random()*(mcfg.duration[1]-mcfg.duration[0]);
+  const moleData={type,holeIndex,element:moleEl,timeout:null};
+  activeMoles.push(moleData);
+  moleData.timeout=setTimeout(()=>{
+    const idx=activeMoles.indexOf(moleData);if(idx!==-1){activeMoles.splice(idx,1);clearTimeout(moleData.timeout);if(moleData.element&&moleData.element.parentNode){moleData.element.classList.remove('show');setTimeout(()=>moleData.element.remove(),200)}}
+  },Math.max(dur,600));
+}
+
+function onVsHoleClick(playerIdx,index,e){
+  if(!state.vs.running||state.paused)return;
+  if(state.vs.activeMoles[playerIdx].find(m=>m.holeIndex===index))return;
+  showHitEffect(index,'💨','#CCC',playerIdx===0?$('#vs-holes1'):$('#vs-holes2'));
+}
+
+function onVsMoleClick(playerIdx,holeIndex,type,moleEl){
+  if(!state.vs.running||state.paused)return;
+  if(moleEl.classList.contains('hit'))return;
+  const cfg=moleTypes[type];
+  const points=type==='rabbit'?-15:cfg.points;
+  state.vs.scores[playerIdx]=Math.max(0,state.vs.scores[playerIdx]+points);
+  $(`#vs-score${playerIdx+1}`).textContent=state.vs.scores[playerIdx];
+  audio.vsScore();
+  const activeMoles=state.vs.activeMoles[playerIdx];
+  const md=activeMoles.find(m=>m.holeIndex===holeIndex);
+  if(md){activeMoles.splice(activeMoles.indexOf(md),1);clearTimeout(md.timeout)}
+  moleEl.classList.add('hit');setTimeout(()=>moleEl.remove(),300);
+  if(state.vs.scores[playerIdx]>=100){endVsGame(playerIdx);return}
+}
+
+function useVsItem(playerIdx,itemType){
+  if(!state.vs.running||state.paused)return;
+  const target=playerIdx===0?1:0;
+  if(itemType==='bubble'){
+    // Block holes for opponent
+    const container=target===0?$('#vs-holes1'):$('#vs-holes2');
+    const holes=container.querySelectorAll('.vs-hole');
+    const blocked=Math.floor(Math.random()*6);
+    for(let i=0;i<2;i++){const h=holes[(blocked+i)%6];h.style.opacity='0.3';h.style.pointerEvents='none';setTimeout(()=>{h.style.opacity='1';h.style.pointerEvents='auto'},3000)}
+    showAnnounce('🫧 对手被泡泡遮住了!');
+  }else if(itemType==='honey'){
+    // Slow opponent
+    clearInterval(state.vs.spawnIntervals[target]);
+    state.vs.spawnIntervals[target]=setInterval(()=>spawnVsMole(target),2000);
+    setTimeout(()=>{clearInterval(state.vs.spawnIntervals[target]);if(state.vs.running)state.vs.spawnIntervals[target]=setInterval(()=>spawnVsMole(target),1200)},3000);
+    showAnnounce('🍯 对手被蜂蜜黏住了!');
+  }else if(itemType==='swap'){
+    // Swap scores
+    const tmp=state.vs.scores[0];state.vs.scores[0]=state.vs.scores[1];state.vs.scores[1]=tmp;
+    $('#vs-score1').textContent=state.vs.scores[0];$('#vs-score2').textContent=state.vs.scores[1];
+    showAnnounce('🔄 分数互换了!');
+  }
+  audio.item();
+}
+
+function endVsGame(winner){
+  state.vs.running=false;
+  clearInterval(state.vs.spawnIntervals[0]);clearInterval(state.vs.spawnIntervals[1]);
+  state.score=state.vs.scores[winner];
+  state.totalHits=0;state.maxCombo=0;state.totalMiss=0;state.totalStars=0;
+  showGameOver('vs');
+}
+
+// ============ Effects ============
+function showHitEffect(holeIndex,text,color,container=null){
+  const c=container||$$('.hole')[holeIndex];if(!c)return;
+  const el=document.createElement('div');el.className='hit-effect';el.textContent=text;el.style.color=color;
+  el.style.left='50%';el.style.top='30%';el.style.transform='translateX(-50%)';
+  c.appendChild(el);setTimeout(()=>el.remove(),800);
+}
+
+function spawnParticles(holeIndex,color,count,container=null){
+  const c=container||$$('.hole')[holeIndex];if(!c)return;
+  const particles=['⭐','✨','💖','🌟','💫','🎀','🌸','🍬','💎','🎯'];
+  for(let i=0;i<count;i++){
+    const p=document.createElement('div');p.className='particle';
+    p.textContent=particles[Math.floor(Math.random()*particles.length)];
+    p.style.left='50%';p.style.top='40%';
+    p.style.setProperty('--dx',`${(Math.random()-0.5)*120}px`);
+    p.style.setProperty('--dy',`${-40-Math.random()*80}px`);
+    c.appendChild(p);setTimeout(()=>p.remove(),700);
+  }
+}
+
+function showAnnounce(text){
+  announce.textContent=text;announce.classList.add('show');
+  setTimeout(()=>announce.classList.remove('show'),2000);
+}
+
+function shakeScreen(){
+  gameContainer.classList.add('shake');setTimeout(()=>gameContainer.classList.remove('shake'),400);
+}
+
+// ============ Items ============
+function dropItem(holeIndex){
+  const items=['rainbow','time','freeze','magnet','shield'];
+  const item=items[Math.floor(Math.random()*items.length)];
+  state.items[item]=(state.items[item]||0)+1;updateItemsBar();
+  const hole=$$('.hole')[holeIndex];if(!hole)return;
+  const el=document.createElement('div');el.className='hit-effect';
+  const icons={rainbow:'🌈',time:'⏳',freeze:'❄️',magnet:'🧲',shield:'🫧'};
+  el.textContent=icons[item];el.style.left='50%';el.style.top='20%';el.style.transform='translateX(-50%)';el.style.fontSize='30px';
+  hole.appendChild(el);setTimeout(()=>el.remove(),800);
+}
+
+function useItem(itemType){
+  if(!state.running||state.paused)return;if(!state.items[itemType]||state.items[itemType]<=0)return;
+  state.items[itemType]--;updateItemsBar();audio.item();
+  switch(itemType){
+    case'rainbow':state.activeEffects.rainbow=Date.now()+5000;activeItemEl.textContent='🌈 彩虹锤 5s';activeItemEl.classList.add('show');setTimeout(()=>{if(Date.now()>state.activeEffects.rainbow)activeItemEl.classList.remove('show')},5000);break;
+    case'time':state.timer+=5;updateTimer();showHitEffect(4,'⏳+5s','#FFD700');break;
+    case'freeze':state.activeEffects.freeze=Date.now()+3000;activeItemEl.textContent='❄️ 冰冻 3s';activeItemEl.classList.add('show');gameContainer.style.filter='hue-rotate(180deg)';setTimeout(()=>{gameContainer.style.filter='';if(Date.now()>state.activeEffects.freeze)activeItemEl.classList.remove('show')},3000);break;
+    case'magnet':[...state.activeMoles].forEach(m=>{if(m.element&&m.element.classList.contains('show')&&m.type!=='rabbit'&&m.type!=='bomb')onMoleClick(m.holeIndex,m.type,m.element)});break;
+    case'shield':state.activeEffects.shield=true;activeItemEl.textContent='🫧 护盾生效';activeItemEl.classList.add('show');break;
+  }
+}
+
+// ============ UI Updates ============
+function updateScore(){scoreEl.textContent=state.score}
+function updateTimer(){timerEl.textContent=Math.max(0,Math.ceil(state.timer));if(state.timer<=10&&state.timer>0)timerBox.classList.add('timer-warning');else timerBox.classList.remove('timer-warning')}
+function updateLives(){livesEl.textContent=state.lives;if(state.lives<=1)livesBox.classList.add('timer-warning');else livesBox.classList.remove('timer-warning')}
+function updateStage(){if(state.mode==='classic'){const dc=difficultyConfigs[state.classicDifficulty];stageText.textContent=`关卡${state._currentLevel}/${dc.levelCount}`}else stageText.textContent=`阶段${state.stage}`}
+function updateWave(){waveText.textContent=`波次${state.wave}`}
+function updateCollectHUD(){collectFill.style.width=`${Math.min(100,(state.totalStars/30)*100)}%`;collectProgress.textContent=`${Math.min(state.totalStars,30)}/30 ⭐`;if(state.totalStars>=10)collectBonus.textContent='🔓 已解锁草莓皮肤';if(state.totalStars>=20)collectBonus.textContent='🔓 已解锁布丁锤';if(state.totalStars>=30)collectBonus.textContent='🎉 全部收集!';}
+
+function updateItemsBar(){
+  $$('.item-slot').forEach(slot=>{
+    const it=slot.dataset.item,count=state.items[it]||0,ce=slot.querySelector('.item-count');
+    if(count>0){slot.classList.remove('empty');if(!ce){const c=document.createElement('div');c.className='item-count';c.textContent=count;slot.appendChild(c)}else ce.textContent=count}
+    else{slot.classList.add('empty');if(ce)ce.remove()}
+  });
+}
+
+// ============ Timer ============
+function startTimer(){
+  let lastSecond=Math.ceil(state.timer);
+  state.timerInterval=setInterval(()=>{
+    if(state.paused||state._levelTransitioning)return;
+    state.timer-=0.1;updateTimer();
+    const elapsed=state.maxTimer-state.timer;
+    const cfg=modeConfigs[state.mode];
+
+    // Classic: level-based progression
+    if(state.mode==='classic'){
+      // Update difficulty per level
+      const lvlIdx=state._currentLevel-1;
+      if(lvlIdx<cfg.levelSpeeds.length){
+        state.difficulty=1+lvlIdx*0.4;
+        const baseInt=cfg.levelSpeeds[lvlIdx];
+        const newInt=Math.round(baseInt/50)*50;
+        if(state._currentSpawnInterval!==newInt){
+          clearInterval(state.spawnInterval);
+          state._currentSpawnInterval=newInt;
+          state.spawnInterval=setInterval(spawnMole,state._currentSpawnInterval);
+        }
+      }
+
+      if(state.timer<=0){
+        state.timer=0;updateTimer();
+        const target=cfg.levelTargets[lvlIdx]||0;
+        if(state.score>=target){
+          // Level cleared!
+          state._levelCleared=true;
+          if(state._currentLevel>=cfg.stages){
+            // All levels completed
+            state._levelTransitioning=true;
+            clearInterval(state.spawnInterval);
+            state.activeMoles.forEach(m=>{clearTimeout(m.timeout);if(m.element)m.element.remove()});state.activeMoles=[];
+            showAnnounce('🏆 全部关卡通过!');
+            audio.bonus();spawnParticles(4,'#FFD700',20);
+            setTimeout(()=>endGame(),2000);
+          }else{
+            // Transition to next level
+            state._levelTransitioning=true;
+            clearInterval(state.spawnInterval);
+            state.activeMoles.forEach(m=>{clearTimeout(m.timeout);if(m.element)m.element.remove()});state.activeMoles=[];
+            showAnnounce(`🎉 关卡 ${state._currentLevel} 通过!`);
+            audio.bonus();
+            setTimeout(()=>{
+              state._currentLevel++;state._levelTransitioning=false;
+              state.timer=15;state.maxTimer=15;state._currentSpawnInterval=1200;
+              updateStage();updateTimer();
+              showAnnounce(`📶 进入关卡 ${state._currentLevel}/${cfg.stages}! 目标: ${cfg.levelTargets[state._currentLevel-1]}分`);
+              state.spawnInterval=setInterval(spawnMole,state._currentSpawnInterval);
+              setTimeout(spawnMole,200);setTimeout(spawnMole,500);
+            },1800);
+          }
+        }else{
+          // Level failed
+          state._levelTransitioning=true;
+          clearInterval(state.spawnInterval);
+          state.activeMoles.forEach(m=>{clearTimeout(m.timeout);if(m.element)m.element.remove()});state.activeMoles=[];
+          showAnnounce(`💔 关卡 ${state._currentLevel} 失败! 目标 ${target}分`);
+          audio.gameOver();
+          setTimeout(()=>endGame(),1500);
+        }
+      }
+      return;
+    }
+
+    // Classic: stage progression (non-level mode - kept for other modes)
+    if(cfg.stages>0&&state.mode!=='classic'){
+      const newStage=Math.min(cfg.stages,1+Math.floor(elapsed/cfg.stageInterval));
+      if(newStage!==state.stage){state.stage=newStage;updateStage();showAnnounce(`📶 进入阶段 ${state.stage}!`)}
+      if(cfg.bonusRound&&Math.floor(elapsed)>0&&Math.floor(elapsed)%20===0&&Math.floor(elapsed)!==(state._lastBonus||-1)){state._lastBonus=Math.floor(elapsed);triggerBonusRound()}
+    }
+
+    // Survival: wave progression
+    if(state.mode==='survival'){
+      const newWave=1+Math.floor(elapsed/15);
+      if(newWave!==state.wave){state.wave=newWave;updateWave();showAnnounce(`🌊 第 ${state.wave} 波!`);audio.wave()}
+    }
+
+    // Endless: speed ramp
+    if(state.mode==='endless'){
+      const newWave=1+Math.floor(elapsed/10);
+      if(newWave!==state.wave){state.wave=newWave;updateWave();showAnnounce(`♾️ 第 ${state.wave} 波!`);audio.wave()}
+      state.difficulty=1+elapsed*0.05;
+    }
+
+    // Difficulty
+    if(!cfg.speedRamp&&state.mode!=='classic')state.difficulty=1+Math.floor(elapsed/10)*0.3;
+    const baseInt=cfg.baseInterval||1200;
+    const newInt=Math.max(350,baseInt-state.difficulty*100);
+    if(state._currentSpawnInterval!==Math.round(newInt/50)*50){
+      clearInterval(state.spawnInterval);
+      state._currentSpawnInterval=Math.round(newInt/50)*50;
+      state.spawnInterval=setInterval(spawnMole,state._currentSpawnInterval);
+    }
+
+    if(state.timer<=0){state.timer=0;updateTimer();endGame()}
+  },100);
+}
+
+// ============ Show Rules ============
+function showRules(){
+  const rc=rulesContent[state.mode];
+  $('#rules-icon').textContent=rc.icon;
+  $('#rules-title').textContent=rc.title;
+  $('#rules-subtitle').textContent=rc.sub;
+  $('#rules-content').innerHTML=typeof rc.html==='function'?rc.html():rc.html||(rc.getHtml?rc.getHtml():'');
+  $('#rules-overlay').classList.remove('hidden');
+  // Apply theme
+  const theme=themeConfigs[state.theme];
+  gameContainer.style.background=theme.bg;
+  startScreen.classList.add('hidden');overScreen.classList.add('hidden');
+  gameScreen.classList.remove('hidden');
+  $$('.mole,.hit-effect,.particle').forEach(el=>el.remove());
+}
+
+// ============ Start Game (actual) ============
+function startGame(){
+  $('#rules-overlay').classList.add('hidden');
+  audio.init();
+  let cfg=modeConfigs[state.mode];
+  // Classic mode: override with difficulty config
+  let dc=null;
+  if(state.mode==='classic'){
+    dc=difficultyConfigs[state.classicDifficulty];
+    cfg={...cfg,timer:dc.levelTime,lives:dc.lives,itemDropRate:dc.itemDropRate,stages:dc.levelCount,levelTargets:dc.targets,levelSpeeds:dc.speeds};
+  }
+  state.running=true;state.paused=false;state.score=0;state.timer=cfg.timer;state.maxTimer=cfg.timer;
+  state.lives=cfg.lives;state.combo=0;state.maxCombo=0;state.totalHits=0;state.totalMiss=0;state.totalStars=0;
+  state.activeMoles=[];state.items={rainbow:0,time:0,freeze:0,magnet:0,shield:0};
+  state.activeEffects={rainbow:0,freeze:0,shield:false};state.difficulty=1;
+  state._missStreak=0;state._lastBossSpawn=-999;state._currentSpawnInterval=cfg.baseInterval||1200;
+  state.blindOpened=false;state.stage=1;state.wave=1;state._bonusActive=false;state._lastBonus=-1;
+  state._currentLevel=1;state._levelTransitioning=false;state._levelCleared=false;
+
+  // Event theme
+  if(state.mode==='event'){
+    const themes=['halloween','christmas','spring'];
+    state._eventTheme=themes[Math.floor(Math.random()*themes.length)];
+    const names={halloween:'🎃 万圣节',christmas:'🎄 圣诞节',spring:'🧧 春节'};
+    setTimeout(()=>showAnnounce(names[state._eventTheme]),500);
+  }
+
+  // Apply theme
+  const theme=themeConfigs[state.theme];
+  gameContainer.style.background=theme.bg;
+  $$('.hole-bg').forEach(bg=>{bg.style.background=`radial-gradient(ellipse at center,${theme.holeBg} 0%,${theme.holeBg}dd 60%,${theme.holeBg}99 100%)`;bg.style.boxShadow='inset 0 4px 8px rgba(0,0,0,0.15)'});
+
+  // Mode-specific UI
+  const isVs=state.mode==='vs';
+  holesGrid.style.display=isVs?'none':'grid';
+  vsContainer.style.display=isVs?'flex':'none';
+  vsContainer.classList.toggle('active',isVs);
+  collectHud.style.display=state.mode==='collect'?'block':'none';
+  stageBox.style.display=cfg.showStage?'flex':'none';
+  waveBox.style.display=cfg.showWave?'flex':'none';
+  livesBox.style.display=cfg.showLives||(state.mode==='classic'&&dc&&dc.lives<999)?'flex':'none';
+  timerBox.style.display=state.mode==='collect'||state.mode==='endless'||state.mode==='vs'?'none':'flex';
+  itemsBar.style.display=isVs?'none':'flex';
+
+  updateScore();updateTimer();updateLives();updateStage();updateWave();updateItemsBar();updateCollectHUD();
+  activeItemEl.classList.remove('show');comboDisplay.classList.remove('active');pauseOverlay.classList.add('hidden');gameContainer.style.filter='';
+  $$('.mole,.hit-effect,.particle').forEach(el=>el.remove());
+
+  if(isVs){
+    startVsMode();
+  }else{
+    state.spawnInterval=setInterval(spawnMole,state._currentSpawnInterval);
+    startTimer();
+    setTimeout(spawnMole,300);setTimeout(spawnMole,600);setTimeout(spawnMole,900);
+  }
+}
+
+function startVsMode(){
+  state.vs.running=true;state.vs.scores=[0,0];state.vs.activeMoles=[[],[]];
+  buildVsHoles('#vs-holes1',0);buildVsHoles('#vs-holes2',1);
+  $('#vs-score1').textContent='0';$('#vs-score2').textContent='0';
+  $$('.vs-item').forEach(el=>el.classList.remove('used'));
+  state.vs.spawnIntervals[0]=setInterval(()=>spawnVsMole(0),1200);
+  state.vs.spawnIntervals[1]=setInterval(()=>spawnVsMole(1),1200);
+  // VS interference items
+  $$('#vs-interference1 .vs-item').forEach(el=>el.addEventListener('click',()=>{if(!el.classList.contains('used')){el.classList.add('used');useVsItem(0,el.dataset.item)}}));
+  $$('#vs-interference2 .vs-item').forEach(el=>el.addEventListener('click',()=>{if(!el.classList.contains('used')){el.classList.add('used');useVsItem(1,el.dataset.item)}}));
+}
+
+// ============ End Game ============
+function endGame(){
+  state.running=false;clearInterval(state.spawnInterval);clearInterval(state.timerInterval);
+  state.activeMoles.forEach(m=>{clearTimeout(m.timeout);if(m.element)m.element.remove()});state.activeMoles=[];
+  if(state.mode==='vs'){clearInterval(state.vs.spawnIntervals[0]);clearInterval(state.vs.spawnIntervals[1]);state.vs.running=false}
+  audio.gameOver();showGameOver(state.mode);
+}
+
+function showGameOver(mode){
+  gameScreen.classList.add('hidden');overScreen.classList.remove('hidden');
+  let emoji,title;
+  if(mode==='vs'){
+    const winner=state.vs.scores[0]>=100?0:1;
+    emoji='🏆';title=`玩家${winner+1} 获胜!`;state.score=state.vs.scores[winner];
+    $('#over-score').textContent=`${state.vs.scores[0]} : ${state.vs.scores[1]}`;
+  }else{
+    if(state.mode==='classic'&&state._levelCleared&&state._currentLevel>=difficultyConfigs[state.classicDifficulty].levelCount){emoji='🏆';title='全部通关!'}
+    else if(state.score>=200){emoji='🏆';title='太厉害了!'}
+    else if(state.score>=100){emoji='🎉';title='非常棒!'}
+    else if(state.score>=50){emoji='😊';title='不错哦~'}
+    else if(state.score>=0){emoji='💪';title='继续加油!'}
+    else{emoji='😅';title='下次小心兔兔~'}
+    $('#over-score').textContent=state.score;
+  }
+  $('#over-emoji').textContent=emoji;$('#over-title').textContent=title;
+  $('#over-mode').textContent={
+    classic:`经典模式·${difficultyConfigs[state.classicDifficulty]?.name||'简单'}`,timeattack:'限时挑战',survival:'生存模式',collect:'收集模式',vs:'双人对战',event:'节日活动',endless:'无尽模式'
+  }[mode]||'';
+  $('#stat-hits').textContent=state.totalHits;$('#stat-combo').textContent=state.maxCombo;
+  $('#stat-miss').textContent=state.totalMiss;$('#stat-stars').textContent=state.totalStars;
+
+  // Best score
+  const key=`mole-best-${mode}`;const prev=parseInt(localStorage.getItem(key)||'0');
+  const bs=$('#best-score');
+  if(state.score>prev){localStorage.setItem(key,state.score);bs.textContent=`🏆 新纪录! ${state.score}分`;bs.style.display='block';bs.classList.add('new')}
+  else if(prev>0){bs.textContent=`📊 最高分: ${prev}分`;bs.style.display='block';bs.classList.remove('new')}
+  else bs.style.display='none';
+
+  blindReward.style.display='none';blindBox.style.pointerEvents='auto';blindBox.style.opacity='1';state.blindOpened=false;
+  state.coins=(state.coins||0)+Math.max(1,Math.floor(state.score/20));
+}
+
+// ============ Blind Box ============
+function openBlindBox(){
+  if(state.blindOpened)return;state.blindOpened=true;
+  const rewards=['🍓 草莓地鼠皮肤!','🍮 布丁锤皮肤!','🌸 花朵装饰','⭐ 50金币!','🐱 猫爪锤皮肤!','🦖 恐龙地鼠皮肤!','🎀 星星装饰','💰 100金币!','🧋 奶茶地鼠皮肤!','🍭 棒棒糖锤皮肤!','☁️ 云朵装饰','✨ 30金币!'];
+  blindReward.textContent='获得: '+rewards[Math.floor(Math.random()*rewards.length)];
+  blindReward.style.display='block';blindBox.style.opacity='0.6';blindBox.style.pointerEvents='none';
+  audio.item();spawnParticles(4,'#FFD700',10);
+}
+
+// ============ Pause ============
+function togglePause(){
+  if(!state.running&&!state.vs.running)return;
+  state.paused=!state.paused;
+  if(state.paused)pauseOverlay.classList.remove('hidden');else pauseOverlay.classList.add('hidden');
+}
+
+// ============ Combo Reset ============
+setInterval(()=>{if(state.running&&!state.paused&&state.combo>0){state.combo=0;comboDisplay.classList.remove('active')}},2500);
+
+// ============ Event Listeners ============
+$('#btn-start').addEventListener('click',showRules);
+$('#btn-rules-start').addEventListener('click',startGame);
+$('#btn-rules-back').addEventListener('click',()=>{
+  $('#rules-overlay').classList.add('hidden');
+  gameScreen.classList.add('hidden');
+  startScreen.classList.remove('hidden');
+});
+$('#btn-pause').addEventListener('click',togglePause);
+$('#btn-resume').addEventListener('click',togglePause);
+$('#btn-quit').addEventListener('click',()=>{
+  state.running=false;state.paused=false;clearInterval(state.spawnInterval);clearInterval(state.timerInterval);
+  state.activeMoles.forEach(m=>{clearTimeout(m.timeout);if(m.element)m.element.remove()});state.activeMoles=[];
+  if(state.vs.running){clearInterval(state.vs.spawnIntervals[0]);clearInterval(state.vs.spawnIntervals[1]);state.vs.running=false}
+  gameScreen.classList.add('hidden');pauseOverlay.classList.add('hidden');$('#rules-overlay').classList.add('hidden');startScreen.classList.remove('hidden');
+});
+$('#btn-restart').addEventListener('click',showRules);
+$('#btn-menu').addEventListener('click',()=>{overScreen.classList.add('hidden');startScreen.classList.remove('hidden')});
+blindBox.addEventListener('click',openBlindBox);
+
+$$('.mode-btn').forEach(btn=>btn.addEventListener('click',()=>{
+  $$('.mode-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');state.mode=btn.dataset.mode;
+  // Show/hide difficulty selector for classic mode
+  $('#diff-row').classList.toggle('hidden',state.mode!=='classic');
+}));
+$$('.theme-dot').forEach(dot=>dot.addEventListener('click',()=>{$$('.theme-dot').forEach(d=>d.classList.remove('selected'));dot.classList.add('selected');state.theme=dot.dataset.theme}));
+$$('.diff-btn').forEach(btn=>btn.addEventListener('click',()=>{
+  $$('.diff-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');state.classicDifficulty=btn.dataset.diff;
+}));
+$$('.item-slot').forEach(slot=>slot.addEventListener('click',()=>useItem(slot.dataset.item)));
+
+// ============ Keyboard Controls ============
+document.addEventListener('keydown',e=>{
+  // Global pause
+  if(e.key==='p'||e.key==='P'){togglePause();return}
+  if(e.key===' '&&state.running){e.preventDefault();return}
+
+  // VS Mode keyboard controls
+  if(state.vs.running&&!state.paused){
+    const key=e.key.toUpperCase();
+    // Player 1 holes: 1-6 (number keys, priority over QWASZX)
+    const numKey=parseInt(e.key);
+    if(numKey>=1&&numKey<=6){
+      e.preventDefault();
+      const idx=numKey-1;
+      const mole=state.vs.activeMoles[0].find(m=>m.holeIndex===idx);
+      if(mole&&mole.element&&mole.element.classList.contains('show')){
+        onVsMoleClick(0,idx,mole.type,mole.element);
+      }else{
+        onVsHoleClick(0,idx);
+      }
+      const hole=$('#vs-holes1').querySelectorAll('.vs-hole')[idx];
+      if(hole){hole.classList.add('pressed');setTimeout(()=>hole.classList.remove('pressed'),150)}
+      return;
+    }
+    // Player 1 holes: Q,W,A,S,Z,X (alternative)
+    const p1Keys=['Q','W','A','S','Z','X'];
+    const p1Idx=p1Keys.indexOf(key);
+    if(p1Idx!==-1){
+      e.preventDefault();
+      const mole=state.vs.activeMoles[0].find(m=>m.holeIndex===p1Idx);
+      if(mole&&mole.element&&mole.element.classList.contains('show')){
+        onVsMoleClick(0,p1Idx,mole.type,mole.element);
+      }else{
+        onVsHoleClick(0,p1Idx);
+      }
+      const hole=$('#vs-holes1').querySelectorAll('.vs-hole')[p1Idx];
+      if(hole){hole.classList.add('pressed');setTimeout(()=>hole.classList.remove('pressed'),150)}
+      return;
+    }
+    // Player 2 holes: U,I,J,K,N,M
+    const p2Keys=['U','I','J','K','N','M'];
+    const p2Idx=p2Keys.indexOf(key);
+    if(p2Idx!==-1){
+      e.preventDefault();
+      const mole=state.vs.activeMoles[1].find(m=>m.holeIndex===p2Idx);
+      if(mole&&mole.element&&mole.element.classList.contains('show')){
+        onVsMoleClick(1,p2Idx,mole.type,mole.element);
+      }else{
+        onVsHoleClick(1,p2Idx);
+      }
+      const hole=$('#vs-holes2').querySelectorAll('.vs-hole')[p2Idx];
+      if(hole){hole.classList.add('pressed');setTimeout(()=>hole.classList.remove('pressed'),150)}
+      return;
+    }
+    // Player 2 interference items: 7,8,9
+    if(key==='7'||key==='8'||key==='9'){
+      const items=['bubble','honey','swap'];
+      const idx=parseInt(key)-7;
+      const el=$('#vs-interference2').querySelectorAll('.vs-item')[idx];
+      if(el&&!el.classList.contains('used')){el.classList.add('used');useVsItem(1,items[idx])}
+      return;
+    }
+  }
+
+  // Normal mode: number keys 1-9 for holes
+  if(state.running&&!state.paused&&state.mode!=='vs'){
+    const num=parseInt(e.key);
+    if(num>=1&&num<=9){
+      e.preventDefault();
+      const idx=num-1;
+      const mole=state.activeMoles.find(m=>m.holeIndex===idx);
+      if(mole&&mole.element&&mole.element.classList.contains('show')){
+        onMoleClick(idx,mole.type,mole.element);
+      }else{
+        onHoleClick(idx);
+      }
+    }
+  }
+});
+
+// ============ Init ============
+buildHoles();updateItemsBar();
+</script>
+</body>
+</html>
