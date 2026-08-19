@@ -1,1370 +1,1706 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>萌鼠敲敲乐 | Cute Mole Bonanza</title>
-<style>
-/* ============ Reset & Variables ============ */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --pink:#FFB5C2;--mint:#B5EAD7;--cream:#FFF5E4;--lavender:#E2D5F1;
-  --gold:#FFD700;--brown:#C4956A;--dark:#5D4E37;--white:#FFF;
-  --red:#FF6B6B;--bg-pink:#FFF0F3;--bg-mint:#E8F8F0;
-  --shadow:0 4px 15px rgba(0,0,0,0.1);
-  --radius:20px;--radius-sm:12px;
-  --font:'Quicksand','PingFang SC','Microsoft YaHei',sans-serif;
-}
-body{
-  font-family:var(--font);background:var(--bg-pink);
-  display:flex;justify-content:center;align-items:center;
-  min-height:100vh;overflow-x:hidden;user-select:none;-webkit-user-select:none;
-  background-image:radial-gradient(circle at 20% 30%,#FFE0E8 0%,transparent 50%),
-    radial-gradient(circle at 80% 70%,#E0F0FF 0%,transparent 50%),
-    radial-gradient(circle at 50% 50%,#FFF5E4 0%,transparent 70%);
-}
-#game-container{
-  width:100%;max-width:420px;min-height:100vh;
-  position:relative;overflow:hidden;
-  transition:background 0.5s;
-}
-/* Shake */
-#game-container.shake{animation:screenShake 0.4s ease-out}
-@keyframes screenShake{
-  0%,100%{transform:translateX(0)}10%{transform:translateX(-6px) rotate(-1deg)}
-  30%{transform:translateX(6px) rotate(1deg)}50%{transform:translateX(-4px)}
-  70%{transform:translateX(4px)}90%{transform:translateX(-2px)}
-}
-
-/* ============ Decorative BG ============ */
-.bg-decor{position:absolute;pointer-events:none;z-index:0}
-.bg-cloud{width:80px;height:40px;background:white;border-radius:50px;opacity:0.6;animation:floatCloud 8s ease-in-out infinite}
-.bg-cloud::before,.bg-cloud::after{content:'';position:absolute;background:white;border-radius:50%}
-.bg-cloud::before{width:50px;height:50px;top:-25px;left:10px}
-.bg-cloud::after{width:35px;height:35px;top:-15px;left:40px}
-.bg-decor.star{font-size:20px;animation:twinkle 2s ease-in-out infinite}
-.bg-decor.flower{font-size:24px;animation:sway 3s ease-in-out infinite}
-@keyframes floatCloud{0%,100%{transform:translateX(0)}50%{transform:translateX(20px)}}
-@keyframes twinkle{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1.2)}}
-@keyframes sway{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
-
-/* ============ Screens ============ */
-.screen{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;z-index:10;transition:opacity 0.4s,transform 0.4s}
-.screen.hidden{opacity:0;pointer-events:none;transform:scale(0.95)}
-
-/* ============ Start Screen ============ */
-#start-screen{z-index:50}
-.start-logo{font-size:48px;animation:bounce 2s ease-in-out infinite;margin-bottom:6px}
-@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
-.start-title{font-size:30px;font-weight:800;color:var(--dark);text-shadow:2px 2px 0 rgba(255,181,194,0.5);text-align:center}
-.start-subtitle{font-size:13px;color:#B8A9C9;margin-bottom:12px}
-.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:340px;margin-bottom:10px}
-.mode-btn{padding:12px 10px;border-radius:var(--radius-sm);border:2px solid transparent;background:white;cursor:pointer;text-align:center;transition:all 0.2s;box-shadow:var(--shadow);font-family:var(--font)}
-.mode-btn:hover,.mode-btn.selected{border-color:var(--pink);background:var(--bg-pink);transform:translateY(-2px)}
-.mode-btn .mode-icon{font-size:24px;display:block;margin-bottom:2px}
-.mode-btn .mode-name{font-size:13px;font-weight:700;color:var(--dark)}
-.mode-btn .mode-desc{font-size:10px;color:#999;margin-top:1px}
-.theme-row{display:flex;gap:8px;margin-bottom:10px}
-.theme-dot{width:30px;height:30px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all 0.2s}
-.theme-dot.selected{border-color:var(--dark);transform:scale(1.15)}
-.theme-dot.t-dessert{background:linear-gradient(135deg,#FFB5C2,#B5EAD7)}
-.theme-dot.t-cloud{background:linear-gradient(135deg,#B5D8FF,#E2D5F1)}
-.theme-dot.t-candy{background:linear-gradient(135deg,#FFD700,#FF6B6B)}
-.theme-dot.t-starry{background:linear-gradient(135deg,#1a1a3e,#4a3f8a)}
-/* Difficulty Selector */
-.diff-row{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;justify-content:center}
-.diff-row.hidden{display:none}
-.diff-btn{padding:6px 14px;border-radius:50px;border:2px solid #DDD;background:white;cursor:pointer;font-size:12px;font-weight:700;font-family:var(--font);transition:all 0.2s;box-shadow:var(--shadow)}
-.diff-btn:hover{transform:translateY(-1px)}
-.diff-btn.selected{color:white;border-color:transparent}
-.diff-btn.d-rookie.selected{background:linear-gradient(135deg,#B5EAD7,#7EC8A0);border-color:#B5EAD7}
-.diff-btn.d-easy.selected{background:linear-gradient(135deg,#FFB5C2,#FF9EB5);border-color:#FFB5C2}
-.diff-btn.d-hard.selected{background:linear-gradient(135deg,#FF8C94,#FF6B6B);border-color:#FF8C94}
-.diff-btn.d-hell.selected{background:linear-gradient(135deg,#8B0000,#C0392B);border-color:#8B0000}
-.diff-btn .diff-icon{font-size:14px;margin-right:2px}
-.btn-start{padding:14px 50px;font-size:18px;font-weight:800;background:linear-gradient(135deg,var(--pink),#FF9EB5);color:white;border:none;border-radius:50px;cursor:pointer;box-shadow:0 6px 20px rgba(255,181,194,0.5);transition:all 0.2s;font-family:var(--font)}
-.btn-start:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(255,181,194,0.6)}
-.btn-start:active{transform:scale(0.95)}
-
-/* ============ Game Screen ============ */
-#game-screen{z-index:20}
-.top-bar{display:flex;justify-content:space-between;align-items:center;width:100%;padding:6px 12px;z-index:5;gap:4px}
-.stat-item{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.85);padding:5px 10px;border-radius:50px;box-shadow:var(--shadow);font-size:13px}
-.stat-icon{font-size:16px}
-.stat-value{font-size:16px;font-weight:800;color:var(--dark)}
-.combo-display{position:absolute;top:68px;left:50%;transform:translateX(-50%);font-size:22px;font-weight:800;color:var(--gold);text-shadow:0 2px 4px rgba(0,0,0,0.1);opacity:0;transition:all 0.3s;pointer-events:none;z-index:30}
-.combo-display.active{opacity:1;animation:comboPop 0.4s ease-out}
-@keyframes comboPop{0%{transform:translateX(-50%) scale(0.5)}50%{transform:translateX(-50%) scale(1.3)}100%{transform:translateX(-50%) scale(1)}}
-
-/* Announcement */
-.announce{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);font-size:22px;font-weight:800;color:var(--pink);text-shadow:0 2px 8px rgba(255,181,194,0.6);pointer-events:none;z-index:35;opacity:0;transition:all 0.3s;text-align:center;white-space:nowrap}
-.announce.show{opacity:1;animation:announcePop 0.5s ease-out}
-@keyframes announcePop{0%{transform:translate(-50%,-50%) scale(0.3)}60%{transform:translate(-50%,-50%) scale(1.15)}100%{transform:translate(-50%,-50%) scale(1)}}
-
-/* ============ Holes Grid ============ */
-.holes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px 16px;width:100%;max-width:380px;position:relative;z-index:2}
-.hole{position:relative;aspect-ratio:1;display:flex;align-items:flex-end;justify-content:center;cursor:pointer}
-.hole-bg{position:absolute;bottom:0;width:88%;height:48%;background:radial-gradient(ellipse at center,#E8DDD0 0%,#C4B5A5 60%,#A89888 100%);border-radius:50%;box-shadow:inset 0 4px 8px rgba(0,0,0,0.15);transition:background 0.5s,box-shadow 0.5s}
-.hole-bg::after{content:'';position:absolute;top:4px;left:10%;width:80%;height:60%;background:radial-gradient(ellipse at center,#3D2B1F 0%,#1a1008 100%);border-radius:50%}
-.hole.bonus .hole-bg{animation:holeGlow 0.6s ease-in-out infinite}
-@keyframes holeGlow{0%,100%{box-shadow:inset 0 4px 8px rgba(0,0,0,0.15),0 0 15px rgba(255,215,0,0.3)}50%{box-shadow:inset 0 4px 8px rgba(0,0,0,0.15),0 0 30px rgba(255,215,0,0.7)}}
-
-/* Mole */
-.mole{position:absolute;bottom:20%;left:50%;transform:translateX(-50%) translateY(30px);width:70%;aspect-ratio:1;z-index:3;transition:transform 0.15s ease-out;cursor:pointer;pointer-events:none}
-.mole.show{transform:translateX(-50%) translateY(0);pointer-events:auto}
-.mole.hit{animation:moleHit 0.3s ease-out}
-@keyframes moleHit{0%{transform:translateX(-50%) translateY(0) scale(1,1)}30%{transform:translateX(-50%) translateY(-10px) scale(1.3,0.7)}60%{transform:translateX(-50%) translateY(-5px) scale(0.9,1.1)}100%{transform:translateX(-50%) translateY(30px) scale(0.8,0.8)}}
-.mole-body{width:100%;height:100%;position:relative;animation:moleIdle 2s ease-in-out infinite}
-@keyframes moleIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
-.mole-face{position:absolute;top:15%;left:10%;width:80%;height:65%;background:var(--brown);border-radius:50% 50% 45% 45%}
-.mole-face::before{content:'';position:absolute;bottom:10%;left:10%;width:80%;height:40%;background:#F5DEB3;border-radius:50%}
-.eye{position:absolute;width:20%;height:22%;background:white;border-radius:50%;top:25%}
-.eye::after{content:'';position:absolute;width:55%;height:55%;background:#333;border-radius:50%;top:25%;left:25%}
-.eye::before{content:'';position:absolute;width:20%;height:20%;background:white;border-radius:50%;top:15%;left:15%;z-index:2}
-.eye.left{left:20%}.eye.right{right:20%}
-.nose{position:absolute;width:15%;height:12%;background:#FF8C94;border-radius:50%;top:45%;left:42.5%}
-.mouth{position:absolute;width:30%;height:8%;border-bottom:3px solid #8B5E3C;border-radius:0 0 50% 50%;top:55%;left:35%}
-.blush{position:absolute;width:18%;height:10%;background:rgba(255,150,150,0.4);border-radius:50%;top:48%}
-.blush.left{left:8%}.blush.right{right:8%}
-
-/* Special Moles */
-.mole.golden .mole-face{background:linear-gradient(135deg,#FFD700,#FFA500)}
-.mole.golden .mole-face::before{background:#FFF8DC}
-.mole.golden .crown{position:absolute;top:-15%;left:25%;width:50%;height:25%;font-size:24px;text-align:center;z-index:4;animation:crownFloat 1s ease-in-out infinite}
-@keyframes crownFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
-.mole.bomb .mole-face{background:linear-gradient(135deg,#4a4a4a,#2d2d2d)}
-.mole.bomb .mole-face::before{background:#666}
-.mole.bomb .fuse{position:absolute;top:-20%;left:46%;width:4px;height:30%;background:#FF6B6B;border-radius:2px;z-index:4}
-.mole.bomb .fuse::after{content:'💥';position:absolute;top:-18px;left:-10px;font-size:14px;animation:spark 0.3s ease-in-out infinite}
-@keyframes spark{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.3)}}
-.mole.rabbit .mole-face{background:white;border:2px solid #EEE}
-.mole.rabbit .mole-face::before{background:#FFF}
-.mole.rabbit .ears{position:absolute;top:-25%;width:100%;height:35%;z-index:1}
-.mole.rabbit .ear{position:absolute;width:25%;height:100%;background:white;border-radius:50%;border:2px solid #EEE}
-.mole.rabbit .ear::after{content:'';position:absolute;width:60%;height:70%;background:#FFD5D5;border-radius:50%;top:15%;left:20%}
-.mole.rabbit .ear.left{left:15%}.mole.rabbit .ear.right{right:15%}
-.mole.rabbit .carrot{position:absolute;bottom:-5%;right:-5%;font-size:18px;z-index:5}
-.mole.boss{transform:translateX(-50%) translateY(30px) scale(1.3)}
-.mole.boss.show{transform:translateX(-50%) translateY(0) scale(1.3)}
-.mole.boss .mole-face{background:linear-gradient(135deg,#FF6B6B,#C0392B)}
-.mole.boss .mole-face::before{background:#FFD5D5}
-.mole.boss .big-crown{position:absolute;top:-20%;left:20%;width:60%;height:30%;font-size:28px;text-align:center;z-index:4;animation:crownFloat 0.8s ease-in-out infinite}
-.mole.boss .boss-hp{position:absolute;top:-8%;left:10%;width:80%;height:8px;background:#DDD;border-radius:10px;z-index:5}
-.mole.boss .boss-hp-bar{height:100%;background:var(--red);border-radius:10px;transition:width 0.2s}
-
-/* Event Moles */
-.mole.pumpkin .mole-face{background:linear-gradient(135deg,#FF8C00,#E06500);border-radius:50%}
-.mole.pumpkin .mole-face::before{background:#FFD580}
-.mole.santa .mole-face{background:linear-gradient(135deg,#E74C3C,#C0392B)}
-.mole.santa .mole-face::before{background:white}
-.mole.redpack .mole-face{background:linear-gradient(135deg,#E74C3C,#C0392B)}
-.mole.redpack .mole-face::before{background:#FFD700}
-
-/* Hit Effect */
-.hit-effect{position:absolute;pointer-events:none;z-index:20;font-size:26px;animation:hitFloat 0.8s ease-out forwards}
-@keyframes hitFloat{0%{opacity:1;transform:translateY(0) scale(0.5)}50%{opacity:1;transform:translateY(-35px) scale(1.2)}100%{opacity:0;transform:translateY(-65px) scale(0.8)}}
-.particle{position:absolute;pointer-events:none;z-index:25;animation:particleBurst 0.7s ease-out forwards}
-@keyframes particleBurst{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(0)}}
-
-/* ============ Items Bar ============ */
-.items-bar{display:flex;gap:6px;padding:4px 16px;width:100%;justify-content:center;flex-wrap:wrap;z-index:5}
-.item-slot{width:42px;height:42px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.85);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;box-shadow:var(--shadow);transition:all 0.2s;position:relative}
-.item-slot:hover{transform:translateY(-2px)}
-.item-slot:active{transform:scale(0.9)}
-.item-slot .item-count{position:absolute;top:-4px;right:-4px;background:var(--red);color:white;font-size:10px;font-weight:700;width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-.item-slot.empty{opacity:0.35;cursor:default}
-.active-item-indicator{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:13px;font-weight:700;color:var(--pink);background:rgba(255,255,255,0.9);padding:4px 12px;border-radius:50px;pointer-events:none;z-index:25;opacity:0;transition:opacity 0.3s;white-space:nowrap}
-.active-item-indicator.show{opacity:1}
-
-/* ============ Collect Mode HUD ============ */
-.collect-hud{display:none;width:100%;padding:0 16px 8px;z-index:5}
-.collect-hud .collect-bar{width:100%;height:14px;background:#EEE;border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
-.collect-hud .collect-fill{height:100%;background:linear-gradient(90deg,#FFD700,#FFA500);border-radius:10px;transition:width 0.3s;width:0%}
-.collect-hud .collect-text{display:flex;justify-content:space-between;font-size:11px;color:#999;margin-top:2px;padding:0 4px}
-
-/* ============ VS Mode ============ */
-.vs-container{display:none;width:100%;flex:1;flex-direction:row;z-index:2;position:relative}
-.vs-container.active{display:flex}
-.vs-divider{position:absolute;left:50%;top:0;bottom:0;width:3px;background:linear-gradient(180deg,transparent,var(--pink),var(--pink),transparent);z-index:3;pointer-events:none}
-.vs-player{flex:1;display:flex;flex-direction:column;align-items:center;padding:6px;position:relative}
-.vs-player .vs-label{font-size:13px;font-weight:700;color:var(--dark);margin-bottom:2px}
-.vs-player .vs-score{font-size:20px;font-weight:800;color:var(--pink)}
-.vs-holes{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;width:100%;padding:4px}
-.vs-hole{position:relative;aspect-ratio:1;cursor:pointer}
-.vs-hole .hole-bg{position:absolute;bottom:0;width:88%;height:48%;background:radial-gradient(ellipse at center,#E8DDD0 0%,#C4B5A5 60%,#A89888 100%);border-radius:50%;box-shadow:inset 0 4px 8px rgba(0,0,0,0.15);left:6%}
-.vs-hole .hole-bg::after{content:'';position:absolute;top:4px;left:10%;width:80%;height:60%;background:radial-gradient(ellipse at center,#3D2B1F 0%,#1a1008 100%);border-radius:50%}
-.vs-hole .mole{width:75%}
-.vs-interference{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;justify-content:center}
-.vs-interference .vs-item{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.85);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;box-shadow:var(--shadow);transition:all 0.2s}
-.vs-interference .vs-item:hover{transform:translateY(-2px)}
-.vs-interference .vs-item:active{transform:scale(0.9)}
-.vs-interference .vs-item.used{opacity:0.35;pointer-events:none}
-
-/* ============ Progress Bar (generic) ============ */
-.progress-mini{width:100%;height:8px;background:rgba(255,255,255,0.5);border-radius:4px;overflow:hidden;margin-top:4px}
-.progress-mini-fill{height:100%;border-radius:4px;transition:width 0.3s}
-
-/* ============ Game Over Screen ============ */
-#over-screen{z-index:40}
-.over-card{background:white;border-radius:var(--radius);padding:22px;box-shadow:0 10px 40px rgba(0,0,0,0.1);text-align:center;width:90%;max-width:340px;max-height:90vh;overflow-y:auto}
-.over-emoji{font-size:48px;margin-bottom:4px}
-.over-title{font-size:22px;font-weight:800;color:var(--dark);margin-bottom:2px}
-.over-score{font-size:38px;font-weight:800;color:var(--pink);margin-bottom:2px}
-.over-mode{font-size:12px;color:#999;margin-bottom:4px}
-.over-stats{display:flex;justify-content:center;gap:16px;margin:8px 0;flex-wrap:wrap}
-.over-stat{text-align:center}
-.over-stat-val{font-size:18px;font-weight:700;color:var(--dark)}
-.over-stat-lbl{font-size:10px;color:#999}
-.blind-box{margin:10px 0;padding:10px;background:var(--bg-pink);border-radius:var(--radius-sm)}
-.blind-box .box-emoji{font-size:36px;animation:bounce 1.5s ease-in-out infinite;cursor:pointer}
-.blind-box .box-text{font-size:12px;color:#999;margin-top:2px}
-.blind-box .reward{font-size:15px;font-weight:700;color:var(--pink);margin-top:3px;display:none}
-.btn-row{display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap}
-.btn{padding:10px 20px;font-size:14px;font-weight:700;border:none;border-radius:50px;cursor:pointer;font-family:var(--font);transition:all 0.15s;box-shadow:var(--shadow)}
-.btn:hover{transform:translateY(-2px)}.btn:active{transform:scale(0.95)}
-.btn-primary{background:var(--pink);color:white}
-.btn-secondary{background:white;color:var(--dark);border:2px solid #DDD}
-.btn-gold{background:linear-gradient(135deg,#FFD700,#FFA500);color:white}
-
-/* Best Score */
-.best-score{margin-top:6px;font-size:13px;color:var(--gold);font-weight:700}
-.best-score.new{animation:bestScorePop 0.6s ease-out}
-@keyframes bestScorePop{0%{transform:scale(0.5)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
-
-/* ============ Pause ============ */
-.pause-btn{position:absolute;top:10px;right:12px;z-index:30;width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,0.85);font-size:16px;cursor:pointer;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;transition:all 0.15s}
-.pause-btn:hover{transform:scale(1.1)}
-.pause-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;z-index:35;backdrop-filter:blur(4px)}
-.pause-overlay.hidden{display:none}
-.pause-card{background:white;border-radius:var(--radius);padding:20px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.15)}
-.pause-card h3{font-size:20px;color:var(--dark);margin-bottom:10px}
-
-/* Timer Warning */
-.timer-warning{animation:timerPulse 0.5s ease-in-out}
-@keyframes timerPulse{0%,100%{color:var(--dark)}50%{color:var(--red);transform:scale(1.1)}}
-
-/* Event Decorations */
-.event-decor{position:absolute;pointer-events:none;z-index:1;font-size:20px;animation:eventFloat 3s ease-in-out infinite}
-@keyframes eventFloat{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-10px) rotate(10deg)}}
-
-/* ============ Rules Overlay ============ */
-.rules-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;z-index:45;backdrop-filter:blur(6px)}
-.rules-overlay.hidden{display:none}
-.rules-card{background:white;border-radius:var(--radius);padding:24px 20px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.15);width:88%;max-width:340px;max-height:85vh;overflow-y:auto;animation:rulesIn 0.3s ease-out}
-@keyframes rulesIn{0%{transform:scale(0.8);opacity:0}100%{transform:scale(1);opacity:1}}
-.rules-icon{font-size:52px;margin-bottom:6px}
-.rules-title{font-size:20px;font-weight:800;color:var(--dark);margin-bottom:2px}
-.rules-subtitle{font-size:12px;color:#999;margin-bottom:12px}
-.rules-section{text-align:left;margin-bottom:10px;background:var(--bg-pink);border-radius:var(--radius-sm);padding:12px 14px}
-.rules-section h4{font-size:13px;font-weight:700;color:var(--pink);margin-bottom:4px}
-.rules-section p,.rules-section li{font-size:12px;color:#666;line-height:1.7}
-.rules-section ul{list-style:none;padding:0}
-.rules-section ul li::before{content:'• ';color:var(--pink)}
-.rules-keys{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
-.rules-key{display:inline-block;background:var(--dark);color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;font-family:monospace;min-width:18px;text-align:center}
-.rules-ctrl{font-size:11px;color:#999;margin-top:6px;display:flex;align-items:center;gap:4px;justify-content:center}
-.rules-btn-row{display:flex;gap:8px;justify-content:center;margin-top:10px}
-
-/* ============ VS Keyboard Hints ============ */
-.vs-hole .key-hint{position:absolute;top:4px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.7);color:white;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;z-index:10;pointer-events:none;font-family:monospace;opacity:0.6;transition:opacity 0.2s}
-.vs-hole:active .key-hint,.vs-hole.pressed .key-hint{opacity:1;background:var(--pink)}
-
-/* ============ Desktop VS Layout ============ */
-@media(min-width:768px){
-  #game-container{max-width:800px}
-  .vs-container{flex-direction:row}
-  .vs-player{padding:12px}
-  .vs-player .vs-label{font-size:16px}
-  .vs-player .vs-score{font-size:28px}
-  .vs-holes{gap:10px;padding:8px;max-width:300px}
-  .vs-hole .mole{width:70%}
-  .vs-interference{gap:8px;margin-top:8px}
-  .vs-interference .vs-item{width:44px;height:44px;font-size:22px}
-  .vs-divider{width:4px}
-  .vs-player .vs-keys-legend{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;justify-content:center}
-  .vs-keys-legend span{font-size:10px;color:#999;background:rgba(255,255,255,0.7);padding:2px 6px;border-radius:4px;font-family:monospace}
-}
-
-/* ============ Responsive ============ */
-@media(min-width:420px){.holes-grid{gap:14px;padding:16px 20px}}
-@media(max-width:360px){.holes-grid{gap:6px;padding:8px}.start-title{font-size:24px}.stat-value{font-size:14px}.mode-btn{padding:10px 8px}.mode-btn .mode-icon{font-size:20px}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>坦克大战 - 钢铁风暴·对峙版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0a0a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Arial', 'Microsoft YaHei', 'SimHei', sans-serif;
+            user-select: none;
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        canvas {
+            display: block;
+            background: #0d0d0d;
+            cursor: crosshair;
+            outline: none;
+        }
+        #mobile-controls {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 20;
+            display: none;
+            pointer-events: none;
+        }
+        #joystick-zone {
+            width: 110px;
+            height: 110px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            position: relative;
+            pointer-events: auto;
+            backdrop-filter: blur(4px);
+        }
+        #joystick-knob {
+            width: 46px;
+            height: 46px;
+            background: rgba(255, 255, 255, 0.35);
+            border-radius: 50%;
+            position: absolute;
+            top: 32px;
+            left: 32px;
+            pointer-events: none;
+            transition: all 0.06s ease-out;
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+        }
+        #fire-btn {
+            position: fixed;
+            bottom: 40px;
+            right: 30px;
+            width: 75px;
+            height: 75px;
+            background: rgba(220, 60, 60, 0.55);
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 14px;
+            font-weight: bold;
+            pointer-events: auto;
+            z-index: 21;
+            letter-spacing: 1px;
+            backdrop-filter: blur(4px);
+        }
+        #skill-btn {
+            position: fixed;
+            bottom: 125px;
+            right: 35px;
+            width: 65px;
+            height: 65px;
+            background: rgba(30, 130, 200, 0.55);
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+            pointer-events: auto;
+            z-index: 21;
+            letter-spacing: 1px;
+            backdrop-filter: blur(4px);
+        }
+        @media (pointer: coarse) {
+            #mobile-controls {
+                display: block;
+            }
+            #fire-btn,
+            #skill-btn {
+                display: flex;
+            }
+        }
+        @media (pointer: fine) {
+            #fire-btn,
+            #skill-btn {
+                display: none;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<div id="game-container">
-  <!-- BG Decor -->
-  <div class="bg-decor bg-cloud" style="top:8%;left:5%"></div>
-  <div class="bg-decor bg-cloud" style="top:15%;right:5%;animation-delay:3s;width:60px;height:30px"></div>
-  <div class="bg-decor star" style="top:12%;left:15%">⭐</div>
-  <div class="bg-decor star" style="top:20%;right:12%;animation-delay:1s">✨</div>
-  <div class="bg-decor flower" style="bottom:8%;left:8%">🌸</div>
-  <div class="bg-decor flower" style="bottom:12%;right:8%;animation-delay:1.5s">🌷</div>
-
-  <!-- Start Screen -->
-  <div id="start-screen" class="screen">
-    <div class="start-logo">🐹</div>
-    <div class="start-title">萌鼠敲敲乐</div>
-    <div class="start-subtitle">Cute Mole Bonanza ✨</div>
-    <div class="mode-grid" id="mode-grid">
-      <button class="mode-btn selected" data-mode="classic"><span class="mode-icon">⏱️</span><span class="mode-name">经典模式</span><span class="mode-desc">3阶段 · 奖励轮</span></button>
-      <button class="mode-btn" data-mode="timeattack"><span class="mode-icon">⚡</span><span class="mode-name">限时挑战</span><span class="mode-desc">连击倍率 · 30s</span></button>
-      <button class="mode-btn" data-mode="survival"><span class="mode-icon">💖</span><span class="mode-name">生存模式</span><span class="mode-desc">波次递增 · 3命</span></button>
-      <button class="mode-btn" data-mode="collect"><span class="mode-icon">🌟</span><span class="mode-name">收集模式</span><span class="mode-desc">集星解锁 · 休闲</span></button>
-      <button class="mode-btn" data-mode="vs"><span class="mode-icon">👥</span><span class="mode-name">双人对战</span><span class="mode-desc">同屏PK · 干扰</span></button>
-      <button class="mode-btn" data-mode="event"><span class="mode-icon">🎃</span><span class="mode-name">节日活动</span><span class="mode-desc">限定角色 · 60s</span></button>
-      <button class="mode-btn" data-mode="endless"><span class="mode-icon">♾️</span><span class="mode-name">无尽模式</span><span class="mode-desc">极限挑战</span></button>
+    <canvas id="gameCanvas" tabindex="0"></canvas>
+    <div id="mobile-controls">
+        <div id="joystick-zone"><div id="joystick-knob"></div></div>
     </div>
-    <div class="theme-row" id="theme-row">
-      <div class="theme-dot t-dessert selected" data-theme="dessert" title="甜品森林"></div>
-      <div class="theme-dot t-cloud" data-theme="cloud" title="云朵牧场"></div>
-      <div class="theme-dot t-candy" data-theme="candy" title="糖果工厂"></div>
-      <div class="theme-dot t-starry" data-theme="starry" title="星空夜市"></div>
-    </div>
-    <div class="diff-row" id="diff-row">
-      <button class="diff-btn d-rookie" data-diff="rookie"><span class="diff-icon">🐣</span>菜鸟</button>
-      <button class="diff-btn d-easy selected" data-diff="easy"><span class="diff-icon">🌸</span>简单</button>
-      <button class="diff-btn d-hard" data-diff="hard"><span class="diff-icon">🔥</span>困难</button>
-      <button class="diff-btn d-hell" data-diff="hell"><span class="diff-icon">💀</span>地狱</button>
-    </div>
-    <button class="btn-start" id="btn-start">🎮 开始游戏</button>
-  </div>
+    <div id="fire-btn">开火</div>
+    <div id="skill-btn">技能</div>
+    <script>
+        // ==================== 基础工具 ====================
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        canvas.focus();
 
-  <!-- Game Screen -->
-  <div id="game-screen" class="screen hidden">
-    <div class="top-bar" id="top-bar">
-      <div class="stat-item"><span class="stat-icon">⭐</span><span class="stat-value" id="score">0</span></div>
-      <div class="stat-item" id="stage-box" style="display:none"><span class="stat-icon">📶</span><span class="stat-value" id="stage-text">阶段1</span></div>
-      <div class="stat-item" id="timer-box"><span class="stat-icon">⏱️</span><span class="stat-value" id="timer">60</span></div>
-      <div class="stat-item" id="lives-box"><span class="stat-icon">💖</span><span class="stat-value" id="lives">3</span></div>
-      <div class="stat-item" id="wave-box" style="display:none"><span class="stat-icon">🌊</span><span class="stat-value" id="wave-text">波次1</span></div>
-    </div>
-    <div class="combo-display" id="combo-display"></div>
-    <div class="announce" id="announce"></div>
-    <div class="active-item-indicator" id="active-item"></div>
-    <button class="pause-btn" id="btn-pause">⏸️</button>
+        function rand(min, max) { return Math.random() * (max - min) + min; }
 
-    <!-- Collect HUD -->
-    <div class="collect-hud" id="collect-hud">
-      <div class="collect-bar"><div class="collect-fill" id="collect-fill"></div></div>
-      <div class="collect-text"><span id="collect-progress">0/30 ⭐</span><span id="collect-bonus"></span></div>
-    </div>
+        function randInt(min, max) { return Math.floor(rand(min, max)); }
 
-    <!-- Standard holes grid -->
-    <div class="holes-grid" id="holes-grid"></div>
+        function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
 
-    <!-- VS Mode Container -->
-    <div class="vs-container" id="vs-container">
-      <div class="vs-divider"></div>
-      <div class="vs-player" id="vs-p1">
-        <div class="vs-label">👤 玩家1</div>
-        <div class="vs-score" id="vs-score1">0</div>
-        <div class="vs-holes" id="vs-holes1"></div>
-        <div class="vs-interference" id="vs-interference1">
-          <div class="vs-item" data-item="bubble" title="泡泡遮洞">🫧</div>
-          <div class="vs-item" data-item="honey" title="蜂蜜减速">🍯</div>
-          <div class="vs-item" data-item="swap" title="互换分数">🔄</div>
-        </div>
-      </div>
-      <div class="vs-player" id="vs-p2">
-        <div class="vs-label">👤 玩家2</div>
-        <div class="vs-score" id="vs-score2">0</div>
-        <div class="vs-holes" id="vs-holes2"></div>
-        <div class="vs-interference" id="vs-interference2">
-          <div class="vs-item" data-item="bubble" title="泡泡遮洞">🫧</div>
-          <div class="vs-item" data-item="honey" title="蜂蜜减速">🍯</div>
-          <div class="vs-item" data-item="swap" title="互换分数">🔄</div>
-        </div>
-      </div>
-    </div>
+        function lerp(a, b, t) { return a + (b - a) * t; }
 
-    <!-- Items Bar -->
-    <div class="items-bar" id="items-bar">
-      <div class="item-slot empty" data-item="rainbow" title="彩虹锤:双倍分(5秒)">🌈</div>
-      <div class="item-slot empty" data-item="time" title="时间沙漏:+5秒">⏳</div>
-      <div class="item-slot empty" data-item="freeze" title="冰冻雪花:减速(3秒)">❄️</div>
-      <div class="item-slot empty" data-item="magnet" title="磁铁星星:全屏吸附">🧲</div>
-      <div class="item-slot empty" data-item="shield" title="护盾泡泡:免扣分1次">🫧</div>
-    </div>
+        function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
-    <!-- Rules Overlay -->
-    <div class="rules-overlay hidden" id="rules-overlay">
-      <div class="rules-card">
-        <div class="rules-icon" id="rules-icon">🐹</div>
-        <div class="rules-title" id="rules-title">经典模式</div>
-        <div class="rules-subtitle" id="rules-subtitle"></div>
-        <div id="rules-content"></div>
-        <div class="rules-btn-row">
-          <button class="btn btn-secondary" id="btn-rules-back">← 返回</button>
-          <button class="btn btn-primary" id="btn-rules-start">开始游戏!</button>
-        </div>
-      </div>
-    </div>
+        function angleLerp(a, b, t) { let d = b - a; while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d +=
+                Math.PI * 2; return a + d * t; }
 
-    <div class="pause-overlay hidden" id="pause-overlay">
-      <div class="pause-card">
-        <h3>⏸️ 暂停中</h3>
-        <div class="btn-row"><button class="btn btn-primary" id="btn-resume">继续</button><button class="btn btn-secondary" id="btn-quit">退出</button></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Over Screen -->
-  <div id="over-screen" class="screen hidden">
-    <div class="over-card">
-      <div class="over-emoji" id="over-emoji">🎉</div>
-      <div class="over-title" id="over-title">太棒了!</div>
-      <div class="over-score" id="over-score">0</div>
-      <div class="over-mode" id="over-mode"></div>
-      <div class="best-score" id="best-score" style="display:none"></div>
-      <div class="over-stats">
-        <div class="over-stat"><div class="over-stat-val" id="stat-hits">0</div><div class="over-stat-lbl">击中</div></div>
-        <div class="over-stat"><div class="over-stat-val" id="stat-combo">0</div><div class="over-stat-lbl">最高连击</div></div>
-        <div class="over-stat"><div class="over-stat-val" id="stat-miss">0</div><div class="over-stat-lbl">失误</div></div>
-        <div class="over-stat"><div class="over-stat-val" id="stat-stars">0</div><div class="over-stat-lbl">收集</div></div>
-      </div>
-      <div class="blind-box">
-        <div class="box-emoji" id="blind-box">🎁</div>
-        <div class="box-text">点击盲盒获取奖励!</div>
-        <div class="reward" id="blind-reward"></div>
-      </div>
-      <div class="btn-row">
-        <button class="btn btn-primary" id="btn-restart">🔄 再来一局</button>
-        <button class="btn btn-secondary" id="btn-menu">🏠 返回菜单</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-// ==================== 萌鼠敲敲乐 v2 - 7模式完整引擎 ====================
-const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
-const gameContainer=$('#game-container'),startScreen=$('#start-screen'),gameScreen=$('#game-screen'),overScreen=$('#over-screen');
-const holesGrid=$('#holes-grid'),scoreEl=$('#score'),timerEl=$('#timer'),livesEl=$('#lives'),livesBox=$('#lives-box'),timerBox=$('#timer-box');
-const comboDisplay=$('#combo-display'),activeItemEl=$('#active-item'),pauseOverlay=$('#pause-overlay');
-const blindBox=$('#blind-box'),blindReward=$('#blind-reward'),announce=$('#announce');
-const stageBox=$('#stage-box'),stageText=$('#stage-text'),waveBox=$('#wave-box'),waveText=$('#wave-text');
-const collectHud=$('#collect-hud'),collectFill=$('#collect-fill'),collectProgress=$('#collect-progress'),collectBonus=$('#collect-bonus');
-const vsContainer=$('#vs-container'),itemsBar=$('#items-bar');
-
-// ============ Audio Engine ============
-class AudioEngine{
-  constructor(){this.ctx=null;this.enabled=true}
-  init(){if(this.ctx)return;try{this.ctx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){this.enabled=false}}
-  play(freq,type,dur,vol=0.12,glide=0){
-    if(!this.enabled||!this.ctx)return;const t=this.ctx.currentTime;
-    const o=this.ctx.createOscillator(),g=this.ctx.createGain();
-    o.type=type;o.frequency.setValueAtTime(freq,t);
-    if(glide)o.frequency.linearRampToValueAtTime(freq+glide,t+dur);
-    g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
-    o.connect(g);g.connect(this.ctx.destination);o.start(t);o.stop(t+dur);
-  }
-  pop(){this.play(500,'sine',0.1,0.12,-200)}
-  combo(n){this.play(400+n*80,'sine',0.1,0.1,200)}
-  golden(){this.play(800,'triangle',0.12,0.1);this.play(1200,'triangle',0.08,0.08)}
-  rabbit(){this.play(200,'sine',0.25,0.07,-50)}
-  bomb(){this.play(80,'sawtooth',0.18,0.07)}
-  bossHit(){this.play(300,'square',0.08,0.05);this.play(600,'square',0.06,0.05)}
-  bossDefeat(){this.play(600,'triangle',0.12,0.08);setTimeout(()=>this.play(800,'triangle',0.12,0.08),80);setTimeout(()=>this.play(1000,'triangle',0.15,0.12),160)}
-  item(){this.play(1000,'sine',0.12,0.08);this.play(1400,'sine',0.08,0.06)}
-  gameOver(){this.play(300,'triangle',0.18,0.12);setTimeout(()=>this.play(200,'triangle',0.18,0.18),150)}
-  bonus(){this.play(600,'triangle',0.1,0.06);setTimeout(()=>this.play(800,'triangle',0.1,0.06),80);setTimeout(()=>this.play(1000,'triangle',0.12,0.08),160)}
-  collect(){this.play(700,'sine',0.1,0.08);this.play(900,'sine',0.06,0.06)}
-  wave(){this.play(400,'triangle',0.15,0.12);setTimeout(()=>this.play(500,'triangle',0.15,0.15),120)}
-  vsScore(){this.play(600,'triangle',0.12,0.1);this.play(1000,'triangle',0.08,0.08)}
-}
-const audio=new AudioEngine();
-
-// ============ Game State ============
-const state={
-  mode:'classic',theme:'dessert',classicDifficulty:'easy',running:false,paused:false,
-  score:0,timer:60,maxTimer:60,lives:3,combo:0,maxCombo:0,
-  totalHits:0,totalMiss:0,totalStars:0,
-  activeMoles:[],items:{rainbow:0,time:0,freeze:0,magnet:0,shield:0},
-  activeEffects:{rainbow:0,freeze:0,shield:false},
-  spawnInterval:null,timerInterval:null,difficulty:1,
-  blindOpened:false,coins:0,stage:1,wave:1,
-  _missStreak:0,_lastBossSpawn:-999,_currentSpawnInterval:1200,
-  _bonusActive:false,_eventTheme:'halloween',
-  // Classic level system
-  _currentLevel:1,_levelTransitioning:false,_levelCleared:false,
-  // VS mode
-  vs:{scores:[0,0],activeMoles:[[],[]],spawnIntervals:[null,null],running:false}
-};
-
-// ============ Mode Configs ============
-const modeConfigs={
-  classic:{timer:15,lives:999,showLives:false,showStage:true,showWave:false,itemDropRate:0.15,bossInterval:0,baseInterval:1200,stages:5,stageInterval:15,bonusRound:false,levels:true,levelTargets:[30,60,100,150,210],levelSpeeds:[1200,1050,900,750,600]},
-  timeattack:{timer:30,lives:999,showLives:false,showStage:false,showWave:false,itemDropRate:0.2,bossInterval:0,baseInterval:700,stages:0,stageInterval:0,bonusRound:false,comboMultiplier:true},
-  survival:{timer:999,lives:3,showLives:true,showStage:false,showWave:true,itemDropRate:0.12,bossInterval:45,baseInterval:1400,stages:0,stageInterval:0,bonusRound:false},
-  collect:{timer:999,lives:999,showLives:false,showStage:false,showWave:false,itemDropRate:0.3,bossInterval:0,baseInterval:1500,stages:0,stageInterval:0,bonusRound:false,collectTarget:30},
-  vs:{timer:999,lives:999,showLives:false,showStage:false,showWave:false,itemDropRate:0,baseInterval:1200,vsTarget:100},
-  event:{timer:60,lives:999,showLives:false,showStage:false,showWave:false,itemDropRate:0.2,bossInterval:20,baseInterval:1100,eventTheme:'halloween'},
-  endless:{timer:999,lives:1,showLives:true,showStage:false,showWave:true,itemDropRate:0.1,bossInterval:30,baseInterval:1200,speedRamp:true}
-};
-
-// ============ Classic Difficulty Configs ============
-const difficultyConfigs={
-  rookie:{
-    name:'菜鸟',icon:'🐣',color:'#B5EAD7',
-    levelCount:5,levelTime:18,
-    targets:[15,30,50,75,110],
-    speeds:[1400,1280,1160,1040,920],
-    moleWeights:{normal:68,golden:16,rabbit:8,bomb:0,boss:0},
-    hasBomb:false,hasRabbit:true,rabbitPenalty:-10,
-    bombPenalty:0,bombTimePenalty:0,
-    lives:999,itemDropRate:0.25,desc:'无炸弹 · 5关 · 每关18秒'
-  },
-  easy:{
-    name:'简单',icon:'🌸',color:'#FFB5C2',
-    levelCount:5,levelTime:15,
-    targets:[30,60,100,150,210],
-    speeds:[1200,1050,900,750,600],
-    moleWeights:{normal:55,golden:10,rabbit:15,bomb:10,boss:3},
-    hasBomb:true,hasRabbit:true,rabbitPenalty:-20,
-    bombPenalty:-15,bombTimePenalty:5,
-    lives:999,itemDropRate:0.15,desc:'标准难度 · 5关 · 每关15秒'
-  },
-  hard:{
-    name:'困难',icon:'🔥',color:'#FF8C94',
-    levelCount:5,levelTime:12,
-    targets:[45,95,160,235,325],
-    speeds:[1000,850,700,550,420],
-    moleWeights:{normal:45,golden:8,rabbit:16,bomb:18,boss:8},
-    hasBomb:true,hasRabbit:true,rabbitPenalty:-25,
-    bombPenalty:-20,bombTimePenalty:7,
-    lives:999,itemDropRate:0.1,desc:'炸弹多 · 5关 · 每关12秒'
-  },
-  hell:{
-    name:'地狱',icon:'💀',color:'#6B0000',
-    levelCount:5,levelTime:10,
-    targets:[80,150,230,320,430],
-    speeds:[800,650,500,380,280],
-    moleWeights:{normal:33,golden:5,rabbit:20,bomb:25,boss:10},
-    hasBomb:true,hasRabbit:true,rabbitPenalty:-30,
-    bombPenalty:-25,bombTimePenalty:10,
-    lives:3,itemDropRate:0.05,desc:'3条命 · 5关 · 每关10秒'
-  }
-};
-
-// ============ Rules Content ============
-const rulesContent={
-  classic:{
-    icon:'⏱️',title:'经典模式',sub:'5关挑战 · 4种难度可选',
-    getHtml:function(){
-      const dc=difficultyConfigs[state.classicDifficulty];
-      const dcs=Object.entries(difficultyConfigs).map(([k,v])=>`<span class="rules-key" style="background:${v.color};color:white">${v.icon}${v.name}</span>`).join(' ');
-      const diffs=Object.entries(difficultyConfigs).map(([k,v])=>(
-        `<li>${v.icon} <b>${v.name}</b>: ${v.desc} | 目标 ${v.targets.join('/')}分</li>`
-      )).join('');
-      return `<div class="rules-section"><h4>⚙️ 当前难度: ${dc.icon} ${dc.name}</h4><p>${dc.desc}</p></div>
-      <div class="rules-section"><h4>📶 4种难度</h4><ul>${diffs}</ul></div>
-      <div class="rules-section"><h4>🎯 5关目标 (${dc.name})</h4><p>${dc.targets.map((t,i)=>`关卡${i+1}: <b>${t}分</b>`).join(' | ')}</p></div>
-      <div class="rules-section"><h4>🐭 角色</h4><p>🐹普通+10 | 👑黄金+30 | 🐰兔兔${dc.rabbitPenalty}分${dc.hasBomb?` | 💣炸弹${dc.bombPenalty}分扣${dc.bombTimePenalty}秒`:''}${dc.moleWeights.boss>0?` | 😈Boss+50`:' | 无Boss'}</p></div>
-      ${dc.lives<999?`<div class="rules-section"><h4>💖 生命</h4><p>${dc.lives}条命! 漏打3只地鼠扣1心!</p></div>`:''}
-      <div class="rules-section"><h4>🎮 操作</h4><p>点击地鼠敲击 | 键盘 <span class="rules-key">1</span>-<span class="rules-key">9</span> 对应9洞 | 按 <span class="rules-key">P</span> 暂停</p></div>`;
-    }
-  },
-  timeattack:{
-    icon:'⚡',title:'限时挑战',sub:'连击倍率 · 30秒极速',
-    html:`
-      <div class="rules-section"><h4>🎯 目标</h4><p>30秒内尽可能多得分，连击越高分数加成越大!</p></div>
-      <div class="rules-section"><h4>🔥 连击倍率</h4><p>连击≥5触发倍率加成：每多一连击+0.5倍分数! 节奏越快收益越高!</p></div>
-      <div class="rules-section"><h4>⚡ 速度层级</h4><p>地鼠出现速度极快，且随时间越来越快，考验反应力!</p></div>
-      <div class="rules-section"><h4>🏆 排名</h4><p>最高分自动保存，挑战自己的极限记录!</p></div>
-      <div class="rules-section"><h4>🎮 操作</h4><p>点击地鼠敲击 | 按 <span class="rules-key">P</span> 暂停</p></div>
-    `
-  },
-  survival:{
-    icon:'💖',title:'生存模式',sub:'波次递增 · 3条命',
-    html:`
-      <div class="rules-section"><h4>🎯 目标</h4><p>坚持尽可能久! 每15秒进入新波次，速度越来越快!</p></div>
-      <div class="rules-section"><h4>💔 生命</h4><p>共3条命 | 漏打3只地鼠扣1心 | 心用完游戏结束</p></div>
-      <div class="rules-section"><h4>😈 Boss恢复</h4><p>每45秒出现地鼠王，击败可恢复1颗心!</p></div>
-      <div class="rules-section"><h4>🌊 波次</h4><p>每波难度递增，地鼠出现更快、停留更短</p></div>
-      <div class="rules-section"><h4>🎮 操作</h4><p>点击地鼠敲击 | 按 <span class="rules-key">P</span> 暂停</p></div>
-    `
-  },
-  collect:{
-    icon:'🌟',title:'收集模式',sub:'集星解锁 · 无限时休闲',
-    html:`
-      <div class="rules-section"><h4>🎯 目标</h4><p>收集30颗星星，解锁皮肤和道具! 无时间限制，轻松游玩~</p></div>
-      <div class="rules-section"><h4>⭐ 收集进度</h4><p>击中地鼠掉落星星 | 避免打到兔兔(不掉星)</p></div>
-      <div class="rules-section"><h4>🔓 解锁奖励</h4><p>10⭐草莓地鼠皮肤 | 20⭐布丁锤皮肤 | 30⭐全部收集完成!</p></div>
-      <div class="rules-section"><h4>🎮 操作</h4><p>点击地鼠敲击 | 按 <span class="rules-key">P</span> 暂停</p></div>
-    `
-  },
-  vs:{
-    icon:'👥',title:'双人对战',sub:'同屏PK · 先到100分胜',
-    html:`
-      <div class="rules-section"><h4>🎯 目标</h4><p>左右分屏对战，先获得100分的玩家获胜!</p></div>
-      <div class="rules-section"><h4>🕹️ 键盘操控 (电脑)</h4><p><b>玩家1(左):</b> 洞 <span class="rules-key">1</span><span class="rules-key">2</span><span class="rules-key">3</span><span class="rules-key">4</span><span class="rules-key">5</span><span class="rules-key">6</span> 或 <span class="rules-key">Q</span><span class="rules-key">W</span><span class="rules-key">A</span><span class="rules-key">S</span><span class="rules-key">Z</span><span class="rules-key">X</span> | 道具: 点击按钮</p><p><b>玩家2(右):</b> 洞 <span class="rules-key">U</span><span class="rules-key">I</span><span class="rules-key">J</span><span class="rules-key">K</span><span class="rules-key">N</span><span class="rules-key">M</span> | 道具 <span class="rules-key">7</span><span class="rules-key">8</span><span class="rules-key">9</span></p></div>
-      <div class="rules-section"><h4>📱 触屏操控</h4><p>直接点击对应半屏的地鼠洞即可!</p></div>
-      <div class="rules-section"><h4>🎯 干扰道具</h4><p>🫧泡泡遮洞3秒 | 🍯蜂蜜减速 | 🔄互换分数</p></div>
-      <div class="rules-section"><h4>⚠️ 注意</h4><p>兔兔扣15分 | 按 <span class="rules-key">P</span> 暂停</p></div>
-    `
-  },
-  event:{
-    icon:'🎃',title:'节日活动',sub:'限定角色 · 随机主题 · 60秒',
-    html:`
-      <div class="rules-section"><h4>🎯 目标</h4><p>60秒内尽可能多得分! 每次随机一个节日主题!</p></div>
-      <div class="rules-section"><h4>🎨 随机主题</h4><p>🎃万圣节: 南瓜地鼠+25分 | 🎄圣诞节: 圣诞地鼠+35分 | 🧧春节: 红包地鼠+20分</p></div>
-      <div class="rules-section"><h4>✨ 限定角色</h4><p>每个主题有专属限定地鼠，出现概率更高、得分更多!</p></div>
-      <div class="rules-section"><h4>🎮 操作</h4><p>点击地鼠敲击 | 按 <span class="rules-key">P</span> 暂停</p></div>
-    `
-  },
-  endless:{
-    icon:'♾️',title:'无尽模式',sub:'极限挑战 · 1条命',
-    html:`
-      <div class="rules-section"><h4>🎯 目标</h4><p>只有1条命! 漏打任何地鼠立即结束，挑战极限!</p></div>
-      <div class="rules-section"><h4>💀 一命通关</h4><p>只要漏打1只地鼠(非兔兔/炸弹)，游戏立刻结束!</p></div>
-      <div class="rules-section"><h4>♾️ 无限递增</h4><p>每10秒进入新波次，难度无上限! 速度越来越快!</p></div>
-      <div class="rules-section"><h4>😈 Boss</h4><p>每30秒出现地鼠王，击败+50分</p></div>
-      <div class="rules-section"><h4>🎮 操作</h4><p>点击地鼠敲击 | 按 <span class="rules-key">P</span> 暂停</p></div>
-    `
-  }
-};
-
-const themeConfigs={
-  dessert:{bg:'linear-gradient(180deg,#FFF5F7 0%,#F0E6FF 30%,#E8F8F0 60%,#FFF5E4 100%)',holeBg:'#E8DDD0',name:'甜品森林'},
-  cloud:{bg:'linear-gradient(180deg,#E8F4FD 0%,#D4E8FF 30%,#F0E6FF 60%,#FFF 100%)',holeBg:'#D4E8FF',name:'云朵牧场'},
-  candy:{bg:'linear-gradient(180deg,#FFF0F0 0%,#FFE0E8 30%,#FFF5E4 60%,#FFE8D0 100%)',holeBg:'#FFD5D5',name:'糖果工厂'},
-  starry:{bg:'linear-gradient(180deg,#1a1a3e 0%,#2d2d5e 30%,#3d3d7e 60%,#1a1a3e 100%)',holeBg:'#3d3d7e',name:'星空夜市'}
-};
-
-const moleTypes={
-  normal:{emoji:'🐹',cls:'',points:10,weight:55,duration:[1200,2000],sound:'pop'},
-  golden:{emoji:'👑',cls:'golden',points:30,weight:10,duration:[800,1400],sound:'golden'},
-  rabbit:{emoji:'🐰',cls:'rabbit',points:-20,weight:15,duration:[1500,2500],sound:'rabbit'},
-  bomb:{emoji:'💣',cls:'bomb',points:-15,weight:10,duration:[1500,2200],sound:'bomb'},
-  boss:{emoji:'😈',cls:'boss',points:50,weight:5,duration:[3000,4000],sound:'bossHit',bossHP:3},
-  // Event specials
-  pumpkin:{emoji:'🎃',cls:'pumpkin',points:25,weight:15,duration:[1000,1800],sound:'pop'},
-  santa:{emoji:'🎅',cls:'santa',points:35,weight:12,duration:[900,1600],sound:'golden'},
-  redpack:{emoji:'🧧',cls:'redpack',points:20,weight:15,duration:[1100,1900],sound:'pop'}
-};
-
-// ============ Build Holes ============
-function buildHoles(){
-  holesGrid.innerHTML='';
-  for(let i=0;i<9;i++){
-    const h=document.createElement('div');h.className='hole';h.dataset.index=i;
-    h.innerHTML=`<div class="hole-bg"></div><div style="position:absolute;top:2px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.5);color:white;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;z-index:10;pointer-events:none;font-family:monospace;opacity:0.5">${i+1}</div>`;
-    h.addEventListener('pointerdown',e=>onHoleClick(i,e));
-    holesGrid.appendChild(h);
-  }
-}
-
-function buildVsHoles(containerId,playerIdx){
-  const c=$(containerId);c.innerHTML='';
-  const keys=playerIdx===0?['Q','W','A','S','Z','X']:['U','I','J','K','N','M'];
-  const numKeys=playerIdx===0?['1','2','3','4','5','6']:null;
-  for(let i=0;i<6;i++){
-    const h=document.createElement('div');h.className='vs-hole';h.dataset.index=i;h.dataset.player=playerIdx;
-    const hint=numKeys?`${numKeys[i]}/${keys[i]}`:keys[i];
-    h.innerHTML=`<div class="hole-bg"></div><div class="key-hint">${hint}</div>`;
-    h.addEventListener('pointerdown',e=>onVsHoleClick(playerIdx,i,e));
-    c.appendChild(h);
-  }
-  // Add keyboard legend
-  const legend=document.createElement('div');
-  legend.className='vs-keys-legend';
-  const legendKeys=numKeys?numKeys.map((n,i)=>`${n}/${keys[i]}`):keys;
-  legend.innerHTML=legendKeys.map(k=>`<span>${k}</span>`).join(' ');
-  legend.style.cssText='display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;justify-content:center;font-size:10px;color:#999;';
-  c.parentElement.appendChild(legend);
-}
-
-// ============ Create Mole ============
-function createMoleElement(type){
-  const cfg=moleTypes[type];const el=document.createElement('div');el.className=`mole ${cfg.cls}`;
-  let inner='<div class="mole-body"><div class="mole-face"><div class="eye left"></div><div class="eye right"></div><div class="nose"></div><div class="mouth"></div><div class="blush left"></div><div class="blush right"></div></div></div>';
-  if(type==='golden')inner+='<div class="crown">👑</div>';
-  if(type==='bomb')inner+='<div class="fuse"></div>';
-  if(type==='rabbit'){inner+='<div class="ears"><div class="ear left"></div><div class="ear right"></div></div>';inner+='<div class="carrot">🥕</div>'}
-  if(type==='boss'){inner+='<div class="big-crown">👑</div>';inner+='<div class="boss-hp"><div class="boss-hp-bar" style="width:100%"></div></div>'}
-  el.innerHTML=inner;return el;
-}
-
-// ============ Spawn Mole ============
-function spawnMole(){
-  if(!state.running||state.paused||state._bonusActive)return;
-  const cfg=modeConfigs[state.mode];
-  const elapsed=state.maxTimer-state.timer;
-
-  // Boss spawn check
-  let type;
-  if(cfg.bossInterval>0&&elapsed>0&&Math.floor(elapsed)%cfg.bossInterval===0&&Math.floor(elapsed)>(state._lastBossSpawn||-cfg.bossInterval)){
-    if(!state.activeMoles.some(m=>m.type==='boss')){
-      type='boss';state._lastBossSpawn=Math.floor(elapsed);
-      audio.play(400,'triangle',0.12,0.08);
-      setTimeout(()=>audio.play(600,'triangle',0.12,0.12),100);
-    }
-  }
-  if(!type){
-    // Build available types
-    let available=[];
-    if(state.mode==='event'){
-      const et=state._eventTheme;
-      const eventMap={halloween:'pumpkin',christmas:'santa',spring:'redpack'};
-      const eventType=eventMap[et]||'pumpkin';
-      available=[{type:'normal',weight:50},{type:'golden',weight:8},{type:'rabbit',weight:12},{type:'bomb',weight:8},{type:eventType,weight:22}];
-    }else if(state.mode==='classic'){
-      // Use difficulty-based mole weights for classic mode
-      const dc=difficultyConfigs[state.classicDifficulty];
-      const mw=dc.moleWeights;
-      const baseTypes=Object.entries(moleTypes).filter(([k])=>k!=='boss'&&k!=='pumpkin'&&k!=='santa'&&k!=='redpack');
-      available=[];
-      for(const [k] of baseTypes){
-        if(mw[k]!==undefined&&mw[k]>0)available.push({type:k,weight:mw[k]});
-      }
-      if(mw.boss>0)available.push({type:'boss',weight:mw.boss});
-    }else{
-      available=Object.entries(moleTypes).filter(([k])=>k!=='boss'&&k!=='pumpkin'&&k!=='santa'&&k!=='redpack').map(([k,v])=>({type:k,weight:v.weight}));
-    }
-    const totalW=available.reduce((s,a)=>s+a.weight,0);
-    let rand=Math.random()*totalW;
-    for(const a of available){rand-=a.weight;if(rand<=0){type=a.type;break}}
-    if(!type)type='normal';
-  }
-
-  const occupied=new Set(state.activeMoles.map(m=>m.holeIndex));
-  const avail=Array.from({length:9},(_,i)=>i).filter(i=>!occupied.has(i));
-  if(avail.length===0)return;
-  const holeIndex=avail[Math.floor(Math.random()*avail.length)];
-  const hole=$$('.hole')[holeIndex];
-  const mcfg=moleTypes[type];
-
-  const moleEl=createMoleElement(type);
-  moleEl.addEventListener('pointerdown',e=>{e.stopPropagation();onMoleClick(holeIndex,type,moleEl)});
-  hole.appendChild(moleEl);
-  requestAnimationFrame(()=>moleEl.classList.add('show'));
-
-  const dur=mcfg.duration[0]+Math.random()*(mcfg.duration[1]-mcfg.duration[0]);
-  const sm=state.activeEffects.freeze?0.5:1;
-  const actualDur=dur*sm/Math.min(state.difficulty*0.8,1.5);
-  const moleData={type,holeIndex,element:moleEl,timeout:null};
-  state.activeMoles.push(moleData);
-  moleData.timeout=setTimeout(()=>hideMole(moleData,false),Math.max(actualDur,500));
-}
-
-function hideMole(moleData,wasHit){
-  const idx=state.activeMoles.indexOf(moleData);if(idx===-1)return;
-  state.activeMoles.splice(idx,1);clearTimeout(moleData.timeout);
-  if(moleData.element&&moleData.element.parentNode){
-    if(!wasHit){moleData.element.classList.remove('show');setTimeout(()=>moleData.element.remove(),200)}
-    else moleData.element.remove();
-  }
-  if(state.mode==='survival'&&!wasHit&&moleData.type!=='rabbit'&&moleData.type!=='bomb'){
-    state._missStreak=(state._missStreak||0)+1;
-    if(state._missStreak>=3){state._missStreak=0;state.lives--;updateLives();showHitEffect(moleData.holeIndex,'💔','#FF6B6B');if(state.lives<=0)endGame()}
-  }else if(state.mode==='classic'&&state.classicDifficulty==='hell'&&!wasHit&&moleData.type!=='rabbit'&&moleData.type!=='bomb'){
-    state._missStreak=(state._missStreak||0)+1;
-    if(state._missStreak>=3){state._missStreak=0;state.lives--;updateLives();showHitEffect(moleData.holeIndex,'💔','#FF6B6B');if(state.lives<=0)endGame()}
-  }else if(wasHit)state._missStreak=0;
-  if(state.mode==='endless'&&!wasHit&&moleData.type!=='rabbit'&&moleData.type!=='bomb'){
-    state.lives--;updateLives();showHitEffect(moleData.holeIndex,'💔','#FF6B6B');
-    if(state.lives<=0)endGame();
-  }
-}
-
-// ============ Bonus Round (Classic) ============
-function triggerBonusRound(){
-  if(state._bonusActive||!state.running||state.paused)return;
-  state._bonusActive=true;
-  showAnnounce('🌟 全洞齐冒! 🌟');
-  audio.bonus();
-  $$('.hole').forEach(h=>h.classList.add('bonus'));
-
-  // Spawn moles in all holes
-  const existing=state.activeMoles.map(m=>m.holeIndex);
-  const toSpawn=Array.from({length:9},(_,i)=>i).filter(i=>!existing.includes(i));
-  toSpawn.forEach(i=>{
-    const types=['normal','normal','normal','golden','normal','normal'];
-    const type=types[Math.floor(Math.random()*types.length)];
-    const mcfg=moleTypes[type];const hole=$$('.hole')[i];
-    const moleEl=createMoleElement(type);
-    moleEl.addEventListener('pointerdown',e=>{e.stopPropagation();onMoleClick(i,type,moleEl)});
-    hole.appendChild(moleEl);requestAnimationFrame(()=>moleEl.classList.add('show'));
-    const moleData={type,holeIndex:i,element:moleEl,timeout:null};
-    state.activeMoles.push(moleData);
-  });
-
-  setTimeout(()=>{
-    state._bonusActive=false;
-    $$('.hole').forEach(h=>h.classList.remove('bonus'));
-  },3000);
-}
-
-// ============ Hole Click ============
-function onHoleClick(index,e){
-  if(!state.running||state.paused)return;
-  if(state.activeMoles.find(m=>m.holeIndex===index))return;
-  showHitEffect(index,'💨','#CCC');audio.play(150,'sine',0.04,0.04);
-}
-
-// ============ Mole Click ============
-function onMoleClick(holeIndex,type,moleEl){
-  if(!state.running||state.paused)return;
-  if(moleEl.classList.contains('hit'))return;
-  const cfg=moleTypes[type];
-
-  // Shield
-  if(type==='rabbit'&&state.activeEffects.shield){state.activeEffects.shield=false;activeItemEl.classList.remove('show');showHitEffect(holeIndex,'🛡️','#B5EAD7');hideMole(state.activeMoles.find(m=>m.holeIndex===holeIndex&&m.type===type),true);return}
-
-  // Bomb
-  if(type==='bomb'){
-    const timePenalty=state.mode==='classic'?difficultyConfigs[state.classicDifficulty].bombTimePenalty:5;
-    state.timer=Math.max(0,state.timer-timePenalty);updateTimer();showHitEffect(holeIndex,`💥-${timePenalty}s`,'#FF6B6B');
-    audio.bomb();shakeScreen();moleEl.classList.add('hit');
-    hideMole(state.activeMoles.find(m=>m.holeIndex===holeIndex&&m.type===type),true);spawnParticles(holeIndex,'#FF4444',10);return;
-  }
-
-  // Boss
-  if(type==='boss'){
-    const md=state.activeMoles.find(m=>m.holeIndex===holeIndex&&m.type==='boss');if(!md)return;
-    md.bossHP=(md.bossHP||cfg.bossHP)-1;
-    const hpBar=moleEl.querySelector('.boss-hp-bar');if(hpBar)hpBar.style.width=`${(md.bossHP/cfg.bossHP)*100}%`;
-    if(md.bossHP>0){audio.bossHit();showHitEffect(holeIndex,`👊x${md.bossHP}`,'#FF6B6B');moleEl.style.animation='none';moleEl.offsetHeight;moleEl.style.animation='';return}
-    audio.bossDefeat();state.score+=cfg.points;state.combo++;state.totalHits++;
-    showHitEffect(holeIndex,`+${cfg.points}`,'#FFD700');spawnParticles(holeIndex,'#FFD700',18);
-    if(state.mode==='survival'&&state.lives<3){state.lives++;updateLives();showHitEffect(holeIndex,'💖+1','#FF6B6B')}
-  }else{
-    // Normal hit
-    let points=cfg.points;
-    // Classic mode: use difficulty-based rabbit penalty
-    if(state.mode==='classic'&&type==='rabbit')points=difficultyConfigs[state.classicDifficulty].rabbitPenalty;
-    if(state.mode==='classic'&&type==='bomb')points=difficultyConfigs[state.classicDifficulty].bombPenalty;
-    if(state.activeEffects.rainbow)points*=2;
-    if(state.mode==='timeattack'&&state.combo>=5)points=Math.floor(points*(1+(state.combo-4)*0.5));
-    state.score=Math.max(0,state.score+points);state.combo++;state.totalHits++;
-    const sf=cfg.sound==='golden'?'golden':cfg.sound==='rabbit'?'rabbit':'pop';
-    if(sf==='pop'){audio.pop();if(state.combo>=3)audio.combo(Math.min(state.combo,10))}else audio[sf]();
-    const color=points>=0?(type==='golden'?'#FFD700':'#FFB5C2'):'#FF6B6B';
-    showHitEffect(holeIndex,`${points>=0?'+':''}${points}`,color);spawnParticles(holeIndex,color,points>=0?7:3);
-
-    // Collect mode: drop stars
-    if(state.mode==='collect'&&type!=='rabbit'){
-      state.totalStars++;updateCollectHUD();
-      audio.collect();
-      if(state.totalStars>=30){showAnnounce('🎉 收集完成!');setTimeout(()=>endGame(),1500)}
-    }
-  }
-
-  if(state.combo>=3){comboDisplay.textContent=`🔥 ${state.combo}连击!`;comboDisplay.classList.add('active');clearTimeout(state._comboTimeout);state._comboTimeout=setTimeout(()=>comboDisplay.classList.remove('active'),1500)}
-  state.maxCombo=Math.max(state.maxCombo,state.combo);updateScore();
-  if(!state._bonusActive&&Math.random()<modeConfigs[state.mode].itemDropRate&&type!=='rabbit'&&type!=='bomb')dropItem(holeIndex);
-  moleEl.classList.add('hit');hideMole(state.activeMoles.find(m=>m.holeIndex===holeIndex&&(m.type===type)),true);
-}
-
-// ============ VS Mode ============
-function spawnVsMole(playerIdx){
-  if(!state.vs.running||state.paused)return;
-  const activeMoles=state.vs.activeMoles[playerIdx];
-  const types=['normal','normal','normal','golden','normal','rabbit'];
-  const type=types[Math.floor(Math.random()*types.length)];
-  const occupied=new Set(activeMoles.map(m=>m.holeIndex));
-  const avail=Array.from({length:6},(_,i)=>i).filter(i=>!occupied.has(i));
-  if(avail.length===0)return;
-  const holeIndex=avail[Math.floor(Math.random()*avail.length)];
-  const container=playerIdx===0?$('#vs-holes1'):$('#vs-holes2');
-  const hole=container.querySelectorAll('.vs-hole')[holeIndex];
-  const mcfg=moleTypes[type];
-  const moleEl=createMoleElement(type);
-  moleEl.addEventListener('pointerdown',e=>{e.stopPropagation();onVsMoleClick(playerIdx,holeIndex,type,moleEl)});
-  hole.appendChild(moleEl);requestAnimationFrame(()=>moleEl.classList.add('show'));
-  const dur=mcfg.duration[0]+Math.random()*(mcfg.duration[1]-mcfg.duration[0]);
-  const moleData={type,holeIndex,element:moleEl,timeout:null};
-  activeMoles.push(moleData);
-  moleData.timeout=setTimeout(()=>{
-    const idx=activeMoles.indexOf(moleData);if(idx!==-1){activeMoles.splice(idx,1);clearTimeout(moleData.timeout);if(moleData.element&&moleData.element.parentNode){moleData.element.classList.remove('show');setTimeout(()=>moleData.element.remove(),200)}}
-  },Math.max(dur,600));
-}
-
-function onVsHoleClick(playerIdx,index,e){
-  if(!state.vs.running||state.paused)return;
-  if(state.vs.activeMoles[playerIdx].find(m=>m.holeIndex===index))return;
-  showHitEffect(index,'💨','#CCC',playerIdx===0?$('#vs-holes1'):$('#vs-holes2'));
-}
-
-function onVsMoleClick(playerIdx,holeIndex,type,moleEl){
-  if(!state.vs.running||state.paused)return;
-  if(moleEl.classList.contains('hit'))return;
-  const cfg=moleTypes[type];
-  const points=type==='rabbit'?-15:cfg.points;
-  state.vs.scores[playerIdx]=Math.max(0,state.vs.scores[playerIdx]+points);
-  $(`#vs-score${playerIdx+1}`).textContent=state.vs.scores[playerIdx];
-  audio.vsScore();
-  const activeMoles=state.vs.activeMoles[playerIdx];
-  const md=activeMoles.find(m=>m.holeIndex===holeIndex);
-  if(md){activeMoles.splice(activeMoles.indexOf(md),1);clearTimeout(md.timeout)}
-  moleEl.classList.add('hit');setTimeout(()=>moleEl.remove(),300);
-  if(state.vs.scores[playerIdx]>=100){endVsGame(playerIdx);return}
-}
-
-function useVsItem(playerIdx,itemType){
-  if(!state.vs.running||state.paused)return;
-  const target=playerIdx===0?1:0;
-  if(itemType==='bubble'){
-    // Block holes for opponent
-    const container=target===0?$('#vs-holes1'):$('#vs-holes2');
-    const holes=container.querySelectorAll('.vs-hole');
-    const blocked=Math.floor(Math.random()*6);
-    for(let i=0;i<2;i++){const h=holes[(blocked+i)%6];h.style.opacity='0.3';h.style.pointerEvents='none';setTimeout(()=>{h.style.opacity='1';h.style.pointerEvents='auto'},3000)}
-    showAnnounce('🫧 对手被泡泡遮住了!');
-  }else if(itemType==='honey'){
-    // Slow opponent
-    clearInterval(state.vs.spawnIntervals[target]);
-    state.vs.spawnIntervals[target]=setInterval(()=>spawnVsMole(target),2000);
-    setTimeout(()=>{clearInterval(state.vs.spawnIntervals[target]);if(state.vs.running)state.vs.spawnIntervals[target]=setInterval(()=>spawnVsMole(target),1200)},3000);
-    showAnnounce('🍯 对手被蜂蜜黏住了!');
-  }else if(itemType==='swap'){
-    // Swap scores
-    const tmp=state.vs.scores[0];state.vs.scores[0]=state.vs.scores[1];state.vs.scores[1]=tmp;
-    $('#vs-score1').textContent=state.vs.scores[0];$('#vs-score2').textContent=state.vs.scores[1];
-    showAnnounce('🔄 分数互换了!');
-  }
-  audio.item();
-}
-
-function endVsGame(winner){
-  state.vs.running=false;
-  clearInterval(state.vs.spawnIntervals[0]);clearInterval(state.vs.spawnIntervals[1]);
-  state.score=state.vs.scores[winner];
-  state.totalHits=0;state.maxCombo=0;state.totalMiss=0;state.totalStars=0;
-  showGameOver('vs');
-}
-
-// ============ Effects ============
-function showHitEffect(holeIndex,text,color,container=null){
-  const c=container||$$('.hole')[holeIndex];if(!c)return;
-  const el=document.createElement('div');el.className='hit-effect';el.textContent=text;el.style.color=color;
-  el.style.left='50%';el.style.top='30%';el.style.transform='translateX(-50%)';
-  c.appendChild(el);setTimeout(()=>el.remove(),800);
-}
-
-function spawnParticles(holeIndex,color,count,container=null){
-  const c=container||$$('.hole')[holeIndex];if(!c)return;
-  const particles=['⭐','✨','💖','🌟','💫','🎀','🌸','🍬','💎','🎯'];
-  for(let i=0;i<count;i++){
-    const p=document.createElement('div');p.className='particle';
-    p.textContent=particles[Math.floor(Math.random()*particles.length)];
-    p.style.left='50%';p.style.top='40%';
-    p.style.setProperty('--dx',`${(Math.random()-0.5)*120}px`);
-    p.style.setProperty('--dy',`${-40-Math.random()*80}px`);
-    c.appendChild(p);setTimeout(()=>p.remove(),700);
-  }
-}
-
-function showAnnounce(text){
-  announce.textContent=text;announce.classList.add('show');
-  setTimeout(()=>announce.classList.remove('show'),2000);
-}
-
-function shakeScreen(){
-  gameContainer.classList.add('shake');setTimeout(()=>gameContainer.classList.remove('shake'),400);
-}
-
-// ============ Items ============
-function dropItem(holeIndex){
-  const items=['rainbow','time','freeze','magnet','shield'];
-  const item=items[Math.floor(Math.random()*items.length)];
-  state.items[item]=(state.items[item]||0)+1;updateItemsBar();
-  const hole=$$('.hole')[holeIndex];if(!hole)return;
-  const el=document.createElement('div');el.className='hit-effect';
-  const icons={rainbow:'🌈',time:'⏳',freeze:'❄️',magnet:'🧲',shield:'🫧'};
-  el.textContent=icons[item];el.style.left='50%';el.style.top='20%';el.style.transform='translateX(-50%)';el.style.fontSize='30px';
-  hole.appendChild(el);setTimeout(()=>el.remove(),800);
-}
-
-function useItem(itemType){
-  if(!state.running||state.paused)return;if(!state.items[itemType]||state.items[itemType]<=0)return;
-  state.items[itemType]--;updateItemsBar();audio.item();
-  switch(itemType){
-    case'rainbow':state.activeEffects.rainbow=Date.now()+5000;activeItemEl.textContent='🌈 彩虹锤 5s';activeItemEl.classList.add('show');setTimeout(()=>{if(Date.now()>state.activeEffects.rainbow)activeItemEl.classList.remove('show')},5000);break;
-    case'time':state.timer+=5;updateTimer();showHitEffect(4,'⏳+5s','#FFD700');break;
-    case'freeze':state.activeEffects.freeze=Date.now()+3000;activeItemEl.textContent='❄️ 冰冻 3s';activeItemEl.classList.add('show');gameContainer.style.filter='hue-rotate(180deg)';setTimeout(()=>{gameContainer.style.filter='';if(Date.now()>state.activeEffects.freeze)activeItemEl.classList.remove('show')},3000);break;
-    case'magnet':[...state.activeMoles].forEach(m=>{if(m.element&&m.element.classList.contains('show')&&m.type!=='rabbit'&&m.type!=='bomb')onMoleClick(m.holeIndex,m.type,m.element)});break;
-    case'shield':state.activeEffects.shield=true;activeItemEl.textContent='🫧 护盾生效';activeItemEl.classList.add('show');break;
-  }
-}
-
-// ============ UI Updates ============
-function updateScore(){scoreEl.textContent=state.score}
-function updateTimer(){timerEl.textContent=Math.max(0,Math.ceil(state.timer));if(state.timer<=10&&state.timer>0)timerBox.classList.add('timer-warning');else timerBox.classList.remove('timer-warning')}
-function updateLives(){livesEl.textContent=state.lives;if(state.lives<=1)livesBox.classList.add('timer-warning');else livesBox.classList.remove('timer-warning')}
-function updateStage(){if(state.mode==='classic'){const dc=difficultyConfigs[state.classicDifficulty];stageText.textContent=`关卡${state._currentLevel}/${dc.levelCount}`}else stageText.textContent=`阶段${state.stage}`}
-function updateWave(){waveText.textContent=`波次${state.wave}`}
-function updateCollectHUD(){collectFill.style.width=`${Math.min(100,(state.totalStars/30)*100)}%`;collectProgress.textContent=`${Math.min(state.totalStars,30)}/30 ⭐`;if(state.totalStars>=10)collectBonus.textContent='🔓 已解锁草莓皮肤';if(state.totalStars>=20)collectBonus.textContent='🔓 已解锁布丁锤';if(state.totalStars>=30)collectBonus.textContent='🎉 全部收集!';}
-
-function updateItemsBar(){
-  $$('.item-slot').forEach(slot=>{
-    const it=slot.dataset.item,count=state.items[it]||0,ce=slot.querySelector('.item-count');
-    if(count>0){slot.classList.remove('empty');if(!ce){const c=document.createElement('div');c.className='item-count';c.textContent=count;slot.appendChild(c)}else ce.textContent=count}
-    else{slot.classList.add('empty');if(ce)ce.remove()}
-  });
-}
-
-// ============ Timer ============
-function startTimer(){
-  let lastSecond=Math.ceil(state.timer);
-  state.timerInterval=setInterval(()=>{
-    if(state.paused||state._levelTransitioning)return;
-    state.timer-=0.1;updateTimer();
-    const elapsed=state.maxTimer-state.timer;
-    const cfg=modeConfigs[state.mode];
-
-    // Classic: level-based progression
-    if(state.mode==='classic'){
-      // Update difficulty per level
-      const lvlIdx=state._currentLevel-1;
-      if(lvlIdx<cfg.levelSpeeds.length){
-        state.difficulty=1+lvlIdx*0.4;
-        const baseInt=cfg.levelSpeeds[lvlIdx];
-        const newInt=Math.round(baseInt/50)*50;
-        if(state._currentSpawnInterval!==newInt){
-          clearInterval(state.spawnInterval);
-          state._currentSpawnInterval=newInt;
-          state.spawnInterval=setInterval(spawnMole,state._currentSpawnInterval);
+        function roundRect(ctx, x, y, w, h, r) {
+            r = Math.min(r, w / 2, h / 2);
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.arcTo(x + w, y, x + w, y + r, r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+            ctx.lineTo(x + r, y + h);
+            ctx.arcTo(x, y + h, x, y + h - r, r);
+            ctx.lineTo(x, y + r);
+            ctx.arcTo(x, y, x + r, y, r);
+            ctx.closePath();
         }
-      }
 
-      if(state.timer<=0){
-        state.timer=0;updateTimer();
-        const target=cfg.levelTargets[lvlIdx]||0;
-        if(state.score>=target){
-          // Level cleared!
-          state._levelCleared=true;
-          if(state._currentLevel>=cfg.stages){
-            // All levels completed
-            state._levelTransitioning=true;
-            clearInterval(state.spawnInterval);
-            state.activeMoles.forEach(m=>{clearTimeout(m.timeout);if(m.element)m.element.remove()});state.activeMoles=[];
-            showAnnounce('🏆 全部关卡通过!');
-            audio.bonus();spawnParticles(4,'#FFD700',20);
-            setTimeout(()=>endGame(),2000);
-          }else{
-            // Transition to next level
-            state._levelTransitioning=true;
-            clearInterval(state.spawnInterval);
-            state.activeMoles.forEach(m=>{clearTimeout(m.timeout);if(m.element)m.element.remove()});state.activeMoles=[];
-            showAnnounce(`🎉 关卡 ${state._currentLevel} 通过!`);
-            audio.bonus();
-            setTimeout(()=>{
-              state._currentLevel++;state._levelTransitioning=false;
-              state.timer=15;state.maxTimer=15;state._currentSpawnInterval=1200;
-              updateStage();updateTimer();
-              showAnnounce(`📶 进入关卡 ${state._currentLevel}/${cfg.stages}! 目标: ${cfg.levelTargets[state._currentLevel-1]}分`);
-              state.spawnInterval=setInterval(spawnMole,state._currentSpawnInterval);
-              setTimeout(spawnMole,200);setTimeout(spawnMole,500);
-            },1800);
-          }
-        }else{
-          // Level failed
-          state._levelTransitioning=true;
-          clearInterval(state.spawnInterval);
-          state.activeMoles.forEach(m=>{clearTimeout(m.timeout);if(m.element)m.element.remove()});state.activeMoles=[];
-          showAnnounce(`💔 关卡 ${state._currentLevel} 失败! 目标 ${target}分`);
-          audio.gameOver();
-          setTimeout(()=>endGame(),1500);
+        // ==================== 音效系统 ====================
+        class SoundManager {
+            constructor() { this.ctx = null;
+                this.enabled = true;
+                this.init(); }
+            init() { if (!this.ctx) { try { this.ctx = new(window.AudioContext || window
+                        .webkitAudioContext)(); } catch (e) {} } }
+            playTone(freq, dur, type = 'square', vol = 0.2) { if (!this.enabled || !this.ctx) return; try { const osc =
+                        this.ctx.createOscillator(); const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + dur);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + dur); } catch (e) {} }
+            shoot() { this.playTone(800, 0.07, 'sawtooth', 0.18); }
+            explosion() { this.playTone(100, 0.35, 'triangle', 0.7);
+                this.playTone(70, 0.5, 'sawtooth', 0.5); }
+            hit() { this.playTone(400, 0.05, 'square', 0.12); }
+            powerup() { this.playTone(950, 0.12, 'sine', 0.2); }
+            uiClick() { this.playTone(600, 0.04, 'square', 0.1); }
         }
-      }
-      return;
-    }
 
-    // Classic: stage progression (non-level mode - kept for other modes)
-    if(cfg.stages>0&&state.mode!=='classic'){
-      const newStage=Math.min(cfg.stages,1+Math.floor(elapsed/cfg.stageInterval));
-      if(newStage!==state.stage){state.stage=newStage;updateStage();showAnnounce(`📶 进入阶段 ${state.stage}!`)}
-      if(cfg.bonusRound&&Math.floor(elapsed)>0&&Math.floor(elapsed)%20===0&&Math.floor(elapsed)!==(state._lastBonus||-1)){state._lastBonus=Math.floor(elapsed);triggerBonusRound()}
-    }
+        // ==================== 游戏状态 ====================
+        const STATE = { MENU: 0, TANK_SELECT: 1, LEVEL_SELECT: 2, PLAYING: 3, PAUSED: 4, GAME_OVER: 5, VICTORY: 6 };
+        const TILE = { EMPTY: 0, STONE: 1, SMOKE: 2 };
 
-    // Survival: wave progression
-    if(state.mode==='survival'){
-      const newWave=1+Math.floor(elapsed/15);
-      if(newWave!==state.wave){state.wave=newWave;updateWave();showAnnounce(`🌊 第 ${state.wave} 波!`);audio.wave()}
-    }
+        // ==================== 坦克类型 ====================
+        const TANK_TYPES = {
+            scout: { name: '侦察坦克', color: '#4fc3f7', darkColor: '#0277bd', hp: 85, shield: 40, speed: 2.8,
+                turnSpeed: 0.065, weapon: 'cannon', weaponCooldown: 150, damage: 26, skill: 'dash',
+                skillCooldown: 5000, desc: '高机动性' },
+            medium: { name: '中型坦克', color: '#8bc34a', darkColor: '#558b2f', hp: 125, shield: 60, speed: 2.2,
+                turnSpeed: 0.05, weapon: 'cannon', weaponCooldown: 180, damage: 36, skill: 'repair',
+                skillCooldown: 8000, desc: '均衡全能' },
+            heavy: { name: '重型坦克', color: '#ff7043', darkColor: '#bf360c', hp: 210, shield: 100, speed: 1.6,
+                turnSpeed: 0.038, weapon: 'cannon', weaponCooldown: 250, damage: 52, skill: 'shield',
+                skillCooldown: 10000, desc: '重甲火力' },
+            sniper: { name: '狙击坦克', color: '#ab47bc', darkColor: '#6a1b9a', hp: 105, shield: 50, speed: 1.8,
+                turnSpeed: 0.042, weapon: 'laser', weaponCooldown: 400, damage: 85, skill: 'aim',
+                skillCooldown: 6000, desc: '远程精准' },
+            engineer: { name: '工程坦克', color: '#ffd54f', darkColor: '#f57f17', hp: 95, shield: 70, speed: 2.0,
+                turnSpeed: 0.045, weapon: 'emp', weaponCooldown: 300, damage: 30, skill: 'drone',
+                skillCooldown: 8000, desc: '支援辅助' }
+        };
 
-    // Endless: speed ramp
-    if(state.mode==='endless'){
-      const newWave=1+Math.floor(elapsed/10);
-      if(newWave!==state.wave){state.wave=newWave;updateWave();showAnnounce(`♾️ 第 ${state.wave} 波!`);audio.wave()}
-      state.difficulty=1+elapsed*0.05;
-    }
+        // ==================== 难度 ====================
+        const DIFFICULTIES = {
+            easy: { name: '简单', enemyHpMul: 0.7, enemyDmgMul: 0.6, waveMul: 0.8, resourceMul: 1.5,
+            obstacleMul: 0.5, color: '#66bb6a' },
+            normal: { name: '普通', enemyHpMul: 1.0, enemyDmgMul: 1.0, waveMul: 1.0, resourceMul: 1.0,
+                obstacleMul: 1.0, color: '#ffa726' },
+            hard: { name: '困难', enemyHpMul: 1.4, enemyDmgMul: 1.3, waveMul: 1.3, resourceMul: 0.7,
+                obstacleMul: 1.5, color: '#ef5350' },
+            nightmare: { name: '噩梦', enemyHpMul: 2.0, enemyDmgMul: 1.8, waveMul: 1.6, resourceMul: 0.4,
+                obstacleMul: 2.0, color: '#ab47bc' }
+        };
 
-    // Difficulty
-    if(!cfg.speedRamp&&state.mode!=='classic')state.difficulty=1+Math.floor(elapsed/10)*0.3;
-    const baseInt=cfg.baseInterval||1200;
-    const newInt=Math.max(350,baseInt-state.difficulty*100);
-    if(state._currentSpawnInterval!==Math.round(newInt/50)*50){
-      clearInterval(state.spawnInterval);
-      state._currentSpawnInterval=Math.round(newInt/50)*50;
-      state.spawnInterval=setInterval(spawnMole,state._currentSpawnInterval);
-    }
+        // ==================== 粒子系统 ====================
+        class Particle {
+            constructor(x, y, vx, vy, life, size, color, type = 'circle', gravity = 0) {
+                this.x = x;
+                this.y = y;
+                this.vx = vx;
+                this.vy = vy;
+                this.life = life;
+                this.maxLife = life;
+                this.size = size;
+                this.color = color;
+                this.type = type;
+                this.gravity = gravity;
+                this.alpha = 1;
+            }
+            update(dt) {
+                this.x += this.vx * dt;
+                this.y += this.vy * dt;
+                this.vy += this.gravity * dt;
+                this.life -= dt;
+                this.alpha = Math.max(0, this.life / this.maxLife);
+                return this.life > 0;
+            }
+            draw(ctx, camX = 0, camY = 0) {
+                ctx.globalAlpha = this.alpha * 0.85;
+                if (this.type === 'circle') {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x - camX, this.y - camY, this.size * this.alpha, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (this.type === 'smoke') {
+                    const r = this.size * (1.5 - this.alpha * 0.5);
+                    const grad = ctx.createRadialGradient(this.x - camX, this.y - camY, 0, this.x - camX, this.y -
+                        camY, r);
+                    grad.addColorStop(0, this.color);
+                    grad.addColorStop(1, 'transparent');
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(this.x - camX, this.y - camY, r, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (this.type === 'spark') {
+                    ctx.strokeStyle = this.color;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(this.x - camX, this.y - camY);
+                    ctx.lineTo(this.x - camX - this.vx * 0.04, this.y - camY - this.vy * 0.04);
+                    ctx.stroke();
+                }
+                ctx.globalAlpha = 1;
+            }
+        }
+        class ParticleSystem {
+            constructor() { this.particles = [];
+                this.maxParticles = 250; }
+            emit(x, y, count, options = {}) {
+                if (this.particles.length >= this.maxParticles) return;
+                const { speedMin = 40, speedMax = 130, lifeMin = 0.25, lifeMax = 0.7, sizeMin = 1, sizeMax = 4,
+                    color = '#fff', type = 'circle', gravity = 0, angleMin = 0, angleMax = Math.PI * 2 } =
+                options;
+                for (let i = 0; i < count; i++) {
+                    const angle = rand(angleMin, angleMax);
+                    const speed = rand(speedMin, speedMax);
+                    this.particles.push(new Particle(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed, rand(
+                        lifeMin, lifeMax), rand(sizeMin, sizeMax), color, type, gravity));
+                }
+            }
+            update(dt) { this.particles = this.particles.filter(p => p.update(dt)); }
+            draw(ctx, camX = 0, camY = 0) { for (const p of this.particles) p.draw(ctx, camX, camY); }
+            clear() { this.particles = []; }
+        }
 
-    if(state.timer<=0){state.timer=0;updateTimer();endGame()}
-  },100);
-}
+        // ==================== 地图 ====================
+        class GameMap {
+            constructor(width, height, difficulty, tileSize = 40) {
+                this.width = width;
+                this.height = height;
+                this.tileSize = tileSize;
+                this.difficulty = difficulty;
+                this.tiles = [];
+                this.generate();
+            }
+            generate() {
+                this.tiles = [];
+                const obstacleMul = this.difficulty.obstacleMul || 1.0;
+                for (let y = 0; y < this.height; y++) {
+                    this.tiles[y] = [];
+                    for (let x = 0; x < this.width; x++) {
+                        this.tiles[y][x] = (x === 0 || y === 0 || x === this.width - 1 || y === this.height - 1) ?
+                            TILE.STONE : TILE.EMPTY;
+                    }
+                }
+                const stoneProb = 0.04 * obstacleMul;
+                for (let y = 1; y < this.height - 1; y++)
+                    for (let x = 1; x < this.width - 1; x++)
+                        if (Math.random() < stoneProb) this.tiles[y][x] = TILE.STONE;
+                const smokeProb = 0.03;
+                for (let y = 1; y < this.height - 1; y++)
+                    for (let x = 1; x < this.width - 1; x++)
+                        if (this.tiles[y][x] === TILE.EMPTY && Math.random() < smokeProb) {
+                            let isolated = true;
+                            for (let dy = -2; dy <= 2; dy++)
+                                for (let dx = -2; dx <= 2; dx++) {
+                                    const nx = x + dx,
+                                        ny = y + dy;
+                                    if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height && this.tiles[ny][
+                                            nx
+                                        ] === TILE.SMOKE) { isolated = false; break; }
+                                }
+                            if (isolated) this.tiles[y][x] = TILE.SMOKE;
+                        }
+                const spawn = this.getPlayerSpawn();
+                this.clearArea(spawn.x, spawn.y, 3);
+            }
+            getPlayerSpawn() { return { x: Math.floor(this.width / 2), y: Math.floor(this.height / 2) }; }
+            clearArea(cx, cy, r) {
+                for (let y = cy - r; y <= cy + r; y++)
+                    for (let x = cx - r; x <= cx + r; x++)
+                        if (x >= 0 && x < this.width && y >= 0 && y < this.height) this.tiles[y][x] = TILE.EMPTY;
+            }
+            getTile(x, y) { return (x < 0 || x >= this.width || y < 0 || y >= this.height) ? TILE.STONE : this.tiles[
+                    y][x]; }
+            isSolid(x, y) { return this.getTile(x, y) === TILE.STONE; }
+            isSmoke(x, y) { return this.getTile(x, y) === TILE.SMOKE; }
+            // 墙壁不可破坏 - destroyTile 已移除
+            draw(ctx, camX, camY, viewW, viewH) {
+                const ts = this.tileSize;
+                const startX = Math.floor(camX / ts) - 1,
+                    startY = Math.floor(camY / ts) - 1;
+                const endX = startX + Math.ceil(viewW / ts) + 2,
+                    endY = startY + Math.ceil(viewH / ts) + 2;
+                for (let y = startY; y < endY; y++)
+                    for (let x = startX; x < endX; x++) {
+                        if (x < 0 || x >= this.width || y < 0 || y >= this.height) continue;
+                        const tile = this.tiles[y][x];
+                        const px = x * ts - camX,
+                            py = y * ts - camY;
+                        ctx.fillStyle = '#1c1c1c';
+                        ctx.fillRect(px, py, ts, ts);
+                        ctx.fillStyle = '#222';
+                        ctx.fillRect(px + 0.5, py + 0.5, ts - 1, ts - 1);
+                        if (tile === TILE.STONE) {
+                            const isBoundary = (x === 0 || y === 0 || x === this.width - 1 || y === this.height - 1);
+                            if (isBoundary) {
+                                ctx.fillStyle = '#8a7e6e';
+                                ctx.fillRect(px, py, ts, ts);
+                                ctx.strokeStyle = '#5a5040';
+                                ctx.lineWidth = 2;
+                                ctx.beginPath();
+                                ctx.moveTo(px, py + ts / 2 - 4);
+                                ctx.lineTo(px + ts, py + ts / 2 + 4);
+                                ctx.stroke();
+                                ctx.beginPath();
+                                ctx.moveTo(px, py + ts / 2 + 4);
+                                ctx.lineTo(px + ts, py + ts / 2 - 4);
+                                ctx.stroke();
+                            } else {
+                                ctx.fillStyle = '#a09080';
+                                roundRect(ctx, px + 2, py + 2, ts - 4, ts - 4, 8);
+                                ctx.fill();
+                                ctx.fillStyle = '#b0a090';
+                                roundRect(ctx, px + 5, py + 5, ts - 10, ts - 10, 5);
+                                ctx.fill();
+                            }
+                        } else if (tile === TILE.SMOKE) {
+                            ctx.fillStyle = '#b0b0b0';
+                            ctx.fillRect(px, py, ts, ts);
+                            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                            for (let i = 0; i < 3; i++) {
+                                ctx.beginPath();
+                                ctx.arc(px + rand(6, ts - 6), py + rand(6, ts - 6), rand(4, 8), 0, Math.PI * 2);
+                                ctx.fill();
+                            }
+                        }
+                    }
+            }
+        }
 
-// ============ Show Rules ============
-function showRules(){
-  const rc=rulesContent[state.mode];
-  $('#rules-icon').textContent=rc.icon;
-  $('#rules-title').textContent=rc.title;
-  $('#rules-subtitle').textContent=rc.sub;
-  $('#rules-content').innerHTML=typeof rc.html==='function'?rc.html():rc.html||(rc.getHtml?rc.getHtml():'');
-  $('#rules-overlay').classList.remove('hidden');
-  // Apply theme
-  const theme=themeConfigs[state.theme];
-  gameContainer.style.background=theme.bg;
-  startScreen.classList.add('hidden');overScreen.classList.add('hidden');
-  gameScreen.classList.remove('hidden');
-  $$('.mole,.hit-effect,.particle').forEach(el=>el.remove());
-}
+        // ==================== 实体与子弹 ====================
+        class Entity {
+            constructor(x, y, w, h) {
+                this.x = x;
+                this.y = y;
+                this.width = w;
+                this.height = h;
+                this.vx = 0;
+                this.vy = 0;
+                this.angle = 0;
+                this.hp = 100;
+                this.maxHp = 100;
+                this.alive = true;
+            }
+            get centerX() { return this.x + this.width / 2; }
+            get centerY() { return this.y + this.height / 2; }
+        }
+        class Bullet extends Entity {
+            constructor(x, y, angle, owner, options = {}) {
+                super(x, y, 6, 6);
+                this.angle = angle;
+                this.owner = owner;
+                this.speed = options.speed || 6;
+                this.damage = options.damage || 25;
+                this.life = options.life || 2;
+                this.color = options.color || '#ff0';
+                this.radius = options.radius || 3;
+                this.explosive = options.explosive || false;
+                this.pierce = options.pierce || false;
+                this.pierceLeft = this.pierce ? 3 : 0;
+                this.trail = [];
+            }
+            update(dt) {
+                this.vx = Math.cos(this.angle) * this.speed * 60;
+                this.vy = Math.sin(this.angle) * this.speed * 60;
+                this.x += this.vx * dt;
+                this.y += this.vy * dt;
+                this.life -= dt;
+                if (this.life <= 0) this.alive = false;
+                this.trail.push({ x: this.x, y: this.y });
+                if (this.trail.length > 6) this.trail.shift();
+            }
+            draw(ctx, camX, camY) {
+                const sx = this.x - camX,
+                    sy = this.y - camY;
+                const col = this.explosive ? '#ff6600' : (this.pierce ? '#ff00ff' : this.color);
+                for (let i = 0; i < this.trail.length; i++) {
+                    ctx.globalAlpha = i / this.trail.length * 0.4;
+                    ctx.fillStyle = col;
+                    ctx.beginPath();
+                    ctx.arc(this.trail[i].x - camX, this.trail[i].y - camY, this.radius * (i / this.trail.length), 0,
+                        Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = col;
+                ctx.beginPath();
+                ctx.arc(sx, sy, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(sx, sy, this.radius * 0.45, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
 
-// ============ Start Game (actual) ============
-function startGame(){
-  $('#rules-overlay').classList.add('hidden');
-  audio.init();
-  let cfg=modeConfigs[state.mode];
-  // Classic mode: override with difficulty config
-  let dc=null;
-  if(state.mode==='classic'){
-    dc=difficultyConfigs[state.classicDifficulty];
-    cfg={...cfg,timer:dc.levelTime,lives:dc.lives,itemDropRate:dc.itemDropRate,stages:dc.levelCount,levelTargets:dc.targets,levelSpeeds:dc.speeds};
-  }
-  state.running=true;state.paused=false;state.score=0;state.timer=cfg.timer;state.maxTimer=cfg.timer;
-  state.lives=cfg.lives;state.combo=0;state.maxCombo=0;state.totalHits=0;state.totalMiss=0;state.totalStars=0;
-  state.activeMoles=[];state.items={rainbow:0,time:0,freeze:0,magnet:0,shield:0};
-  state.activeEffects={rainbow:0,freeze:0,shield:false};state.difficulty=1;
-  state._missStreak=0;state._lastBossSpawn=-999;state._currentSpawnInterval=cfg.baseInterval||1200;
-  state.blindOpened=false;state.stage=1;state.wave=1;state._bonusActive=false;state._lastBonus=-1;
-  state._currentLevel=1;state._levelTransitioning=false;state._levelCleared=false;
+        // ==================== 坦克基类 ====================
+        class Tank extends Entity {
+            constructor(x, y, type, isPlayer = false) {
+                super(x, y, 36, 36);
+                this.type = type;
+                this.isPlayer = isPlayer;
+                this.hp = type.hp;
+                this.maxHp = type.hp;
+                this.shield = type.shield;
+                this.maxShield = type.shield;
+                this.speed = type.speed;
+                this.turnSpeed = type.turnSpeed;
+                this.weapon = type.weapon;
+                this.weaponCooldown = type.weaponCooldown;
+                this.damage = type.damage;
+                this.cooldown = 0;
+                this.skillCooldown = type.skillCooldown;
+                this.skillTimer = 0;
+                this.angle = 0;
+                this.turretAngle = 0;
+                this.alive = true;
+                this.hiddenInSmoke = false;
+                this.exposedTimer = 0;
+                this.hitFlash = 0;
+                this._killedHandled = false;
+            }
+            update(dt) {
+                if (this.cooldown > 0) this.cooldown -= dt * 1000;
+                if (this.skillTimer > 0) this.skillTimer -= dt * 1000;
+                if (this.exposedTimer > 0) this.exposedTimer -= dt;
+                if (this.hitFlash > 0) this.hitFlash -= dt;
+                this.x += this.vx * dt;
+                this.y += this.vy * dt;
+            }
+            takeDamage(amount, world) {
+                if (!this.alive) return;
+                if (this.shield > 0) { const ab = Math.min(this.shield, amount);
+                    this.shield -= ab;
+                    amount -= ab; }
+                this.hp -= amount;
+                this.hitFlash = 0.1;
+                if (this.hp <= 0) {
+                    this.hp = 0;
+                    this.alive = false;
+                    if (world) {
+                        if (!this.isPlayer) world.handleEnemyKilled(this);
+                        else world.gameOver = true;
+                    }
+                }
+                if (this.isPlayer && this.hiddenInSmoke) this.exposedTimer = 3.0;
+            }
+            drawTankShape(ctx, x, y, w, h, color, darkColor, angle, turretAngle) {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(angle);
+                ctx.fillStyle = color;
+                roundRect(ctx, -w / 2, -h / 2, w, h, 6);
+                ctx.fill();
+                ctx.strokeStyle = darkColor;
+                ctx.lineWidth = 1.5;
+                roundRect(ctx, -w / 2, -h / 2, w, h, 6);
+                ctx.stroke();
+                ctx.fillStyle = '#333';
+                roundRect(ctx, -w / 2 - 2, -h / 2 - 2, w + 4, 5, 2);
+                ctx.fill();
+                roundRect(ctx, -w / 2 - 2, h / 2 - 3, w + 4, 5, 2);
+                ctx.fill();
+                ctx.rotate(turretAngle - angle);
+                ctx.fillStyle = darkColor;
+                ctx.beginPath();
+                ctx.arc(0, 0, 12, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                ctx.fillStyle = '#444';
+                roundRect(ctx, 9, -3.5, 18, 7, 3);
+                ctx.fill();
+                ctx.fillStyle = '#222';
+                roundRect(ctx, 24, -2.5, 4, 5, 2);
+                ctx.fill();
+                ctx.restore();
+            }
+            draw(ctx, camX, camY) {
+                const sx = this.x - camX,
+                    sy = this.y - camY;
+                if (this.hitFlash > 0 && this.hitFlash % 0.05 < 0.025) return;
+                this.drawTankShape(ctx, sx + this.width / 2, sy + this.height / 2, this.width, this.height, this.type
+                    .color, this.type.darkColor || '#333', this.angle, this.turretAngle);
+                if (this.exposedTimer > 0) {
+                    ctx.strokeStyle = 'rgba(255,255,0,0.7)';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(sx + this.width / 2, sy + this.height / 2, this.width / 2 + 9, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+                if (!this.isPlayer || this.hp < this.maxHp) {
+                    const bw = this.width,
+                        bh = 4;
+                    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                    ctx.fillRect(sx - 1, sy - 9, bw + 2, bh + 2);
+                    ctx.fillStyle = '#e53935';
+                    ctx.fillRect(sx, sy - 8, bw, bh);
+                    ctx.fillStyle = '#66bb6a';
+                    ctx.fillRect(sx, sy - 8, bw * (this.hp / this.maxHp), bh);
+                }
+            }
+        }
 
-  // Event theme
-  if(state.mode==='event'){
-    const themes=['halloween','christmas','spring'];
-    state._eventTheme=themes[Math.floor(Math.random()*themes.length)];
-    const names={halloween:'🎃 万圣节',christmas:'🎄 圣诞节',spring:'🧧 春节'};
-    setTimeout(()=>showAnnounce(names[state._eventTheme]),500);
-  }
+        // ==================== 玩家坦克 ====================
+        class PlayerTank extends Tank {
+            constructor(x, y, typeKey) {
+                super(x, y, TANK_TYPES[typeKey], true);
+                this.typeKey = typeKey;
+                this.ammo = 50;
+                this.maxAmmo = 50;
+                this.energy = 100;
+                this.maxEnergy = 100;
+                this.energyRegen = 10;
+                this.kills = 0;
+                this.exp = 0;
+                this.expToNext = 100;
+                this.level = 1;
+                this.combo = 0;
+                this.comboTimer = 0;
+                this.mouseX = 0;
+                this.mouseY = 0;
+                this.keys = {};
+                this.shooting = false;
+                this.altShooting = false;
+                this.skillUsed = false;
+                this.explosiveAmmo = 0;
+                this.pierceAmmo = 0;
+                this.touchDir = null;
+                this.trackTimer = 0;
+            }
+            update(dt, world) {
+                super.update(dt);
+                this.energy = Math.min(this.maxEnergy, this.energy + this.energyRegen * dt);
+                if (this.comboTimer > 0) this.comboTimer -= dt;
+                else this.combo = 0;
+                let ax = 0,
+                    ay = 0;
+                if (this.touchDir) { ax = this.touchDir.x;
+                    ay = this.touchDir.y; }
+                if (this.keys['shift']) {
+                    const dx = this.mouseX + world.camera.x - this.centerX;
+                    const dy = this.mouseY + world.camera.y - this.centerY;
+                    const target = Math.atan2(dy, dx);
+                    this.angle = angleLerp(this.angle, target, this.turnSpeed * 2.2 * dt * 60);
+                    this.vx = Math.cos(this.angle) * this.speed * 60 * 1.25;
+                    this.vy = Math.sin(this.angle) * this.speed * 60 * 1.25;
+                } else {
+                    if (this.keys['w'] || this.keys['arrowup']) ay -= 1;
+                    if (this.keys['s'] || this.keys['arrowdown']) ay += 1;
+                    if (this.keys['a'] || this.keys['arrowleft']) ax -= 1;
+                    if (this.keys['d'] || this.keys['arrowright']) ax += 1;
+                    const len = Math.hypot(ax, ay);
+                    if (len > 0) {
+                        ax /= len;
+                        ay /= len;
+                        const target = Math.atan2(ay, ax);
+                        this.angle = angleLerp(this.angle, target, this.turnSpeed * dt * 60);
+                        this.vx = Math.cos(this.angle) * this.speed * 60 * len;
+                        this.vy = Math.sin(this.angle) * this.speed * 60 * len;
+                    } else { this.vx = 0;
+                        this.vy = 0; }
+                }
+                this.trackTimer += dt;
+                if (this.trackTimer > 0.08 && (Math.abs(this.vx) > 1 || Math.abs(this.vy) > 1)) {
+                    this.trackTimer = 0;
+                    world.addTrackMark(this.centerX, this.centerY);
+                }
+                const dx = this.mouseX + world.camera.x - this.centerX;
+                const dy = this.mouseY + world.camera.y - this.centerY;
+                this.turretAngle = Math.atan2(dy, dx);
+                if ((this.shooting || this.keys[' ']) && this.cooldown <= 0 && this.ammo > 0) this.fire(world);
+                if (this.altShooting && this.skillTimer <= 0) this.useSkill(world);
+                if (this.ammo < this.maxAmmo) this.ammo += 0.08;
+                this.resolveCollision(world.map);
+                this.hiddenInSmoke = world.map.isSmoke(Math.floor(this.centerX / world.map.tileSize), Math.floor(this
+                    .centerY / world.map.tileSize));
+            }
+            fire(world) {
+                const base = this.turretAngle;
+                for (const off of [-0.13, 0, 0.13]) {
+                    const opts = { speed: 6, damage: this.damage, color: '#ffaa00', radius: 3 };
+                    if (this.explosiveAmmo > 0) { opts.explosive = true;
+                        opts.color = '#ff6600';
+                        this.explosiveAmmo--; } else if (this.pierceAmmo > 0) { opts.pierce = true;
+                        opts.color = '#ff00ff';
+                        this.pierceAmmo--; }
+                    world.bullets.push(new Bullet(this.centerX, this.centerY, base + off, this, opts));
+                }
+                this.cooldown = this.weaponCooldown;
+                this.ammo--;
+                world.sound.shoot();
+                world.camera.shake(2, 80);
+            }
+            useSkill(world) {
+                const skill = this.type.skill;
+                if (skill === 'dash') { this.speed *= 2.5;
+                    setTimeout(() => this.speed /= 2.5, 400); } else if (skill === 'repair') { this.hp = Math.min(this
+                        .maxHp, this.hp + 50);
+                    this.shield += 25; } else if (skill === 'shield') { this.shield += 45; } else if (skill ===
+                    'aim') { this.damage *= 1.5;
+                    setTimeout(() => this.damage /= 1.5, 3500); } else if (skill === 'drone') {
+                    world.particles.emit(this.centerX, this.centerY, 15, { color: '#ffd54f' });
+                }
+                this.skillTimer = this.skillCooldown;
+                this.skillUsed = true;
+                world.sound.powerup();
+            }
+            resolveCollision(map) {
+                const ts = map.tileSize;
+                for (let y = Math.floor(this.y / ts); y <= Math.floor((this.y + this.height) / ts); y++)
+                    for (let x = Math.floor(this.x / ts); x <= Math.floor((this.x + this.width) / ts); x++)
+                        if (map.isSolid(x, y)) {
+                            const tx = x * ts,
+                                ty = y * ts;
+                            if (this.x + this.width > tx && this.x < tx + ts && this.y + this.height > ty && this
+                                .y < ty + ts) {
+                                const ox = Math.min(this.x + this.width - tx, tx + ts - this.x);
+                                const oy = Math.min(this.y + this.height - ty, ty + ts - this.y);
+                                if (ox < oy) { if (this.centerX < tx + ts / 2) this.x = tx - this.width;
+                                    else this.x = tx + ts; } else { if (this.centerY < ty + ts / 2) this.y = ty -
+                                        this.height;
+                                    else this.y = ty + ts; }
+                            }
+                        }
+            }
+        }
 
-  // Apply theme
-  const theme=themeConfigs[state.theme];
-  gameContainer.style.background=theme.bg;
-  $$('.hole-bg').forEach(bg=>{bg.style.background=`radial-gradient(ellipse at center,${theme.holeBg} 0%,${theme.holeBg}dd 60%,${theme.holeBg}99 100%)`;bg.style.boxShadow='inset 0 4px 8px rgba(0,0,0,0.15)'});
+        // ==================== 敌人坦克 ====================
+        class EnemyTank extends Tank {
+            constructor(x, y, typeKey, difficulty) {
+                super(x, y, TANK_TYPES[typeKey], false);
+                this.typeKey = typeKey;
+                this.difficulty = difficulty;
+                this.aiTimer = 0;
+                this.aiState = 'patrol';
+                this.hp *= difficulty.enemyHpMul;
+                this.maxHp = this.hp;
+                this.damage *= difficulty.enemyDmgMul;
+                this.shield *= difficulty.enemyHpMul;
+                this.maxShield = this.shield;
+                this.patrolTarget = { x: rand(100, 1500), y: rand(100, 900) };
+                this.attackRange = 280;
+                this.detectionRange = 380;
+                this.isBoss = false;
+            }
+            update(dt, world) {
+                super.update(dt);
+                this.aiTimer -= dt;
+                const player = world.player;
+                const distToPlayer = dist(this, player);
+                const playerHidden = player.hiddenInSmoke && player.exposedTimer <= 0;
+                if (distToPlayer < this.detectionRange && !playerHidden) this.aiState = 'attack';
+                else if (this.aiState === 'attack') this.aiState = 'patrol';
+                if (this.aiState === 'patrol') {
+                    if (this.aiTimer <= 0) {
+                        this.patrolTarget = { x: rand(100, world.map.width * world.map.tileSize - 100), y: rand(100,
+                                world.map.height * world.map.tileSize - 100) };
+                        this.aiTimer = rand(1, 3);
+                    }
+                    const dx = this.patrolTarget.x - this.centerX,
+                        dy = this.patrolTarget.y - this.centerY;
+                    const target = Math.atan2(dy, dx);
+                    if (dist(this, this.patrolTarget) < 30) { this.vx = 0;
+                        this.vy = 0; } else { this.vx = Math.cos(target) * this.speed * 60 * 0.4;
+                        this.vy = Math.sin(target) * this.speed * 60 * 0.4; }
+                    this.angle = angleLerp(this.angle, target, this.turnSpeed * dt * 60);
+                } else {
+                    this.turretAngle = Math.atan2(player.centerY - this.centerY, player.centerX - this.centerX);
+                    const desired = (this.typeKey === 'sniper') ? 300 : 200;
+                    const angleToPlayer = Math.atan2(player.y - this.y, player.x - this.x);
+                    const diff = distToPlayer - desired;
+                    if (Math.abs(diff) > 30) { const dir = diff > 0 ? 1 : -1;
+                        this.vx = Math.cos(angleToPlayer) * this.speed * 60 * dir;
+                        this.vy = Math.sin(angleToPlayer) * this.speed * 60 * dir; } else { this.vx = 0;
+                        this.vy = 0; }
+                    this.angle = angleLerp(this.angle, angleToPlayer, this.turnSpeed * dt * 60);
+                    if (this.cooldown <= 0 && distToPlayer < this.attackRange) this.fire(world);
+                }
+                this.resolveCollision(world.map);
+            }
+            fire(world) {
+                world.bullets.push(new Bullet(this.centerX, this.centerY, this.turretAngle, this, { speed: 2.8,
+                    damage: this.damage, color: '#ff5252', radius: 3 }));
+                this.cooldown = this.weaponCooldown;
+                world.sound.shoot();
+            }
+            resolveCollision(map) {
+                const ts = map.tileSize;
+                for (let y = Math.floor(this.y / ts); y <= Math.floor((this.y + this.height) / ts); y++)
+                    for (let x = Math.floor(this.x / ts); x <= Math.floor((this.x + this.width) / ts); x++)
+                        if (map.isSolid(x, y)) {
+                            const tx = x * ts,
+                                ty = y * ts;
+                            if (this.x + this.width > tx && this.x < tx + ts && this.y + this.height > ty && this
+                                .y < ty + ts) {
+                                const ox = Math.min(this.x + this.width - tx, tx + ts - this.x);
+                                const oy = Math.min(this.y + this.height - ty, ty + ts - this.y);
+                                if (ox < oy) { if (this.centerX < tx + ts / 2) this.x = tx - this.width;
+                                    else this.x = tx + ts; } else { if (this.centerY < ty + ts / 2) this.y = ty -
+                                        this.height;
+                                    else this.y = ty + ts; }
+                            }
+                        }
+            }
+        }
 
-  // Mode-specific UI
-  const isVs=state.mode==='vs';
-  holesGrid.style.display=isVs?'none':'grid';
-  vsContainer.style.display=isVs?'flex':'none';
-  vsContainer.classList.toggle('active',isVs);
-  collectHud.style.display=state.mode==='collect'?'block':'none';
-  stageBox.style.display=cfg.showStage?'flex':'none';
-  waveBox.style.display=cfg.showWave?'flex':'none';
-  livesBox.style.display=cfg.showLives||(state.mode==='classic'&&dc&&dc.lives<999)?'flex':'none';
-  timerBox.style.display=state.mode==='collect'||state.mode==='endless'||state.mode==='vs'?'none':'flex';
-  itemsBar.style.display=isVs?'none':'flex';
+        // ==================== 游戏世界 ====================
+        class GameWorld {
+            constructor(mode, difficulty, playerType, level = 1) {
+                this.mode = mode;
+                this.difficulty = difficulty;
+                this.level = level;
+                this.map = new GameMap(40, 30, difficulty);
+                this.player = new PlayerTank(this.map.getPlayerSpawn().x * 40, this.map.getPlayerSpawn().y * 40,
+                    playerType);
+                this.enemies = [];
+                this.bullets = [];
+                this.lasers = [];
+                this.particles = new ParticleSystem();
+                this.explosions = [];
+                this.trackMarks = [];
+                this.powerups = [];
+                this.camera = { x: 0, y: 0, shakeAmount: 0, shakeTime: 0 };
+                this.sound = new SoundManager();
+                this.wave = 0;
+                this.enemiesToSpawn = 0;
+                this.spawnTimer = 0;
+                this.score = 0;
+                this.totalWaves = 20;
+                this.gameOver = false;
+                this.victory = false;
+                this.bossesDefeated = 0;
+                this.initMode();
+                this.updateCamera();
+            }
+            addTrackMark(x, y) { this.trackMarks.push({ x, y, life: 1 });
+                if (this.trackMarks.length > 60) this.trackMarks.shift(); }
+            createExplosion(x, y, radius, big = false) {
+                this.particles.emit(x, y, big ? 35 : 18, { color: '#ffaa00', speedMin: 80, speedMax: 260, lifeMin: 0.25,
+                    lifeMax: 0.7, sizeMin: 1, sizeMax: 6 });
+                this.particles.emit(x, y, big ? 18 : 10, { color: '#ff4400', speedMin: 50, speedMax: 160, lifeMin: 0.3,
+                    lifeMax: 0.9, sizeMin: 2, sizeMax: 8 });
+                this.explosions.push({ x, y, radius, life: 0.4 });
+                this.camera.shake(big ? 10 : 5, big ? 350 : 180);
+                this.sound.explosion();
+            }
+            initMode() { this.startWave(); }
+            startWave() {
+                this.wave++;
+                this.enemiesToSpawn = Math.floor(4 + this.wave * 1.5 * this.difficulty.waveMul);
+                if (this.wave % 5 === 0) this.enemiesToSpawn = Math.max(3, Math.floor(this.wave / 2));
+                this.spawnTimer = 0;
+            }
+            spawnEnemy() {
+                if (this.enemiesToSpawn <= 0) return;
+                let typeKey = 'medium';
+                const r = Math.random();
+                if (this.wave % 5 === 0) typeKey = 'heavy';
+                else if (this.wave < 3) typeKey = r < 0.6 ? 'scout' : 'medium';
+                else if (this.wave < 6) typeKey = r < 0.4 ? 'scout' : r < 0.75 ? 'medium' : 'heavy';
+                else typeKey = r < 0.3 ? 'scout' : r < 0.55 ? 'medium' : r < 0.8 ? 'heavy' : 'sniper';
+                const margin = 60,
+                    mapW = this.map.width * this.map.tileSize,
+                    mapH = this.map.height * this.map.tileSize;
+                let x, y;
+                if (Math.random() < 0.5) { x = rand(margin, mapW - margin);
+                    y = Math.random() < 0.5 ? margin : mapH - margin; } else { x = Math.random() < 0.5 ? margin :
+                        mapW - margin;
+                    y = rand(margin, mapH - margin); }
+                const enemy = new EnemyTank(x, y, typeKey, this.difficulty);
+                if (this.wave % 5 === 0) { enemy.hp *= 4.5;
+                    enemy.maxHp = enemy.hp;
+                    enemy.damage *= 1.7;
+                    enemy.isBoss = true; }
+                this.enemies.push(enemy);
+                this.enemiesToSpawn--;
+            }
+            handleEnemyKilled(e) {
+                if (e._killedHandled) return;
+                e._killedHandled = true;
+                this.player.kills++;
+                this.player.combo++;
+                this.player.comboTimer = 2.5;
+                this.score += Math.floor(100 * this.player.combo);
+                this.player.exp += 30;
+                this.checkLevelUp();
+                this.dropPowerup(e.x, e.y);
+                if (e.isBoss) this.bossesDefeated++;
+            }
+            checkLevelUp() {
+                const p = this.player;
+                while (p.exp >= p.expToNext) {
+                    p.exp -= p.expToNext;
+                    p.level++;
+                    p.expToNext = Math.floor(100 * Math.pow(1.15, p.level));
+                    p.maxHp += 8;
+                    p.hp = Math.min(p.maxHp, p.hp + 20);
+                    p.damage += 2;
+                    p.weaponCooldown *= 0.96;
+                    this.particles.emit(p.centerX, p.centerY, 15, { color: '#ffff00', speedMin: 50, speedMax: 150,
+                        lifeMin: 0.5, lifeMax: 1, sizeMin: 2, sizeMax: 5 });
+                }
+            }
+            dropPowerup(x, y) {
+                if (Math.random() > this.difficulty.resourceMul * 0.35) return;
+                const types = ['ammo', 'health', 'shield', 'explosive', 'pierce'];
+                const type = types[randInt(0, types.length)];
+                this.powerups.push({ x, y, type, life: 12 });
+            }
+            update(dt) {
+                if (this.gameOver || this.victory) return;
+                this.spawnTimer += dt;
+                if (this.enemiesToSpawn > 0 && this.spawnTimer > 1.8 && this.enemies.length < 14) {
+                    this.spawnTimer = 0;
+                    this.spawnEnemy();
+                }
+                this.player.update(dt, this);
+                for (const e of this.enemies) e.update(dt, this);
+                this.enemies = this.enemies.filter(e => e.alive);
+                for (const b of this.bullets) {
+                    b.update(dt);
+                    const tileX = Math.floor(b.x / this.map.tileSize),
+                        tileY = Math.floor(b.y / this.map.tileSize);
+                    if (this.map.isSolid(tileX, tileY)) {
+                        if (b.explosive) {
+                            // 爆炸弹碰到墙壁：产生爆炸伤害敌人，但墙壁不可破坏
+                            this.createExplosion(b.x, b.y, 50, false);
+                            for (const e of this.enemies)
+                                if (dist(b, e) < 80) e.takeDamage(b.damage * 1.5, this);
+                            b.alive = false;
+                        } else {
+                            // 墙壁绝对不可破坏，所有子弹击中墙壁直接消失
+                            b.alive = false;
+                        }
+                    }
+                    if (b.alive) {
+                        if (b.owner !== this.player) {
+                            if (dist(b, this.player) < b.radius + this.player.width / 2) {
+                                this.player.takeDamage(b.damage, this);
+                                b.alive = false;
+                            }
+                        } else {
+                            for (const e of this.enemies) {
+                                if (dist(b, e) < b.radius + e.width / 2) {
+                                    e.takeDamage(b.damage, this);
+                                    b.alive = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (b.life <= 0) b.alive = false;
+                }
+                this.bullets = this.bullets.filter(b => b.alive);
+                this.particles.update(dt);
+                this.trackMarks = this.trackMarks.filter(t => (t.life -= dt) > 0);
+                this.explosions = this.explosions.filter(e => (e.life -= dt) > 0);
+                this.updateCamera();
+                this.updateMode(dt);
+                if (this.enemies.length === 0 && this.enemiesToSpawn <= 0 && !this.gameOver && !this.victory) {
+                    if (this.mode === 'survival' && this.wave >= this.totalWaves) this.victory = true;
+                    else this.startWave();
+                }
+                if (!this.player.alive) this.gameOver = true;
+            }
+            updateMode(dt) {
+                for (let i = this.powerups.length - 1; i >= 0; i--) {
+                    const p = this.powerups[i];
+                    if (dist(this.player, p) < 28) {
+                        this.applyPowerup(p.type);
+                        this.sound.powerup();
+                        this.powerups.splice(i, 1);
+                    } else {
+                        p.life -= dt;
+                        if (p.life <= 0) this.powerups.splice(i, 1);
+                    }
+                }
+            }
+            applyPowerup(type) {
+                const p = this.player;
+                switch (type) {
+                    case 'ammo':
+                        p.ammo = Math.min(p.maxAmmo, p.ammo + 25);
+                        break;
+                    case 'health':
+                        p.hp = Math.min(p.maxHp, p.hp + 40);
+                        break;
+                    case 'shield':
+                        p.shield += 30;
+                        break;
+                    case 'explosive':
+                        p.explosiveAmmo += 10;
+                        break;
+                    case 'pierce':
+                        p.pierceAmmo += 5;
+                        break;
+                }
+            }
+            updateCamera() {
+                const tx = this.player.centerX - canvas.width / 2,
+                    ty = this.player.centerY - canvas.height / 2;
+                this.camera.x = lerp(this.camera.x, tx, 0.1);
+                this.camera.y = lerp(this.camera.y, ty, 0.1);
+                if (this.camera.shakeTime > 0) { this.camera.shakeTime -= 16;
+                    this.camera.shakeAmount *= 0.9; }
+                if (this.camera.shakeAmount > 0) {
+                    this.camera.x += rand(-this.camera.shakeAmount, this.camera.shakeAmount);
+                    this.camera.y += rand(-this.camera.shakeAmount, this.camera.shakeAmount);
+                }
+            }
+            draw(ctx) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.save();
+                if (this.camera.shakeTime > 0) ctx.translate(rand(-this.camera.shakeAmount, this.camera.shakeAmount),
+                    rand(-this.camera.shakeAmount, this.camera.shakeAmount));
+                this.map.draw(ctx, this.camera.x, this.camera.y, canvas.width, canvas.height);
+                for (const t of this.trackMarks) {
+                    ctx.globalAlpha = t.life * 0.5;
+                    ctx.fillStyle = '#333';
+                    ctx.beginPath();
+                    ctx.arc(t.x - this.camera.x, t.y - this.camera.y, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
+                for (const p of this.powerups) {
+                    const col = p.type === 'explosive' ? '#ff6600' : p.type === 'pierce' ? '#ff00ff' : p.type ===
+                        'ammo' ? '#ffaa00' : '#66bb6a';
+                    ctx.fillStyle = col;
+                    ctx.beginPath();
+                    ctx.arc(p.x - this.camera.x, p.y - this.camera.y, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 9px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(p.type[0].toUpperCase(), p.x - this.camera.x, p.y - this.camera.y + 3);
+                }
+                if (this.player.alive) this.player.draw(ctx, this.camera.x, this.camera.y);
+                for (const e of this.enemies) e.draw(ctx, this.camera.x, this.camera.y);
+                for (const b of this.bullets) b.draw(ctx, this.camera.x, this.camera.y);
+                for (const exp of this.explosions) {
+                    ctx.globalAlpha = exp.life * 2;
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(exp.x - this.camera.x, exp.y - this.camera.y, exp.radius * (1 - exp.life), 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.globalAlpha = 1;
+                }
+                this.particles.draw(ctx, this.camera.x, this.camera.y);
+                ctx.restore();
+                this.drawHUD(ctx);
+            }
+            drawHUD(ctx) {
+                const p = this.player;
+                ctx.fillStyle = 'rgba(0,0,0,0.65)';
+                roundRect(ctx, 12, 12, 170, 20, 6);
+                ctx.fill();
+                ctx.fillStyle = '#66bb6a';
+                roundRect(ctx, 15, 15, 164 * (p.hp / p.maxHp), 14, 4);
+                ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 11px Arial';
+                ctx.fillText('HP ' + Math.floor(p.hp), 18, 26);
+                ctx.fillStyle = 'rgba(0,0,0,0.65)';
+                roundRect(ctx, 12, 36, 170, 16, 5);
+                ctx.fill();
+                ctx.fillStyle = '#4fc3f7';
+                roundRect(ctx, 15, 39, 164 * (p.shield / p.maxShield), 10, 3);
+                ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.font = '11px Arial';
+                ctx.fillText('盾 ' + Math.floor(p.shield), 18, 48);
+                ctx.fillStyle = '#fff';
+                ctx.font = '12px Arial';
+                ctx.fillText('弹药 ' + Math.floor(p.ammo), 15, 70);
+                const skillReady = p.skillTimer <= 0;
+                ctx.fillStyle = skillReady ? '#66bb6a' : '#ef5350';
+                ctx.fillText('技能 ' + (skillReady ? '就绪' : Math.ceil(p.skillTimer / 1000) + 's'), 15, 87);
+                if (p.explosiveAmmo > 0) { ctx.fillStyle = '#ff6600';
+                    ctx.fillText('爆弹 x' + p.explosiveAmmo, 15, 104); }
+                if (p.pierceAmmo > 0) { ctx.fillStyle = '#ff00ff';
+                    ctx.fillText('穿弹 x' + p.pierceAmmo, 15, 121); }
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('波次 ' + this.wave, canvas.width / 2, 28);
+                ctx.fillText('得分 ' + this.score, canvas.width / 2, 50);
+                ctx.fillText('击杀 ' + p.kills, canvas.width / 2, 72);
+                ctx.textAlign = 'left';
+            }
+        }
 
-  updateScore();updateTimer();updateLives();updateStage();updateWave();updateItemsBar();updateCollectHUD();
-  activeItemEl.classList.remove('show');comboDisplay.classList.remove('active');pauseOverlay.classList.add('hidden');gameContainer.style.filter='';
-  $$('.mole,.hit-effect,.particle').forEach(el=>el.remove());
+        // ==================== 歼-20绘制函数 ====================
+        function drawJ20(ctx, cx, cy, angle, scale) {
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(angle);
+            ctx.scale(scale, scale);
 
-  if(isVs){
-    startVsMode();
-  }else{
-    state.spawnInterval=setInterval(spawnMole,state._currentSpawnInterval);
-    startTimer();
-    setTimeout(spawnMole,300);setTimeout(spawnMole,600);setTimeout(spawnMole,900);
-  }
-}
+            // 机身高光层
+            ctx.fillStyle = '#1a1a1a';
+            ctx.beginPath();
+            ctx.moveTo(38, 0);
+            ctx.quadraticCurveTo(32, -6, 22, -8);
+            ctx.lineTo(-8, -12);
+            ctx.lineTo(-16, -22);
+            ctx.lineTo(-4, -9);
+            ctx.lineTo(-28, -28);
+            ctx.lineTo(-42, -18);
+            ctx.lineTo(-44, -6);
+            ctx.lineTo(-38, -4);
+            ctx.lineTo(-38, 4);
+            ctx.lineTo(-44, 6);
+            ctx.lineTo(-42, 18);
+            ctx.lineTo(-28, 28);
+            ctx.lineTo(-4, 9);
+            ctx.lineTo(-16, 22);
+            ctx.lineTo(-8, 12);
+            ctx.lineTo(22, 8);
+            ctx.quadraticCurveTo(32, 6, 38, 0);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(120,120,120,0.5)';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
 
-function startVsMode(){
-  state.vs.running=true;state.vs.scores=[0,0];state.vs.activeMoles=[[],[]];
-  buildVsHoles('#vs-holes1',0);buildVsHoles('#vs-holes2',1);
-  $('#vs-score1').textContent='0';$('#vs-score2').textContent='0';
-  $$('.vs-item').forEach(el=>el.classList.remove('used'));
-  state.vs.spawnIntervals[0]=setInterval(()=>spawnVsMole(0),1200);
-  state.vs.spawnIntervals[1]=setInterval(()=>spawnVsMole(1),1200);
-  // VS interference items
-  $$('#vs-interference1 .vs-item').forEach(el=>el.addEventListener('click',()=>{if(!el.classList.contains('used')){el.classList.add('used');useVsItem(0,el.dataset.item)}}));
-  $$('#vs-interference2 .vs-item').forEach(el=>el.addEventListener('click',()=>{if(!el.classList.contains('used')){el.classList.add('used');useVsItem(1,el.dataset.item)}}));
-}
+            // 座舱盖
+            ctx.fillStyle = '#333';
+            ctx.beginPath();
+            ctx.ellipse(14, 0, 10, 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(150,150,150,0.6)';
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
 
-// ============ End Game ============
-function endGame(){
-  state.running=false;clearInterval(state.spawnInterval);clearInterval(state.timerInterval);
-  state.activeMoles.forEach(m=>{clearTimeout(m.timeout);if(m.element)m.element.remove()});state.activeMoles=[];
-  if(state.mode==='vs'){clearInterval(state.vs.spawnIntervals[0]);clearInterval(state.vs.spawnIntervals[1]);state.vs.running=false}
-  audio.gameOver();showGameOver(state.mode);
-}
+            // 发动机进气道
+            ctx.fillStyle = '#222';
+            ctx.beginPath();
+            ctx.moveTo(-6, -9);
+            ctx.lineTo(-2, -7);
+            ctx.lineTo(-2, 7);
+            ctx.lineTo(-6, 9);
+            ctx.closePath();
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(-8, -10);
+            ctx.lineTo(-12, -8);
+            ctx.lineTo(-12, 8);
+            ctx.lineTo(-8, 10);
+            ctx.closePath();
+            ctx.fill();
 
-function showGameOver(mode){
-  gameScreen.classList.add('hidden');overScreen.classList.remove('hidden');
-  let emoji,title;
-  if(mode==='vs'){
-    const winner=state.vs.scores[0]>=100?0:1;
-    emoji='🏆';title=`玩家${winner+1} 获胜!`;state.score=state.vs.scores[winner];
-    $('#over-score').textContent=`${state.vs.scores[0]} : ${state.vs.scores[1]}`;
-  }else{
-    if(state.mode==='classic'&&state._levelCleared&&state._currentLevel>=difficultyConfigs[state.classicDifficulty].levelCount){emoji='🏆';title='全部通关!'}
-    else if(state.score>=200){emoji='🏆';title='太厉害了!'}
-    else if(state.score>=100){emoji='🎉';title='非常棒!'}
-    else if(state.score>=50){emoji='😊';title='不错哦~'}
-    else if(state.score>=0){emoji='💪';title='继续加油!'}
-    else{emoji='😅';title='下次小心兔兔~'}
-    $('#over-score').textContent=state.score;
-  }
-  $('#over-emoji').textContent=emoji;$('#over-title').textContent=title;
-  $('#over-mode').textContent={
-    classic:`经典模式·${difficultyConfigs[state.classicDifficulty]?.name||'简单'}`,timeattack:'限时挑战',survival:'生存模式',collect:'收集模式',vs:'双人对战',event:'节日活动',endless:'无尽模式'
-  }[mode]||'';
-  $('#stat-hits').textContent=state.totalHits;$('#stat-combo').textContent=state.maxCombo;
-  $('#stat-miss').textContent=state.totalMiss;$('#stat-stars').textContent=state.totalStars;
+            // 尾喷口
+            ctx.fillStyle = '#ff6600';
+            ctx.beginPath();
+            ctx.moveTo(-38, -3);
+            ctx.lineTo(-46, -2);
+            ctx.lineTo(-46, 2);
+            ctx.lineTo(-38, 3);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = '#ffaa00';
+            ctx.beginPath();
+            ctx.moveTo(-42, -1);
+            ctx.lineTo(-48, 0);
+            ctx.lineTo(-42, 1);
+            ctx.closePath();
+            ctx.fill();
 
-  // Best score
-  const key=`mole-best-${mode}`;const prev=parseInt(localStorage.getItem(key)||'0');
-  const bs=$('#best-score');
-  if(state.score>prev){localStorage.setItem(key,state.score);bs.textContent=`🏆 新纪录! ${state.score}分`;bs.style.display='block';bs.classList.add('new')}
-  else if(prev>0){bs.textContent=`📊 最高分: ${prev}分`;bs.style.display='block';bs.classList.remove('new')}
-  else bs.style.display='none';
+            ctx.restore();
+        }
 
-  blindReward.style.display='none';blindBox.style.pointerEvents='auto';blindBox.style.opacity='1';state.blindOpened=false;
-  state.coins=(state.coins||0)+Math.max(1,Math.floor(state.score/20));
-}
+        // ==================== 坦克剪影绘制函数 ====================
+        function drawTankSilhouette(ctx, cx, cy, angle, scale) {
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(angle);
+            ctx.scale(scale, scale);
 
-// ============ Blind Box ============
-function openBlindBox(){
-  if(state.blindOpened)return;state.blindOpened=true;
-  const rewards=['🍓 草莓地鼠皮肤!','🍮 布丁锤皮肤!','🌸 花朵装饰','⭐ 50金币!','🐱 猫爪锤皮肤!','🦖 恐龙地鼠皮肤!','🎀 星星装饰','💰 100金币!','🧋 奶茶地鼠皮肤!','🍭 棒棒糖锤皮肤!','☁️ 云朵装饰','✨ 30金币!'];
-  blindReward.textContent='获得: '+rewards[Math.floor(Math.random()*rewards.length)];
-  blindReward.style.display='block';blindBox.style.opacity='0.6';blindBox.style.pointerEvents='none';
-  audio.item();spawnParticles(4,'#FFD700',10);
-}
+            // 履带
+            ctx.fillStyle = '#222';
+            roundRect(ctx, -34, -24, 68, 12, 5);
+            ctx.fill();
+            roundRect(ctx, -34, 12, 68, 12, 5);
+            ctx.fill();
+            // 履带纹理
+            ctx.fillStyle = '#444';
+            for (let i = -30; i <= 30; i += 8) {
+                ctx.fillRect(i, -22, 3, 8);
+                ctx.fillRect(i, 14, 3, 8);
+            }
+            // 车体
+            ctx.fillStyle = '#3a3a3a';
+            roundRect(ctx, -26, -16, 52, 32, 8);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(100,100,100,0.6)';
+            ctx.lineWidth = 1.2;
+            roundRect(ctx, -26, -16, 52, 32, 8);
+            ctx.stroke();
+            // 炮塔
+            ctx.fillStyle = '#4a4a4a';
+            ctx.beginPath();
+            ctx.arc(0, 0, 14, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(100,100,100,0.5)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            // 炮管
+            ctx.fillStyle = '#333';
+            roundRect(ctx, 12, -4, 36, 8, 3);
+            ctx.fill();
+            // 炮口
+            ctx.fillStyle = '#1a1a1a';
+            roundRect(ctx, 44, -5, 5, 10, 2);
+            ctx.fill();
+            // 天线
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(-5, -14);
+            ctx.lineTo(-8, -24);
+            ctx.stroke();
 
-// ============ Pause ============
-function togglePause(){
-  if(!state.running&&!state.vs.running)return;
-  state.paused=!state.paused;
-  if(state.paused)pauseOverlay.classList.remove('hidden');else pauseOverlay.classList.add('hidden');
-}
+            ctx.restore();
+        }
 
-// ============ Combo Reset ============
-setInterval(()=>{if(state.running&&!state.paused&&state.combo>0){state.combo=0;comboDisplay.classList.remove('active')}},2500);
+        // ==================== 游戏主类 ====================
+        class Game {
+            constructor() {
+                this.state = STATE.MENU;
+                this.selectedTank = 'medium';
+                this.selectedMode = 'survival';
+                this.selectedDifficulty = 'normal';
+                this.selectedLevel = 1;
+                this.maxUnlockedLevel = parseInt(localStorage.getItem('tankMaxLevel') || '1');
+                this.world = null;
+                this.keys = {};
+                this.mouse = { x: 0, y: 0 };
+                this.lastTime = 0;
+                this.touch = { active: false, id: null, startX: 0, startY: 0, dx: 0, dy: 0 };
+                this.uiTransition = { from: STATE.MENU, to: STATE.MENU, progress: 1 };
+                this.menuParticles = new ParticleSystem();
+                this.menuParticleTimer = 0;
+                this.j20Angle = -0.15;
+                this.tankAngle = 0.12;
+                this.initEvents();
+                requestAnimationFrame(this.loop.bind(this));
+            }
+            initEvents() {
+                window.addEventListener('keydown', e => {
+                    this.keys[e.key.toLowerCase()] = true;
+                    if (e.key === ' ') e.preventDefault();
+                    if (e.key === 'Escape' && this.state === STATE.PLAYING) this.state = STATE.PAUSED;
+                    if (this.state === STATE.PLAYING && e.key === 'e') {
+                        const p = this.world.player;
+                        if (p && p.skillTimer <= 0) p.useSkill(this.world);
+                    }
+                    canvas.focus();
+                });
+                window.addEventListener('keyup', e => { this.keys[e.key.toLowerCase()] = false; });
+                canvas.addEventListener('mousemove', e => {
+                    const rect = canvas.getBoundingClientRect();
+                    this.mouse.x = e.clientX - rect.left;
+                    this.mouse.y = e.clientY - rect.top;
+                    if (this.world && this.world.player) {
+                        this.world.player.mouseX = this.mouse.x;
+                        this.world.player.mouseY = this.mouse.y;
+                    }
+                });
+                canvas.addEventListener('mousedown', e => {
+                    if (this.state === STATE.PLAYING && this.world.player) {
+                        if (e.button === 0) this.world.player.shooting = true;
+                        if (e.button === 2) this.world.player.altShooting = true;
+                    }
+                    canvas.focus();
+                });
+                canvas.addEventListener('mouseup', e => {
+                    if (this.world && this.world.player) {
+                        if (e.button === 0) this.world.player.shooting = false;
+                        if (e.button === 2) this.world.player.altShooting = false;
+                    }
+                });
+                canvas.addEventListener('contextmenu', e => e.preventDefault());
+                canvas.addEventListener('click', e => {
+                    const rect = canvas.getBoundingClientRect();
+                    this.handleClick(e.clientX - rect.left, e.clientY - rect.top);
+                });
+                const jZone = document.getElementById('joystick-zone');
+                const jKnob = document.getElementById('joystick-knob');
+                const fireBtn = document.getElementById('fire-btn');
+                const skillBtn = document.getElementById('skill-btn');
+                jZone.addEventListener('touchstart', e => {
+                    e.preventDefault();
+                    const t = e.touches[0];
+                    this.touch.active = true;
+                    this.touch.id = t.identifier;
+                    this.touch.startX = t.clientX;
+                    this.touch.startY = t.clientY;
+                });
+                jZone.addEventListener('touchmove', e => {
+                    e.preventDefault();
+                    if (!this.touch.active) return;
+                    const t = e.touches[0];
+                    this.touch.dx = t.clientX - this.touch.startX;
+                    this.touch.dy = t.clientY - this.touch.startY;
+                    const maxD = 40;
+                    const d = Math.hypot(this.touch.dx, this.touch.dy);
+                    if (d > maxD) { this.touch.dx = this.touch.dx / d * maxD;
+                        this.touch.dy = this.touch.dy / d * maxD; }
+                    jKnob.style.left = (32 + this.touch.dx) + 'px';
+                    jKnob.style.top = (32 + this.touch.dy) + 'px';
+                    if (this.world) this.world.player.touchDir = { x: this.touch.dx / maxD, y: this.touch.dy /
+                            maxD };
+                });
+                jZone.addEventListener('touchend', e => {
+                    this.touch.active = false;
+                    jKnob.style.left = '32px';
+                    jKnob.style.top = '32px';
+                    if (this.world) this.world.player.touchDir = null;
+                });
+                fireBtn.addEventListener('touchstart', e => { e.preventDefault(); if (this.world) this.world.player
+                        .shooting = true; });
+                fireBtn.addEventListener('touchend', e => { e.preventDefault(); if (this.world) this.world.player
+                        .shooting = false; });
+                skillBtn.addEventListener('touchstart', e => { e.preventDefault(); if (this.world) this.world.player
+                        .altShooting = true; });
+                skillBtn.addEventListener('touchend', e => { e.preventDefault(); if (this.world) this.world.player
+                        .altShooting = false; });
+                window.addEventListener('keydown', e => {
+                    if (this.state === STATE.MENU) { if (e.key === '1') { this.selectedMode = 'survival';
+                            this.transitionTo(STATE.TANK_SELECT); } if (e.key === '2') { this.selectedMode =
+                                'assault';
+                            this.transitionTo(STATE.TANK_SELECT); } if (e.key === '3') { this.selectedMode =
+                                'capture';
+                            this.transitionTo(STATE.TANK_SELECT); } if (e.key === '4') { this.selectedMode =
+                                'escort';
+                            this.transitionTo(STATE.TANK_SELECT); } if (e.key === '5') { this.selectedMode =
+                                'endless';
+                            this.transitionTo(STATE.TANK_SELECT); } if (e.key === '6') { this.selectedMode =
+                                'boss';
+                            this.transitionTo(STATE.TANK_SELECT); } } else if (this.state === STATE.TANK_SELECT) { if (e
+                            .key === '1') { this.selectedTank = 'scout';
+                            this.afterTankSelect(); } if (e.key === '2') { this.selectedTank = 'medium';
+                            this.afterTankSelect(); } if (e.key === '3') { this.selectedTank = 'heavy';
+                            this.afterTankSelect(); } if (e.key === '4') { this.selectedTank = 'sniper';
+                            this.afterTankSelect(); } if (e.key === '5') { this.selectedTank = 'engineer';
+                            this.afterTankSelect(); } if (e.key === 'd') { this.selectedDifficulty = this
+                                .selectedDifficulty === 'easy' ? 'normal' : this.selectedDifficulty ===
+                                'normal' ? 'hard' : this.selectedDifficulty === 'hard' ? 'nightmare' :
+                                'easy'; } if (e.key === 'Escape') this.transitionTo(STATE.MENU); } else if (
+                        this.state === STATE.LEVEL_SELECT) { if (e.key >= '1' && e.key <= '9') { const lvl =
+                                parseInt(e.key); if (lvl <= this.maxUnlockedLevel) { this.selectedLevel = lvl;
+                                this.startGame(); } } if (e.key === 'Escape') this.transitionTo(STATE
+                            .TANK_SELECT); } else if (this.state === STATE.PAUSED) { if (e.key === 'Escape') this
+                            .state = STATE.PLAYING; } else if (this.state === STATE.GAME_OVER || this.state ===
+                        STATE.VICTORY) { if (e.key === 'Enter') this.transitionTo(STATE.MENU); }
+                });
+            }
+            transitionTo(newState) {
+                if (this.uiTransition.progress < 1) return;
+                this.uiTransition = { from: this.state, to: newState, progress: 0 };
+                this.state = newState;
+            }
+            handleClick(mx, my) {
+                if (this.state === STATE.MENU) {
+                    const modes = ['survival', 'assault', 'capture', 'escort', 'endless', 'boss'];
+                    for (let i = 0; i < modes.length; i++) {
+                        const y = 210 + i * 48;
+                        if (mx > canvas.width / 2 - 160 && mx < canvas.width / 2 + 160 && my > y - 20 && my < y +
+                            20) {
+                            this.selectedMode = modes[i];
+                            this.transitionTo(STATE.TANK_SELECT);
+                            return;
+                        }
+                    }
+                } else if (this.state === STATE.TANK_SELECT) {
+                    const keys = Object.keys(TANK_TYPES);
+                    for (let i = 0; i < keys.length; i++) {
+                        const y = 150 + i * 62;
+                        if (mx > canvas.width / 2 - 280 && mx < canvas.width / 2 + 250 && my > y - 25 && my < y +
+                            25) {
+                            this.selectedTank = keys[i];
+                            this.afterTankSelect();
+                            return;
+                        }
+                    }
+                    if (mx > canvas.width / 2 + 200 && mx < canvas.width / 2 + 290 && my > 115 && my < 135) {
+                        this.selectedDifficulty = this.selectedDifficulty === 'easy' ? 'normal' : this
+                            .selectedDifficulty === 'normal' ? 'hard' : this.selectedDifficulty === 'hard' ?
+                            'nightmare' : 'easy';
+                    }
+                    if (mx > 25 && mx < 95 && my > 25 && my < 55) this.transitionTo(STATE.MENU);
+                } else if (this.state === STATE.LEVEL_SELECT) {
+                    for (let i = 1; i <= 9; i++) {
+                        const x = canvas.width / 2 - 220 + (i - 1) * 55;
+                        const y = 170;
+                        if (mx > x - 22 && mx < x + 22 && my > y - 20 && my < y + 20) {
+                            if (i <= this.maxUnlockedLevel) { this.selectedLevel = i;
+                                this.startGame(); }
+                            return;
+                        }
+                    }
+                    if (mx > 25 && mx < 95 && my > 25 && my < 55) this.transitionTo(STATE.TANK_SELECT);
+                }
+            }
+            afterTankSelect() {
+                if (this.selectedMode === 'survival') this.transitionTo(STATE.LEVEL_SELECT);
+                else this.startGame();
+            }
+            startGame() {
+                this.world = new GameWorld(this.selectedMode, DIFFICULTIES[this.selectedDifficulty], this
+                    .selectedTank, this.selectedLevel);
+                this.state = STATE.PLAYING;
+                this.world.player.keys = this.keys;
+                this.uiTransition.progress = 1;
+            }
+            loop(timestamp) {
+                const dt = Math.min((timestamp - this.lastTime) / 1000, 0.05);
+                this.lastTime = timestamp;
+                try {
+                    this.update(dt);
+                    this.draw();
+                } catch (e) { console.error(e); }
+                requestAnimationFrame(this.loop.bind(this));
+            }
+            update(dt) {
+                if (this.uiTransition.progress < 1) {
+                    this.uiTransition.progress = Math.min(1, this.uiTransition.progress + dt * 4);
+                }
+                this.menuParticleTimer += dt;
+                if (this.menuParticleTimer > 0.06 && (this.state === STATE.MENU || this.state === STATE
+                        .TANK_SELECT || this.state === STATE.LEVEL_SELECT)) {
+                    this.menuParticleTimer = 0;
+                    this.menuParticles.emit(rand(0, canvas.width), rand(0, canvas.height), 2, {
+                        color: 'rgba(160,160,160,0.5)',
+                        speedMin: 10,
+                        speedMax: 45,
+                        lifeMin: 1.2,
+                        lifeMax: 2.8,
+                        sizeMin: 5,
+                        sizeMax: 18,
+                        type: 'smoke',
+                        angleMin: -Math.PI / 2 - 0.8,
+                        angleMax: -Math.PI / 2 + 0.8,
+                        gravity: -15
+                    });
+                }
+                this.menuParticles.update(dt);
+                if (this.state === STATE.PLAYING) {
+                    const p = this.world.player;
+                    p.keys = this.keys;
+                    p.mouseX = this.mouse.x;
+                    p.mouseY = this.mouse.y;
+                    this.world.update(dt);
+                    if (this.world.gameOver) this.state = STATE.GAME_OVER;
+                    else if (this.world.victory) {
+                        if (this.selectedMode === 'survival') {
+                            const next = this.selectedLevel + 1;
+                            if (next > this.maxUnlockedLevel && next <= 20) {
+                                this.maxUnlockedLevel = next;
+                                localStorage.setItem('tankMaxLevel', next);
+                            }
+                        }
+                        this.state = STATE.VICTORY;
+                    }
+                }
+            }
+            draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const tp = this.uiTransition.progress;
+                if (tp < 1) {
+                    const fromState = this.uiTransition.from;
+                    const toState = this.uiTransition.to;
+                    const offsetX = (1 - tp) * -80;
+                    const offsetY = (1 - tp) * -30;
+                    const scale = 0.95 + 0.05 * tp;
+                    ctx.save();
+                    ctx.globalAlpha = 1 - tp;
+                    ctx.translate(offsetX, offsetY);
+                    ctx.scale(scale, scale);
+                    this.drawState(fromState);
+                    ctx.restore();
+                    ctx.save();
+                    ctx.globalAlpha = tp;
+                    ctx.translate((1 - tp) * 60, (1 - tp) * 40);
+                    ctx.scale(1.02 - 0.02 * tp, 1.02 - 0.02 * tp);
+                    this.drawState(toState);
+                    ctx.restore();
+                } else {
+                    this.drawState(this.state);
+                }
+            }
+            drawState(s) {
+                if (s === STATE.MENU) this.drawMenu();
+                else if (s === STATE.TANK_SELECT) this.drawTankSelect();
+                else if (s === STATE.LEVEL_SELECT) this.drawLevelSelect();
+                else if (s === STATE.PLAYING || s === STATE.PAUSED) {
+                    if (this.world) {
+                        this.world.draw(ctx);
+                        if (s === STATE.PAUSED) {
+                            ctx.fillStyle = 'rgba(0,0,0,0.75)';
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                            ctx.fillStyle = '#fff';
+                            ctx.font = '48px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.fillText('暂停', canvas.width / 2, canvas.height / 2);
+                        }
+                    }
+                } else if (s === STATE.GAME_OVER) {
+                    ctx.fillStyle = 'rgba(0,0,0,0.85)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = '#ef5350';
+                    ctx.font = 'bold 60px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('游戏结束', canvas.width / 2, canvas.height / 2 - 40);
+                    ctx.fillStyle = '#fff';
+                    ctx.font = '26px Arial';
+                    if (this.world) {
+                        ctx.fillText('得分: ' + this.world.score + ' 击杀: ' + this.world.player.kills, canvas.width /
+                            2, canvas.height / 2 + 25);
+                    }
+                    ctx.fillText('按Enter返回', canvas.width / 2, canvas.height / 2 + 75);
+                } else if (s === STATE.VICTORY) {
+                    ctx.fillStyle = 'rgba(0,0,0,0.85)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = '#66bb6a';
+                    ctx.font = 'bold 60px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('胜利!', canvas.width / 2, canvas.height / 2 - 40);
+                    ctx.fillStyle = '#fff';
+                    ctx.font = '26px Arial';
+                    if (this.world) {
+                        ctx.fillText('得分: ' + this.world.score + ' 击杀: ' + this.world.player.kills, canvas.width /
+                            2, canvas.height / 2 + 25);
+                    }
+                    ctx.fillText('按Enter返回', canvas.width / 2, canvas.height / 2 + 75);
+                }
+            }
+            drawMenu() {
+                ctx.fillStyle = '#1a1a1a';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                grad.addColorStop(0, 'rgba(35,30,25,1)');
+                grad.addColorStop(0.5, 'rgba(20,18,15,1)');
+                grad.addColorStop(1, 'rgba(10,8,5,1)');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                // 地面光影
+                ctx.fillStyle = 'rgba(255,180,60,0.04)';
+                ctx.beginPath();
+                ctx.ellipse(canvas.width / 2, canvas.height / 2, canvas.width * 0.6, canvas.height * 0.5, 0, 0, Math.PI *
+                    2);
+                ctx.fill();
+                // 烟尘粒子
+                this.menuParticles.draw(ctx, 0, 0);
+                // 歼-20（左上角）
+                const j20X = canvas.width * 0.16;
+                const j20Y = canvas.height * 0.2;
+                const j20Scale = Math.min(canvas.width, canvas.height) * 0.0011;
+                drawJ20(ctx, j20X, j20Y, -0.25, j20Scale);
+                // 歼-20尾迹
+                ctx.strokeStyle = 'rgba(180,180,180,0.3)';
+                ctx.lineWidth = 2;
+                for (let i = 1; i <= 5; i++) {
+                    const trailX = j20X - Math.cos(-0.25) * i * 14 * j20Scale;
+                    const trailY = j20Y - Math.sin(-0.25) * i * 14 * j20Scale;
+                    ctx.globalAlpha = 0.3 - i * 0.05;
+                    ctx.beginPath();
+                    ctx.moveTo(trailX, trailY);
+                    ctx.lineTo(trailX - 20, trailY + 8);
+                    ctx.stroke();
+                }
+                ctx.globalAlpha = 1;
+                // 坦克剪影（右下角）
+                const tankX = canvas.width * 0.85;
+                const tankY = canvas.height * 0.78;
+                const tankScale = Math.min(canvas.width, canvas.height) * 0.0012;
+                drawTankSilhouette(ctx, tankX, tankY, 0.35, tankScale);
+                // 坦克炮口烟雾
+                ctx.fillStyle = 'rgba(120,120,120,0.4)';
+                ctx.beginPath();
+                ctx.arc(tankX + 30 * tankScale, tankY - 10 * tankScale, 15, 0, Math.PI * 2);
+                ctx.fill();
+                // 标题
+                ctx.fillStyle = '#fff';
+                ctx.textAlign = 'center';
+                ctx.font = 'bold 56px Arial';
+                ctx.shadowColor = '#ff8800';
+                ctx.shadowBlur = 30;
+                ctx.fillText('坦克大战', canvas.width / 2, 110);
+                ctx.shadowBlur = 0;
+                ctx.font = '20px Arial';
+                ctx.fillStyle = '#ccc';
+                ctx.fillText('钢铁风暴', canvas.width / 2, 145);
+                ctx.font = '15px Arial';
+                ctx.fillStyle = '#ddd';
+                ctx.fillText('选择模式', canvas.width / 2, 180);
+                const modes = ['survival', 'assault', 'capture', 'escort', 'endless', 'boss'];
+                const names = ['经典生存', '限时突袭', '占领据点', '护送任务', '无尽挑战', 'Boss连战'];
+                for (let i = 0; i < modes.length; i++) {
+                    const y = 205 + i * 48;
+                    const hover = this.mouse.x > canvas.width / 2 - 160 && this.mouse.x < canvas.width / 2 + 160 &&
+                        this.mouse.y > y - 18 && this.mouse.y < y + 18;
+                    ctx.fillStyle = hover ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.08)';
+                    roundRect(ctx, canvas.width / 2 - 160, y - 18, 320, 36, 10);
+                    ctx.fill();
+                    if (hover) {
+                        ctx.strokeStyle = 'rgba(255,200,100,0.7)';
+                        ctx.lineWidth = 1.5;
+                        roundRect(ctx, canvas.width / 2 - 160, y - 18, 320, 36, 10);
+                        ctx.stroke();
+                    }
+                    ctx.fillStyle = hover ? '#fff' : '#ccc';
+                    ctx.font = hover ? 'bold 17px Arial' : '16px Arial';
+                    ctx.fillText((i + 1) + '. ' + names[i], canvas.width / 2, y + 6);
+                }
+                ctx.fillStyle = '#777';
+                ctx.font = '12px Arial';
+                ctx.fillText('鼠标点击或按数字键选择', canvas.width / 2, 510);
+            }
+            drawTankSelect() {
+                ctx.fillStyle = '#1a1a1a';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                this.menuParticles.draw(ctx, 0, 0);
+                ctx.fillStyle = '#fff';
+                ctx.textAlign = 'center';
+                ctx.font = 'bold 42px Arial';
+                ctx.shadowColor = '#ff8800';
+                ctx.shadowBlur = 18;
+                ctx.fillText('选择坦克', canvas.width / 2, 70);
+                ctx.shadowBlur = 0;
+                const diff = DIFFICULTIES[this.selectedDifficulty];
+                ctx.font = '14px Arial';
+                ctx.fillStyle = diff.color;
+                ctx.fillText('难度: ' + diff.name + ' (点击切换)', canvas.width / 2 + 210, 115);
+                ctx.fillStyle = '#888';
+                ctx.font = '13px Arial';
+                ctx.fillText('← 返回', 60, 42);
+                const keys = Object.keys(TANK_TYPES);
+                for (let i = 0; i < keys.length; i++) {
+                    const key = keys[i];
+                    const type = TANK_TYPES[key];
+                    const y = 150 + i * 62;
+                    const hover = this.mouse.x > canvas.width / 2 - 290 && this.mouse.x < canvas.width / 2 + 240 &&
+                        this.mouse.y > y - 26 && this.mouse.y < y + 26;
+                    ctx.fillStyle = hover ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.06)';
+                    roundRect(ctx, canvas.width / 2 - 290, y - 26, 530, 52, 12);
+                    ctx.fill();
+                    if (this.selectedTank === key) {
+                        ctx.strokeStyle = '#66bb6a';
+                        ctx.lineWidth = 2;
+                        roundRect(ctx, canvas.width / 2 - 290, y - 26, 530, 52, 12);
+                        ctx.stroke();
+                    }
+                    ctx.fillStyle = this.selectedTank === key ? '#66bb6a' : '#fff';
+                    ctx.font = 'bold 18px Arial';
+                    ctx.textAlign = 'left';
+                    ctx.fillText((i + 1) + '. ' + type.name, canvas.width / 2 - 260, y - 3);
+                    ctx.fillStyle = '#bbb';
+                    ctx.font = '12px Arial';
+                    ctx.fillText(type.desc + ' | HP:' + type.hp + ' 速度:' + type.speed.toFixed(1) + ' 技能:' + type
+                        .skill, canvas.width / 2 - 260, y + 15);
+                    const dummy = new Tank(0, 0, type, false);
+                    dummy.drawTankShape(ctx, canvas.width / 2 + 165, y, 32, 32, type.color, type.darkColor || '#333', -
+                        Math.PI / 4, -0.4);
+                }
+                ctx.fillStyle = '#888';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('点击或按数字键选择 | D切换难度 | ESC返回', canvas.width / 2, 500);
+            }
+            drawLevelSelect() {
+                ctx.fillStyle = '#1a1a1a';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                this.menuParticles.draw(ctx, 0, 0);
+                ctx.fillStyle = '#fff';
+                ctx.textAlign = 'center';
+                ctx.font = 'bold 42px Arial';
+                ctx.shadowColor = '#ff8800';
+                ctx.shadowBlur = 18;
+                ctx.fillText('选择关卡', canvas.width / 2, 70);
+                ctx.shadowBlur = 0;
+                ctx.font = '15px Arial';
+                ctx.fillStyle = '#ccc';
+                ctx.fillText('已解锁至第 ' + this.maxUnlockedLevel + ' 关', canvas.width / 2, 110);
+                ctx.fillStyle = '#888';
+                ctx.font = '13px Arial';
+                ctx.fillText('← 返回', 60, 42);
+                for (let i = 1; i <= 9; i++) {
+                    const x = canvas.width / 2 - 220 + (i - 1) * 55;
+                    const y = 170;
+                    const locked = i > this.maxUnlockedLevel;
+                    const hover = this.mouse.x > x - 22 && this.mouse.x < x + 22 && this.mouse.y > y - 20 && this
+                        .mouse.y < y + 20;
+                    ctx.fillStyle = locked ? 'rgba(60,60,60,0.7)' : hover ? 'rgba(255,255,255,0.25)' :
+                        'rgba(255,255,255,0.1)';
+                    roundRect(ctx, x - 22, y - 20, 44, 40, 10);
+                    ctx.fill();
+                    if (locked) {
+                        ctx.fillStyle = '#555';
+                        ctx.font = '15px Arial';
+                        ctx.fillText('🔒', x, y + 6);
+                    } else {
+                        ctx.fillStyle = '#66bb6a';
+                        ctx.font = 'bold 18px Arial';
+                        ctx.fillText(i, x, y + 6);
+                    }
+                    if (hover && !locked) {
+                        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+                        ctx.lineWidth = 1.5;
+                        roundRect(ctx, x - 22, y - 20, 44, 40, 10);
+                        ctx.stroke();
+                    }
+                }
+                ctx.fillStyle = '#888';
+                ctx.font = '12px Arial';
+                ctx.fillText('点击或按数字键选择已解锁关卡 | ESC返回', canvas.width / 2, 260);
+            }
+        }
 
-// ============ Event Listeners ============
-$('#btn-start').addEventListener('click',showRules);
-$('#btn-rules-start').addEventListener('click',startGame);
-$('#btn-rules-back').addEventListener('click',()=>{
-  $('#rules-overlay').classList.add('hidden');
-  gameScreen.classList.add('hidden');
-  startScreen.classList.remove('hidden');
-});
-$('#btn-pause').addEventListener('click',togglePause);
-$('#btn-resume').addEventListener('click',togglePause);
-$('#btn-quit').addEventListener('click',()=>{
-  state.running=false;state.paused=false;clearInterval(state.spawnInterval);clearInterval(state.timerInterval);
-  state.activeMoles.forEach(m=>{clearTimeout(m.timeout);if(m.element)m.element.remove()});state.activeMoles=[];
-  if(state.vs.running){clearInterval(state.vs.spawnIntervals[0]);clearInterval(state.vs.spawnIntervals[1]);state.vs.running=false}
-  gameScreen.classList.add('hidden');pauseOverlay.classList.add('hidden');$('#rules-overlay').classList.add('hidden');startScreen.classList.remove('hidden');
-});
-$('#btn-restart').addEventListener('click',showRules);
-$('#btn-menu').addEventListener('click',()=>{overScreen.classList.add('hidden');startScreen.classList.remove('hidden')});
-blindBox.addEventListener('click',openBlindBox);
-
-$$('.mode-btn').forEach(btn=>btn.addEventListener('click',()=>{
-  $$('.mode-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');state.mode=btn.dataset.mode;
-  // Show/hide difficulty selector for classic mode
-  $('#diff-row').classList.toggle('hidden',state.mode!=='classic');
-}));
-$$('.theme-dot').forEach(dot=>dot.addEventListener('click',()=>{$$('.theme-dot').forEach(d=>d.classList.remove('selected'));dot.classList.add('selected');state.theme=dot.dataset.theme}));
-$$('.diff-btn').forEach(btn=>btn.addEventListener('click',()=>{
-  $$('.diff-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');state.classicDifficulty=btn.dataset.diff;
-}));
-$$('.item-slot').forEach(slot=>slot.addEventListener('click',()=>useItem(slot.dataset.item)));
-
-// ============ Keyboard Controls ============
-document.addEventListener('keydown',e=>{
-  // Global pause
-  if(e.key==='p'||e.key==='P'){togglePause();return}
-  if(e.key===' '&&state.running){e.preventDefault();return}
-
-  // VS Mode keyboard controls
-  if(state.vs.running&&!state.paused){
-    const key=e.key.toUpperCase();
-    // Player 1 holes: 1-6 (number keys, priority over QWASZX)
-    const numKey=parseInt(e.key);
-    if(numKey>=1&&numKey<=6){
-      e.preventDefault();
-      const idx=numKey-1;
-      const mole=state.vs.activeMoles[0].find(m=>m.holeIndex===idx);
-      if(mole&&mole.element&&mole.element.classList.contains('show')){
-        onVsMoleClick(0,idx,mole.type,mole.element);
-      }else{
-        onVsHoleClick(0,idx);
-      }
-      const hole=$('#vs-holes1').querySelectorAll('.vs-hole')[idx];
-      if(hole){hole.classList.add('pressed');setTimeout(()=>hole.classList.remove('pressed'),150)}
-      return;
-    }
-    // Player 1 holes: Q,W,A,S,Z,X (alternative)
-    const p1Keys=['Q','W','A','S','Z','X'];
-    const p1Idx=p1Keys.indexOf(key);
-    if(p1Idx!==-1){
-      e.preventDefault();
-      const mole=state.vs.activeMoles[0].find(m=>m.holeIndex===p1Idx);
-      if(mole&&mole.element&&mole.element.classList.contains('show')){
-        onVsMoleClick(0,p1Idx,mole.type,mole.element);
-      }else{
-        onVsHoleClick(0,p1Idx);
-      }
-      const hole=$('#vs-holes1').querySelectorAll('.vs-hole')[p1Idx];
-      if(hole){hole.classList.add('pressed');setTimeout(()=>hole.classList.remove('pressed'),150)}
-      return;
-    }
-    // Player 2 holes: U,I,J,K,N,M
-    const p2Keys=['U','I','J','K','N','M'];
-    const p2Idx=p2Keys.indexOf(key);
-    if(p2Idx!==-1){
-      e.preventDefault();
-      const mole=state.vs.activeMoles[1].find(m=>m.holeIndex===p2Idx);
-      if(mole&&mole.element&&mole.element.classList.contains('show')){
-        onVsMoleClick(1,p2Idx,mole.type,mole.element);
-      }else{
-        onVsHoleClick(1,p2Idx);
-      }
-      const hole=$('#vs-holes2').querySelectorAll('.vs-hole')[p2Idx];
-      if(hole){hole.classList.add('pressed');setTimeout(()=>hole.classList.remove('pressed'),150)}
-      return;
-    }
-    // Player 2 interference items: 7,8,9
-    if(key==='7'||key==='8'||key==='9'){
-      const items=['bubble','honey','swap'];
-      const idx=parseInt(key)-7;
-      const el=$('#vs-interference2').querySelectorAll('.vs-item')[idx];
-      if(el&&!el.classList.contains('used')){el.classList.add('used');useVsItem(1,items[idx])}
-      return;
-    }
-  }
-
-  // Normal mode: number keys 1-9 for holes
-  if(state.running&&!state.paused&&state.mode!=='vs'){
-    const num=parseInt(e.key);
-    if(num>=1&&num<=9){
-      e.preventDefault();
-      const idx=num-1;
-      const mole=state.activeMoles.find(m=>m.holeIndex===idx);
-      if(mole&&mole.element&&mole.element.classList.contains('show')){
-        onMoleClick(idx,mole.type,mole.element);
-      }else{
-        onHoleClick(idx);
-      }
-    }
-  }
-});
-
-// ============ Init ============
-buildHoles();updateItemsBar();
-</script>
+        // ==================== 启动 ====================
+        window.addEventListener('load', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const game = new Game();
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                canvas.focus();
+            });
+            window.addEventListener('keydown', e => {
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
+            });
+        });
+    </script>
 </body>
 </html>
