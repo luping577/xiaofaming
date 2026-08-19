@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>双模式粒子交互 · 星云之力</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+        width: 100%; height: 100%; overflow: hidden;
+        background: #02020a; font-family: "Microsoft YaHei", sans-serif;
+        color: #fff;
+        -webkit-user-select: none; user-select: none;
+    }
+    #main-canvas { position: fixed; top: 0; left: 0; z-index: 1; }
+
+    /* 右上角摄像头预览 */
+    #preview-container {
+        position: fixed; top: 20px; right: 20px; z-index: 100;
+        width: 240px; height: 180px;
+        border: 1px solid rgba(0, 243, 255, 0.3);
+        background: rgba(0, 0, 0, 0.8);
+        border-radius: 10px; overflow: hidden;
+        box-shadow: 0 0 20px rgba(0, 243, 255, 0.15);
+    }
+    #video-input { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block; }
+    #output-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1); }
+    #loading-tip {
+        position: absolute; inset: 0;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 13px; color: #00f3ff; background: rgba(0,0,0,0.85);
+        text-shadow: 0 0 8px #00f3ff;
+    }
+
+    /* 中央大字提示 */
+    #center-msg {
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.7);
+        z-index: 90; font-size: 64px; font-weight: 900; letter-spacing: 4px;
+        color: #fff; opacity: 0; pointer-events: none;
+        text-shadow: 0 0 30px #00f3ff, 0 0 60px #00f3ff, 0 0 100px rgba(0,243,255,0.6);
+        transition: opacity 0.4s ease, transform 0.4s ease;
+        white-space: nowrap;
+    }
+    #center-msg.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+    /* 左下角引导区 */
+    #guide-area {
+        position: fixed; bottom: 30px; left: 30px; z-index: 100;
+        min-width: 280px; max-width: 360px;
+        padding: 18px 22px; border-radius: 14px;
+        background: rgba(10, 10, 20, 0.55);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 243, 255, 0.25);
+        box-shadow: 0 0 25px rgba(0, 243, 255, 0.12);
+        transition: opacity 0.6s ease;
+    }
+    #guide-text {
+        font-size: 18px; font-weight: 600; color: #fff;
+        text-shadow: 0 0 10px rgba(0, 243, 255, 0.8);
+        animation: breathe 2s ease-in-out infinite;
+    }
+    @keyframes breathe {
+        0%, 100% { opacity: 0.85; }
+        50% { opacity: 1; text-shadow: 0 0 18px rgba(0, 243, 255, 1); }
+    }
+    .guide-divider {
+        height: 1px; margin: 12px 0;
+        background: linear-gradient(90deg, transparent, rgba(0,243,255,0.4), transparent);
+    }
+    .status-row {
+        display: flex; justify-content: space-between;
+        font-size: 13px; color: rgba(255,255,255,0.6);
+    }
+    #gesture-status { color: #00f3ff; font-weight: 600; }
+
+    /* 右下图鉴 */
+    #codex-btn {
+        position: fixed; bottom: 30px; right: 30px; z-index: 100;
+        padding: 12px 18px; border-radius: 10px;
+        background: rgba(10, 10, 20, 0.55);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 243, 255, 0.25);
+        color: #fff; font-size: 14px; cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    #codex-btn:hover {
+        background: rgba(0, 243, 255, 0.15);
+        border-color: rgba(0, 243, 255, 0.6);
+        box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+    }
+    #codex-panel {
+        position: fixed; bottom: 90px; right: 30px; z-index: 100;
+        width: 280px; padding: 20px; border-radius: 12px;
+        background: rgba(10, 10, 20, 0.85);
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(0, 243, 255, 0.3);
+        box-shadow: 0 0 30px rgba(0, 243, 255, 0.15);
+        opacity: 0; transform: translateY(10px); pointer-events: none;
+        transition: all 0.3s ease;
+    }
+    #codex-panel.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    #codex-panel h3 { font-size: 16px; margin-bottom: 12px; color: #00f3ff; }
+    .codex-item {
+        display: flex; align-items: center; gap: 10px;
+        padding: 8px 0; font-size: 13px; color: rgba(255,255,255,0.85);
+        border-bottom: 1px dashed rgba(255,255,255,0.08);
+    }
+    .codex-item:last-child { border-bottom: none; }
+    .codex-icon { font-size: 20px; }
+
+    /* 旋转提示遮罩（手机竖屏时） */
+    #rotate-tip {
+        position: fixed; inset: 0; z-index: 9999;
+        background: rgba(2, 2, 10, 0.92);
+        display: none; align-items: center; justify-content: center;
+        flex-direction: column; gap: 18px;
+        padding: 20px;
+    }
+    #rotate-tip.show { display: flex; }
+    #rotate-tip .rotate-icon {
+        font-size: 80px; animation: rotatePhone 2.2s ease-in-out infinite;
+    }
+    #rotate-tip .rotate-text {
+        font-size: 18px; color: #00f3ff; text-align: center;
+        text-shadow: 0 0 12px rgba(0, 243, 255, 0.8);
+        line-height: 1.7;
+    }
+    #rotate-tip .rotate-btn {
+        margin-top: 10px; padding: 12px 28px;
+        background: rgba(0, 243, 255, 0.15); border: 1px solid rgba(0, 243, 255, 0.5);
+        border-radius: 10px; color: #00f3ff; font-size: 15px;
+        cursor: pointer; backdrop-filter: blur(8px);
+    }
+    #rotate-tip .rotate-btn:hover { background: rgba(0, 243, 255, 0.3); }
+    @keyframes rotatePhone {
+        0%, 100% { transform: rotate(-90deg); }
+        50% { transform: rotate(-90deg) scale(1.15); }
+    }
+
+    /* 音效按钮 */
+    #sound-btn {
+        position: fixed; top: 20px; left: 20px; z-index: 100;
+        width: 42px; height: 42px; border-radius: 50%;
+        background: rgba(10, 10, 20, 0.55);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 243, 255, 0.25);
+        color: #00f3ff; font-size: 20px; cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex; align-items: center; justify-content: center;
+    }
+    #sound-btn:hover {
+        background: rgba(0, 243, 255, 0.15);
+        box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+    }
+    #sound-btn.muted { color: rgba(255,255,255,0.3); }
+
+    @media (max-width: 640px) {
+        #preview-container { width: 140px; height: 105px; top: 10px; right: 10px; border-radius: 8px; }
+        #guide-area { left: 10px; bottom: 10px; min-width: 180px; max-width: 75vw; padding: 10px 12px; }
+        #guide-text { font-size: 13px; }
+        #center-msg { font-size: 28px; letter-spacing: 2px; }
+        #codex-btn { right: 10px; bottom: 10px; padding: 8px 10px; font-size: 12px; }
+        #codex-panel { right: 10px; bottom: 65px; width: 220px; padding: 14px; }
+        #codex-panel h3 { font-size: 14px; }
+        .codex-item { font-size: 12px; padding: 6px 0; }
+        #sound-btn { top: 10px; left: 10px; width: 36px; height: 36px; font-size: 18px; }
+        .status-row { font-size: 11px; }
+    }
+
+    /* 手机横屏优化 */
+    @media (max-height: 500px) and (orientation: landscape) {
+        #preview-container { width: 180px; height: 135px; }
+        #guide-area { min-width: 240px; max-width: 320px; }
+        #center-msg { font-size: 40px; }
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<canvas id="main-canvas"></canvas>
+
+<div id="preview-container">
+    <video id="video-input" autoplay playsinline></video>
+    <canvas id="output-canvas" width="320" height="240"></canvas>
+    <div id="loading-tip">⏳ 加载模型中...</div>
+</div>
+
+<button id="sound-btn" title="音效开关">🔊</button>
+
+<div id="rotate-tip">
+    <div class="rotate-icon">📱</div>
+    <div class="rotate-text">
+        建议横屏使用<br>
+        <span style="font-size:14px;color:rgba(255,255,255,0.6)">体验更佳 · 竖屏也可使用</span>
+    </div>
+    <button class="rotate-btn" id="rotate-dismiss">知道了</button>
+</div>
+
+<div id="center-msg"></div>
+
+<div id="guide-area">
+    <div id="guide-text">👉 准备就绪</div>
+    <div class="guide-divider"></div>
+    <div class="status-row">
+        <span>当前手势</span>
+        <span id="gesture-status">等待</span>
+    </div>
+</div>
+
+<button id="codex-btn">📖 图鉴</button>
+<div id="codex-panel">
+    <h3>📖 手势图鉴</h3>
+    <div class="codex-item"><span class="codex-icon">✊</span><span>握拳 → 星球凝聚 · 橙金</span></div>
+    <div class="codex-item"><span class="codex-icon">🖐️</span><span>张开 → 星云爆炸 · 白蓝</span></div>
+    <div class="codex-item"><span class="codex-icon">🤲</span><span>双手 → 立方显现 · LVYWCX</span></div>
+    <div class="codex-item"><span class="codex-icon">🙌</span><span>离手 → 星沙散落 · 粉红</span></div>
+    <div class="codex-item"><span class="codex-icon">🙏</span><span>合十 → 人类宣言 · 青</span></div>
+    <div class="codex-item"><span class="codex-icon">👍</span><span>拇指 → 王露平 · 青粉</span></div>
+</div>
+
+<script>
+// ==================== 全局配置 ====================
+const CONFIG = {
+    BASE_PARTICLE_COUNT: 2800,  // 基础粒子（通用模式）
+    DECLARATION_EXTRA:   2200,  // 宣言专用额外粒子
+    COLOR_LERP_SPEED: 0.18,
+    Z_AMPLITUDE: 0.12,
+    GRAVITY_SAND: 0.05,
+    LERP_SPEED: 0.22,
+    GESTURE_DEBOUNCE_MS: 280,
+    MODE_COOLDOWN_MS: 700,
+};
+CONFIG.PARTICLE_COUNT = CONFIG.BASE_PARTICLE_COUNT + CONFIG.DECLARATION_EXTRA;
+
+// 移动端检测 & 自适应配置
+const IS_MOBILE = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.innerWidth < 768 && 'ontouchstart' in window);
+const IS_TOUCH = 'ontouchstart' in window;
+if (IS_MOBILE) {
+    CONFIG.BASE_PARTICLE_COUNT = 1800;   // 移动端基础粒子
+    CONFIG.DECLARATION_EXTRA = 1400;      // 移动端宣言额外粒子
+    CONFIG.PARTICLE_COUNT = CONFIG.BASE_PARTICLE_COUNT + CONFIG.DECLARATION_EXTRA;
+    CONFIG.Z_AMPLITUDE = 0.08;            // 降低Z轴计算
+    CONFIG.LERP_SPEED = 0.25;             // 移动端粒子更快到位
+}
+
+// 延续原版赛博青粉双色系：每个模式只用 1~2 色，提升流畅度与一致性
+const PALETTES = {
+    idle:    ['#00f3ff', '#ff0055'],          // 弥散星云：青粉混合
+    planet:  ['#00f3ff'],                     // 星球凝聚：纯青
+    explode: ['#ffffff', '#00f3ff'],          // 爆炸：白青高光
+    cube:    ['#00f3ff', '#ff0055'],          // 立方：青粉双面
+    sand:    ['#ff0055'],                     // 沙化：粉红飘落
+    text:    ['#00f3ff'],                     // 宣言：纯青文字
+};
+
+const DECLARATION_LINES = [
+    'AI 的到来，不可撼动。',
+    '但——',
+    '工具，永远臣服于人类的意志。',
+    '只要主体屹立，',
+    '想象的火焰不熄，',
+    '人类必将乘势而上，凌越时代之巅。',
+];
+
+const GUIDE_STEPS = [
+    { gesture: 'open',     text: '🖐️ 张开手掌 · 唤醒星云', msg: '💥 星云爆炸！' },
+    { gesture: 'fist',     text: '✊ 握紧拳头 · 凝聚星球', msg: '🌍 星球凝聚！' },
+    { gesture: 'twohands', text: '🤲 伸出双手 · 召唤立方', msg: '📦 立方显现！' },
+    { gesture: 'nohands',  text: '🙌 移开双手 · 星沙散落', msg: '🏜️ 星沙散落！' },
+    { gesture: 'pray',     text: '🙏 双手合十 · 宣读宣言', msg: '📜 人类宣言！' },
+];
+
+// ==================== 全局状态 ====================
+let canvas, ctx, W, H;
+let particles = [];
+let currentMode = 'idle';
+let cubeBaseData = null;
+let cubeRotation = 0;
+let explosionTimer = 0;
+let lastGesture = '';
+let lastGestureTime = 0;
+let lastModeChangeTime = 0;
+let guideStepIndex = 0;
+let guideCompleted = false;
+let soundEnabled = true;
+
+// ==================== 音效系统（Web Audio API） ====================
+let audioCtx = null;
+function initAudio() {
+    if (audioCtx) return;
+    try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (e) { console.warn('Web Audio not supported'); }
+}
+
+function playSound(mode) {
+    if (!soundEnabled || !audioCtx) return;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+
+    // 每个模式独特的音效
+    const presets = {
+        planet:  { type: 'sine',   freqs: [80, 200, 800], duration: 0.35, vol: 0.15, attack: 0.05, release: 0.3 },
+        explode: { type: 'sawtooth', freqs: [200, 60, 1200], duration: 0.5, vol: 0.18, attack: 0.01, release: 0.45 },
+        cube:    { type: 'square', freqs: [400, 600, 800], duration: 0.4, vol: 0.12, attack: 0.02, release: 0.35 },
+        sand:    { type: 'triangle', freqs: [300, 150], duration: 0.6, vol: 0.1, attack: 0.1, release: 0.5 },
+        text:    { type: 'sine', freqs: [523, 659, 784], duration: 0.8, vol: 0.14, attack: 0.15, release: 0.5 },
+        wang:    { type: 'sine', freqs: [440, 554, 659], duration: 0.6, vol: 0.14, attack: 0.1, release: 0.4 },
+        idle:    { type: 'sine', freqs: [200], duration: 0.15, vol: 0.04, attack: 0.02, release: 0.1 },
+    };
+    const p = presets[mode] || presets.idle;
+
+    // 包络发生器
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+
+    osc.type = p.type;
+    osc.frequency.setValueAtTime(p.freqs[0], now);
+
+    // 频率扫动
+    for (let i = 1; i < p.freqs.length; i++) {
+        osc.frequency.linearRampToValueAtTime(p.freqs[i], now + p.duration * (i / p.freqs.length));
+    }
+    osc.frequency.linearRampToValueAtTime(p.freqs[p.freqs.length - 1] * 0.5, now + p.duration);
+
+    // 包络
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(p.vol, now + p.attack);
+    gain.gain.linearRampToValueAtTime(p.vol * 0.6, now + p.duration - p.release);
+    gain.gain.linearRampToValueAtTime(0, now + p.duration);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(3000, now);
+    filter.frequency.linearRampToValueAtTime(1500, now + p.duration);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start(now);
+    osc.stop(now + p.duration + 0.05);
+}
+
+function toggleSound() {
+    soundEnabled = !soundEnabled;
+    const btn = document.getElementById('sound-btn');
+    if (soundEnabled) {
+        btn.textContent = '🔊';
+        btn.classList.remove('muted');
+        initAudio();
+    } else {
+        btn.textContent = '🔇';
+        btn.classList.add('muted');
+    }
+}
+
+// ==================== 旋转提示 ====================
+let rotateTipShown = false;
+function checkRotation() {
+    if (!IS_MOBILE) return;
+    const isPortrait = window.innerHeight > window.innerWidth;
+    const tip = document.getElementById('rotate-tip');
+    if (isPortrait && !rotateTipShown) {
+        tip.classList.add('show');
+    } else if (!isPortrait) {
+        tip.classList.remove('show');
+    }
+}
+function dismissRotateTip() {
+    rotateTipShown = true;
+    document.getElementById('rotate-tip').classList.remove('show');
+}
+
+// ==================== 工具函数 ====================
+function hexToRgb(hex) {
+    return {
+        r: parseInt(hex.slice(1, 3), 16),
+        g: parseInt(hex.slice(3, 5), 16),
+        b: parseInt(hex.slice(5, 7), 16),
+    };
+}
+function randomColor(palette) {
+    return hexToRgb(palette[Math.floor(Math.random() * palette.length)]);
+}
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+// ==================== 初始化 ====================
+function init() {
+    canvas = document.getElementById('main-canvas');
+    ctx = canvas.getContext('2d');
+    resize();
+    window.addEventListener('resize', () => { resize(); checkRotation(); });
+    window.addEventListener('orientationchange', checkRotation);
+
+    // 初始化音效（需要用户交互才能启动）
+    initAudio();
+    document.getElementById('sound-btn').addEventListener('click', () => {
+        initAudio();
+        toggleSound();
+    });
+
+    // 旋转提示
+    document.getElementById('rotate-dismiss').addEventListener('click', dismissRotateTip);
+    checkRotation();
+
+    cubeBaseData = generateCubeBaseData();
+
+    for (let i = 0; i < CONFIG.PARTICLE_COUNT; i++) {
+        particles.push(createParticle());
+    }
+    targetIdle();
+
+    document.getElementById('guide-text').textContent = '👉 ' + GUIDE_STEPS[0].text;
+    animate();
+    initMediaPipe();
+}
+
+function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+}
+
+function createParticle() {
+    const c = randomColor(PALETTES.idle);
+    return {
+        x: Math.random() * W,
+        y: Math.random() * H,
+        z: Math.random(),
+        vx: (Math.random() - 0.5) * 0.6,
+        vy: (Math.random() - 0.5) * 0.6,
+        tx: W / 2, ty: H / 2,
+        size: 0.4 + Math.random() * 0.9,
+        color: { r: c.r, g: c.g, b: c.b },
+        targetColor: { r: c.r, g: c.g, b: c.b },
+        baseAlpha: 0.5 + Math.random() * 0.4,
+        explodeVx: 0, explodeVy: 0,
+        sandSettled: false,
+        cubePointIdx: -1,
+        phase: Math.random() * Math.PI * 2,
+    };
+}
+
+// ==================== 双池管理 ====================
+// 隐藏基础池以外的粒子（非宣言模式下），避免它们在屏幕上残留
+function hideExtraParticles() {
+    const start = CONFIG.BASE_PARTICLE_COUNT;
+    for (let i = start; i < CONFIG.PARTICLE_COUNT; i++) {
+        const p = particles[i];
+        p.tx = -9999;
+        p.ty = -9999;
+        p.baseAlpha = 0;
+        p.targetColor = randomColor(PALETTES.idle);
+        p.vx = 0; p.vy = 0;
+        p.sandSettled = true;
+        p.cubePointIdx = -1;
+        p.explodeVx = 0; p.explodeVy = 0;
+    }
+}
+
+// ==================== 模式目标生成 ====================
+function setMode(mode) {
+    if (currentMode === mode) return;
+    currentMode = mode;
+    lastModeChangeTime = performance.now();
+
+    // 音效：恢复被浏览器挂起的音频上下文
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    playSound(mode);
+
+    // 离开宣言模式时，隐藏额外粒子，提升性能
+    if (mode !== 'text' && mode !== 'wang') {
+        hideExtraParticles();
+    }
+
+    switch (mode) {
+        case 'planet':  targetPlanet();  break;
+        case 'explode': targetExplode(); break;
+        case 'cube':    targetCube();    break;
+        case 'sand':    targetSand();    break;
+        case 'text':    targetText();    break;
+        case 'wang':    targetWang();    break;
+        case 'idle':    targetIdle();    break;
+    }
+}
+
+function targetIdle() {
+    particles.forEach(p => {
+        p.tx = Math.random() * W;
+        p.ty = Math.random() * H;
+        p.vx = (Math.random() - 0.5) * 0.6;
+        p.vy = (Math.random() - 0.5) * 0.6;
+        p.targetColor = randomColor(PALETTES.idle);
+        p.baseAlpha = 0.4 + Math.random() * 0.4;
+        p.cubePointIdx = -1;
+        p.sandSettled = false;
+    });
+}
+
+function targetPlanet() {
+    const cx = W / 2, cy = H / 2;
+    const radius = Math.min(W, H) * 0.16;
+    particles.forEach(p => {
+        // 球面2D投影采样（圆盘分布）
+        const angle = Math.random() * Math.PI * 2;
+        const r = radius * Math.sqrt(Math.random()) * (0.85 + Math.random() * 0.3);
+        p.tx = cx + Math.cos(angle) * r;
+        p.ty = cy + Math.sin(angle) * r;
+        p.vx = (Math.random() - 0.5) * 0.2;
+        p.vy = (Math.random() - 0.5) * 0.2;
+        p.targetColor = randomColor(PALETTES.planet);
+        p.baseAlpha = 0.85;
+        p.cubePointIdx = -1;
+        p.sandSettled = false;
+    });
+}
+
+function targetExplode() {
+    const cx = W / 2, cy = H / 2;
+    particles.forEach(p => {
+        const dx = p.x - cx, dy = p.y - cy;
+        const angle = Math.atan2(dy, dx) || Math.random() * Math.PI * 2;
+        const speed = 6 + Math.random() * 14;
+        p.explodeVx = Math.cos(angle) * speed + (Math.random() - 0.5) * 2;
+        p.explodeVy = Math.sin(angle) * speed + (Math.random() - 0.5) * 2;
+        p.targetColor = randomColor(PALETTES.explode);
+        p.baseAlpha = 1.0;
+        p.cubePointIdx = -1;
+        p.sandSettled = false;
+    });
+    explosionTimer = 0;
+}
+
+function targetCube() {
+    particles.forEach((p, i) => {
+        p.cubePointIdx = i % cubeBaseData.length;
+        p.targetColor = randomColor(PALETTES.cube);
+        p.baseAlpha = 0.9;
+        p.vx = 0; p.vy = 0;
+        p.sandSettled = false;
+    });
+    cubeRotation = 0;
+}
+
+function targetSand() {
+    particles.forEach(p => {
+        p.vx = (Math.random() - 0.5) * 1.2;
+        p.vy = -1 - Math.random() * 2; // 轻微上抛，然后下落
+        p.targetColor = randomColor(PALETTES.sand);
+        p.baseAlpha = 0.85;
+        p.cubePointIdx = -1;
+        p.sandSettled = false;
+    });
+}
+
+function targetText() {
+    const targets = generateTextTargets(DECLARATION_LINES);
+    particles.forEach((p, i) => {
+        if (i < targets.length) {
+            const t = targets[i];
+            p.tx = t.x;
+            p.ty = t.y;
+            p.baseAlpha = 0.9;
+        } else {
+            // 多余粒子隐藏在边缘
+            p.tx = Math.random() * W;
+            p.ty = H + 50;
+            p.baseAlpha = 0;
+        }
+        p.vx = 0; p.vy = 0;
+        p.targetColor = randomColor(PALETTES.text);
+        p.cubePointIdx = -1;
+        p.sandSettled = false;
+    });
+}
+
+// 王露平三个字：逐字分开采样，每字只用两色（共6色但按字隔离，视觉稳定不眩晕）
+const WANG_WORD_COLORS = [
+    ['#00f3ff', '#6bfbff'], // 王 → 青 + 浅青
+    ['#ff0055', '#ff6fa3'], // 露 → 粉 + 浅粉
+    ['#00f3ff', '#ff0055'], // 平 → 青 + 粉（呼应整体风格）
+];
+function targetWang() {
+    const chars = ['王', '露', '平'];
+    // 逐字分开采样，按字水平平铺排列
+    const wordSpacing = 30;          // 字间距（离屏像素）
+    const wordW = 300;               // 每字占宽
+    const totalW = wordW * chars.length + wordSpacing * (chars.length - 1);
+    const startX = (900 - totalW) / 2;
+    const centerY = 660 / 2;
+    const fontPx = 220;
+
+    const allTargets = [];
+    for (let ci = 0; ci < chars.length; ci++) {
+        const sub = generateTextTargets([chars[ci]], fontPx, true);
+        const cx = startX + ci * (wordW + wordSpacing) + wordW / 2;
+        // 将子采样（900x660居中）的原点平移到本字区域
+        const ox = cx - 900 / 2;
+        const oy = centerY - 660 / 2;
+        for (let k = 0; k < sub.length; k++) {
+            allTargets.push({
+                x: sub[k].x + ox,
+                y: sub[k].y + oy,
+                colorIdx: ci,
+            });
+        }
+    }
+
+    // 缩放到屏幕（与 generateTextTargets 的 660 画布一致）
+    const scale = Math.min(W / 900, H / 660) * 0.85;
+    const offsetX = (W - 900 * scale) / 2;
+    const offsetY = (H - 660 * scale) / 2;
+    const screenTargets = allTargets.map(t => ({
+        x: offsetX + t.x * scale,
+        y: offsetY + t.y * scale,
+        colorIdx: t.colorIdx,
+    }));
+
+    // 打乱（避免扫描线感）
+    for (let i = screenTargets.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [screenTargets[i], screenTargets[j]] = [screenTargets[j], screenTargets[i]];
+    }
+
+    particles.forEach((p, i) => {
+        if (i < screenTargets.length) {
+            const t = screenTargets[i];
+            p.tx = t.x;
+            p.ty = t.y;
+            p.baseAlpha = 0.95;
+            // 每个字仅两色交替，按粒子index选色，视觉平稳
+            const palette = WANG_WORD_COLORS[t.colorIdx];
+            const hex = palette[i % palette.length];
+            p.targetColor = hexToRgb(hex);
+        } else {
+            p.tx = Math.random() * W;
+            p.ty = H + 50;
+            p.baseAlpha = 0;
+            p.targetColor = hexToRgb(PALETTES.idle[0]);
+        }
+        p.vx = 0; p.vy = 0;
+        p.cubePointIdx = -1;
+        p.sandSettled = false;
+    });
+}
+
+// ==================== 立方体3D数据预生成 ====================
+function generateCubeBaseData() {
+    const data = [];
+    const letterSize = 0.7;
+
+    // 6个面：每面字母 + 法线方向
+    const faces = [
+        { letter: 'L', axis: 'z', sign: -1 }, // front
+        { letter: 'V', axis: 'z', sign:  1 }, // back
+        { letter: 'Y', axis: 'y', sign:  1 }, // top
+        { letter: 'W', axis: 'y', sign: -1 }, // bottom
+        { letter: 'C', axis: 'x', sign: -1 }, // left
+        { letter: 'X', axis: 'x', sign:  1 }, // right
+    ];
+
+    faces.forEach(face => {
+        const pts2D = sampleLetter2D(face.letter, letterSize);
+        pts2D.forEach(p => {
+            let x = 0, y = 0, z = 0;
+            if (face.axis === 'z') { x = p.x; y = p.y; z = face.sign; }
+            else if (face.axis === 'y') { x = p.x; z = p.y; y = face.sign; }
+            else if (face.axis === 'x') { y = p.x; z = p.y; x = face.sign; }
+            data.push({ x, y, z });
+        });
+    });
+
+    // 12条边线点
+    const verts = [
+        [-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],
+        [-1,-1, 1],[1,-1, 1],[1,1, 1],[-1,1, 1],
+    ];
+    const edges = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+    edges.forEach(([a, b]) => {
+        const va = verts[a], vb = verts[b];
+        const steps = 18;
+        for (let i = 0; i <= steps; i++) {
+            const t = i / steps;
+            data.push({
+                x: va[0] + (vb[0] - va[0]) * t,
+                y: va[1] + (vb[1] - va[1]) * t,
+                z: va[2] + (vb[2] - va[2]) * t,
+            });
+        }
+    });
+
+    return data;
+}
+
+function sampleLetter2D(letter, size) {
+    const off = 80;
+    const c = document.createElement('canvas');
+    c.width = off; c.height = off;
+    const cx = c.getContext('2d');
+    cx.fillStyle = 'black';
+    cx.fillRect(0, 0, off, off);
+    cx.fillStyle = 'white';
+    cx.font = 'bold 60px "Microsoft YaHei", sans-serif';
+    cx.textAlign = 'center';
+    cx.textBaseline = 'middle';
+    cx.fillText(letter, off / 2, off / 2);
+
+    const data = cx.getImageData(0, 0, off, off).data;
+    const points = [];
+    const step = 4;
+    for (let y = 0; y < off; y += step) {
+        for (let x = 0; x < off; x += step) {
+            if (data[(y * off + x) * 4] > 128) {
+                points.push({
+                    x: (x / off - 0.5) * size * 2,
+                    y: (y / off - 0.5) * size * 2,
+                });
+            }
+        }
+    }
+    return points;
+}
+
+function projectCubePoint(point, rotY, rotX, scale, cx, cy) {
+    const x1 = point.x * Math.cos(rotY) + point.z * Math.sin(rotY);
+    const z1 = -point.x * Math.sin(rotY) + point.z * Math.cos(rotY);
+    const y1 = point.y * Math.cos(rotX) - z1 * Math.sin(rotX);
+    return { x: cx + x1 * scale, y: cy + y1 * scale };
+}
+
+function updateCubeTargets() {
+    cubeRotation += 0.006;
+    const cx = W / 2, cy = H / 2;
+    const scale = Math.min(W, H) * 0.22;
+    const rotX = Math.PI / 7;
+    particles.forEach(p => {
+        if (p.cubePointIdx < 0) return;
+        const pt = cubeBaseData[p.cubePointIdx];
+        const proj = projectCubePoint(pt, cubeRotation, rotX, scale, cx, cy);
+        p.tx = proj.x;
+        p.ty = proj.y;
+    });
+}
+
+// ==================== 文字采样 ====================
+// 通用文字采样：将任意多行文字渲染到离屏 Canvas 并提取粒子目标点
+// rawOnly=true 时，返回离屏画布的原始像素坐标（不做屏幕缩放）
+function generateTextTargets(lines, fontPx = 64, rawOnly = false) {
+    const offW = 900, offH = 660;
+    const c = document.createElement('canvas');
+    c.width = offW; c.height = offH;
+    const cx = c.getContext('2d');
+    cx.fillStyle = 'black';
+    cx.fillRect(0, 0, offW, offH);
+    cx.fillStyle = 'white';
+    cx.font = `bold ${fontPx}px "Microsoft YaHei", sans-serif`;
+    cx.textAlign = 'center';
+    cx.textBaseline = 'middle';
+
+    const lineH = fontPx * 1.5;
+    lines.forEach((line, i) => {
+        cx.fillText(line, offW / 2, lineH * 0.7 + i * lineH);
+    });
+
+    const data = cx.getImageData(0, 0, offW, offH).data;
+    const rawTargets = [];
+    // 3px 步长在目标密度和覆盖度间取得平衡
+    for (let y = 0; y < offH; y += 3) {
+        for (let x = 0; x < offW; x += 3) {
+            if (data[(y * offW + x) * 4] > 110) {
+                rawTargets.push({ x, y });
+            }
+        }
+    }
+    // 若原始目标点远超粒子数，随机下采样到粒子数上限，保证每笔都有粒子
+    if (rawOnly) {
+        if (rawTargets.length > CONFIG.PARTICLE_COUNT) {
+            // Fisher-Yates 洗牌，取前 PARTICLE_COUNT 个
+            for (let i = rawTargets.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [rawTargets[i], rawTargets[j]] = [rawTargets[j], rawTargets[i]];
+            }
+            rawTargets.length = CONFIG.PARTICLE_COUNT;
+        }
+        return rawTargets;
+    }
+    // 非 rawOnly 模式：先在原始空间下采样，再缩放
+    if (rawTargets.length > CONFIG.PARTICLE_COUNT) {
+        for (let i = rawTargets.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [rawTargets[i], rawTargets[j]] = [rawTargets[j], rawTargets[i]];
+        }
+        rawTargets.length = CONFIG.PARTICLE_COUNT;
+    }
+
+    const scale = Math.min(W / offW, H / offH) * 0.85;
+    const offsetX = (W - offW * scale) / 2;
+    const offsetY = (H - offH * scale) / 2;
+    const targets = rawTargets.map(t => ({
+        x: offsetX + t.x * scale,
+        y: offsetY + t.y * scale,
+    }));
+    // 打乱顺序，避免明显的扫描线感
+    for (let i = targets.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [targets[i], targets[j]] = [targets[j], targets[i]];
+    }
+    return targets;
+}
+
+// ==================== 渲染循环 ====================
+function animate() {
+    requestAnimationFrame(animate);
+    const time = performance.now() * 0.001;
+    const mode = currentMode;
+    const isTextMode = (mode === 'text' || mode === 'wang');
+
+    // 拖尾背景（残影）：文本模式用更高alpha快速清除，避免模糊叠影
+    ctx.globalCompositeOperation = 'source-over';
+    const trailAlpha = isTextMode ? 0.35 : 0.18;
+    ctx.fillStyle = `rgba(2, 2, 10, ${trailAlpha})`;
+    ctx.fillRect(0, 0, W, H);
+
+    // 各模式特殊更新
+    if (mode === 'cube') {
+        updateCubeTargets();
+    }
+    if (mode === 'explode') {
+        explosionTimer++;
+        if (explosionTimer > 70) setMode('idle');
+    }
+
+    const cs = CONFIG.COLOR_LERP_SPEED;
+    const ls = CONFIG.LERP_SPEED;
+    const za = CONFIG.Z_AMPLITUDE;
+    const gs = CONFIG.GRAVITY_SAND;
+    // 动态决定本帧处理的粒子数量：宣言模式激活全部，其余只用基础池
+    const N = (mode === 'text' || mode === 'wang') ? CONFIG.PARTICLE_COUNT : CONFIG.BASE_PARTICLE_COUNT;
+
+    // 单循环：合并物理更新 + 颜色lerp + 绘制
+    ctx.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < N; i++) {
+        const p = particles[i];
+
+        if (mode === 'explode') {
+            p.x += p.explodeVx;
+            p.y += p.explodeVy;
+            p.explodeVx *= 0.96;
+            p.explodeVy = p.explodeVy * 0.96 + 0.08;
+            p.z = 0.5 + Math.sin(time + p.phase) * za;
+        } else if (mode === 'sand') {
+            if (!p.sandSettled) {
+                p.vy += gs;
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vx *= 0.99;
+                if (p.y > H - 4) {
+                    p.y = H - 4 - Math.random() * 25;
+                    p.vy *= -0.2;
+                    p.vx *= 0.5;
+                    if (Math.abs(p.vy) < 0.3 && Math.abs(p.vx) < 0.1) {
+                        p.sandSettled = true;
+                        p.vy = 0; p.vx = 0;
+                    }
+                }
+                if (p.x < 0) { p.x = 0; p.vx *= -0.5; }
+                if (p.x > W) { p.x = W; p.vx *= -0.5; }
+            }
+            p.z = 0.5;
+        } else {
+            // 普通模式：朝目标漂移（弱化惯性，让LERP主导，速度更快）
+            if (!isTextMode) {
+                p.vx += (Math.random() - 0.5) * 0.05;
+                p.vy += (Math.random() - 0.5) * 0.05;
+                p.vx *= 0.82;
+                p.vy *= 0.82;
+                p.x += p.vx;
+                p.y += p.vy;
+            } else {
+                // 文本模式：关闭惯性，直接lerp，笔画稳定不抖
+                p.vx = 0; p.vy = 0;
+            }
+            p.x += (p.tx - p.x) * ls;
+            p.y += (p.ty - p.y) * ls;
+            // 文本模式：关闭Z轴抖动，粒子固定，消除虚影
+            p.z = isTextMode ? 0.5 : (0.5 + Math.sin(time * 0.6 + p.phase) * za);
+        }
+
+        // 颜色 lerp：文本模式跳过lerp，立即锁定目标颜色，消除过渡模糊
+        if (isTextMode) {
+            p.color.r = p.targetColor.r;
+            p.color.g = p.targetColor.g;
+            p.color.b = p.targetColor.b;
+        } else {
+            p.color.r += (p.targetColor.r - p.color.r) * cs;
+            p.color.g += (p.targetColor.g - p.color.g) * cs;
+            p.color.b += (p.targetColor.b - p.color.b) * cs;
+        }
+
+        // 绘制：文本模式更小更稳定，笔画密集清晰
+        let sizeMul, alpha;
+        if (isTextMode) {
+            // 固定大小、固定亮度 — 消除光晕扩散和闪烁
+            sizeMul = 0.9;
+            alpha = Math.min(1, p.baseAlpha);
+        } else {
+            sizeMul = 0.5 + p.z;
+            alpha = Math.max(0, p.baseAlpha * (0.4 + p.z * 0.6));
+        }
+        const r = p.color.r | 0, g = p.color.g | 0, b = p.color.b | 0;
+        ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * sizeMul, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+
+    if (currentMode === 'cube') {
+        drawCubeWireframe();
+    }
+}
+
+function drawCubeWireframe() {
+    const cx = W / 2, cy = H / 2;
+    const scale = Math.min(W, H) * 0.22;
+    const rotX = Math.PI / 7;
+    const verts = [
+        [-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],
+        [-1,-1, 1],[1,-1, 1],[1,1, 1],[-1,1, 1],
+    ];
+    const projected = verts.map(v => projectCubePoint({x:v[0],y:v[1],z:v[2]}, cubeRotation, rotX, scale, cx, cy));
+    const edges = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+
+    ctx.strokeStyle = 'rgba(0, 212, 255, 0.55)';
+    ctx.lineWidth = 1.5;
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = '#00D4FF';
+    edges.forEach(([a, b]) => {
+        ctx.beginPath();
+        ctx.moveTo(projected[a].x, projected[a].y);
+        ctx.lineTo(projected[b].x, projected[b].y);
+        ctx.stroke();
+    });
+    ctx.shadowBlur = 0;
+}
+
+// ==================== MediaPipe 初始化 ====================
+function initMediaPipe() {
+    let retryCount = 0;
+    const tryStart = setInterval(() => {
+        if (window.Hands && window.Camera) {
+            clearInterval(tryStart);
+            startHands();
+        } else {
+            retryCount++;
+            if (retryCount > 100) {
+                document.getElementById('loading-tip').textContent = '⚠️ 模型加载失败，重试中...';
+                retryCount = 0;
+            }
+        }
+    }, 200);
+}
+
+function startHands() {
+    const video = document.getElementById('video-input');
+    const outputCanvas = document.getElementById('output-canvas');
+    const outputCtx = outputCanvas.getContext('2d');
+
+    const hands = new window.Hands({
+        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+    });
+    // 移动端用Lite模型(complexity 0)，PC端用标准模型(complexity 1)
+    hands.setOptions({
+        maxNumHands: 2,
+        modelComplexity: IS_MOBILE ? 0 : 1,
+        minDetectionConfidence: IS_MOBILE ? 0.5 : 0.6,
+        minTrackingConfidence: IS_MOBILE ? 0.4 : 0.5,
+    });
+    hands.onResults(results => {
+        outputCtx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
+        if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+            results.multiHandLandmarks.forEach(lm => {
+                if (window.drawConnectors && window.HAND_CONNECTIONS) {
+                    window.drawConnectors(outputCtx, lm, window.HAND_CONNECTIONS, { color: '#00f3ff', lineWidth: 1 });
+                }
+                if (window.drawLandmarks) {
+                    window.drawLandmarks(outputCtx, lm, { color: '#ff0055', lineWidth: 1, radius: 2 });
+                }
+            });
+            const gesture = detectGesture(results.multiHandLandmarks);
+            updateGesture(gesture);
+        } else {
+            updateGesture('nohands');
+        }
+    });
+
+    const camera = new window.Camera(video, {
+        onFrame: async () => { await hands.send({ image: video }); },
+        width: IS_MOBILE ? 240 : 320,
+        height: IS_MOBILE ? 180 : 240,
+    });
+    camera.start().then(() => {
+        document.getElementById('loading-tip').style.display = 'none';
+        // 用户首次与摄像头交互时解锁音频
+        video.addEventListener('touchstart', initAudio, { once: true });
+        video.addEventListener('click', initAudio, { once: true });
+        document.addEventListener('touchstart', initAudio, { once: true });
+    }).catch(err => {
+        console.error('Camera failed', err);
+        document.getElementById('loading-tip').textContent = '⚠️ 摄像头无法访问';
+    });
+}
+
+// ==================== 手势识别 ====================
+function detectGesture(landmarksList) {
+    const count = landmarksList.length;
+    if (count === 0) return 'nohands';
+    if (count === 1) {
+        const lm = landmarksList[0];
+        if (isThumbUp(lm)) return 'thumb';   // 优先识别拇指伸出
+        if (isFist(lm)) return 'fist';
+        if (isOpenPalm(lm)) return 'open';
+        return 'open';
+    }
+    if (count === 2) {
+        if (isPray(landmarksList[0], landmarksList[1])) return 'pray';
+        return 'twohands';
+    }
+    return 'nohands';
+}
+
+// 指尖(4,8,12,16,20) 与 指根MCP(5,9,13,17) 的距离比 → 判断每根手指是否伸直
+function getExtendedFingers(lm) {
+    const tips = [8, 12, 16, 20];
+    const pips = [6, 10, 14, 18];
+    const wrist = lm[0];
+    const ext = [];
+    for (let i = 0; i < tips.length; i++) {
+        const tipDist = Math.hypot(lm[tips[i]].x - wrist.x, lm[tips[i]].y - wrist.y);
+        const pipDist = Math.hypot(lm[pips[i]].x - wrist.x, lm[pips[i]].y - wrist.y);
+        ext.push(tipDist > pipDist * 1.05);
+    }
+    // 拇指：横向比较
+    const thumbExt = Math.abs(lm[4].x - lm[17].x) > Math.abs(lm[3].x - lm[17].x);
+    ext.unshift(thumbExt);
+    return ext;
+}
+
+function isFist(lm) {
+    const ext = getExtendedFingers(lm);
+    const extCount = ext.filter(e => e).length;
+    return extCount === 0;
+}
+
+// 只伸大拇指（其余四指弯曲），且拇指明显竖起
+function isThumbUp(lm) {
+    const ext = getExtendedFingers(lm);
+    const extCount = ext.filter(e => e).length;
+    if (!ext[0] || extCount !== 1) return false;
+    // 拇指尖(4)明显高于手腕(0)：拇指朝上
+    return lm[4].y < lm[0].y - 0.08;
+}
+
+function isOpenPalm(lm) {
+    const ext = getExtendedFingers(lm);
+    const extCount = ext.filter(e => e).length;
+    return extCount >= 4;
+}
+
+function isPray(h1, h2) {
+    // 两手中指根(9)距离近
+    const dx = h1[9].x - h2[9].x;
+    const dy = h1[9].y - h2[9].y;
+    const palmDist = Math.hypot(dx, dy);
+    // 手指都朝上（中指尖 y < 手腕 y，y 轴向下）
+    const up1 = h1[12].y < h1[0].y - 0.05;
+    const up2 = h2[12].y < h2[0].y - 0.05;
+    const open1 = isOpenPalm(h1);
+    const open2 = isOpenPalm(h2);
+    // 两手在水平方向上接近
+    return palmDist < 0.25 && up1 && up2 && open1 && open2;
+}
+
+// ==================== 手势 -> 模式 ====================
+function updateGesture(gesture) {
+    document.getElementById('gesture-status').textContent = gestureLabel(gesture);
+
+    const now = performance.now();
+    if (gesture !== lastGesture) {
+        lastGesture = gesture;
+        lastGestureTime = now;
+        return;
+    }
+    // 防抖：手势稳定一段时间 + 模式冷却
+    if (now - lastGestureTime < CONFIG.GESTURE_DEBOUNCE_MS) return;
+    if (now - lastModeChangeTime < CONFIG.MODE_COOLDOWN_MS) return;
+
+    applyGesture(gesture);
+    lastModeChangeTime = now;
+    lastGestureTime = now;
+}
+
+function gestureLabel(g) {
+    return ({
+        fist: '✊ 握拳',
+        open: '🖐️ 张开',
+        thumb: '👍 拇指',
+        twohands: '🤲 双手',
+        nohands: '🙌 无手',
+        pray: '🙏 合十',
+    })[g] || '未知';
+}
+
+function applyGesture(gesture) {
+    let mode = null;
+    let msg = '';
+
+    switch (gesture) {
+        case 'fist':     mode = 'planet';  msg = '🌍 星球凝聚！'; break;
+        case 'open':     mode = 'explode'; msg = '💥 星云爆炸！'; break;
+        case 'thumb':    mode = 'wang';    msg = '';              break; // 聚合王露平时不显示中央大字，避免遮挡
+        case 'twohands': mode = 'cube';    msg = '📦 立方显现！'; break;
+        case 'pray':     mode = 'text';    msg = '';              break; // 聚合宣言时不显示中央大字，避免遮挡
+        case 'nohands':
+            // 从聚合状态离开时触发沙化（避免初始就沙化）
+            if (['cube', 'planet', 'text', 'wang'].includes(currentMode)) {
+                mode = 'sand';
+                msg = '🏜️ 星沙散落！';
+            }
+            break;
+    }
+
+    if (mode) {
+        setMode(mode);
+        if (msg) showCenterMsg(msg);
+    }
+    updateGuide(gesture);
+}
+
+function showCenterMsg(text) {
+    const el = document.getElementById('center-msg');
+    el.textContent = text;
+    el.classList.add('show');
+    clearTimeout(showCenterMsg._t);
+    showCenterMsg._t = setTimeout(() => {
+        el.classList.remove('show');
+    }, 1500);
+}
+
+// ==================== 引导系统 ====================
+function updateGuide(gesture) {
+    if (guideCompleted) return;
+    const stepIdx = GUIDE_STEPS.findIndex(s => s.gesture === gesture);
+    if (stepIdx === -1) return;
+
+    // 跳过规则：做了后面的步骤就跳到对应步骤之后
+    if (stepIdx >= guideStepIndex) {
+        guideStepIndex = stepIdx + 1;
+    } else {
+        // 做了前面的步骤，不更新进度（但不阻止模式触发）
+        return;
+    }
+
+    if (guideStepIndex >= GUIDE_STEPS.length) {
+        guideCompleted = true;
+        document.getElementById('guide-text').textContent = '🎉 你已掌握所有星云之力！';
+        setTimeout(() => {
+            document.getElementById('guide-area').style.opacity = 0;
+        }, 3000);
+    } else {
+        const next = GUIDE_STEPS[guideStepIndex];
+        document.getElementById('guide-text').textContent = '👉 ' + next.text;
+    }
+}
+
+// ==================== 图鉴按钮 ====================
+document.getElementById('codex-btn').addEventListener('click', () => {
+    document.getElementById('codex-panel').classList.toggle('show');
+});
+document.addEventListener('click', (e) => {
+    const panel = document.getElementById('codex-panel');
+    const btn = document.getElementById('codex-btn');
+    if (panel.classList.contains('show') && !panel.contains(e.target) && !btn.contains(e.target)) {
+        panel.classList.remove('show');
+    }
+});
+
+// ==================== 启动 ====================
+init();
+</script>
+</body>
+</html>
